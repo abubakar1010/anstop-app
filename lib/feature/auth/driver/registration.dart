@@ -1,10 +1,7 @@
-import 'package:ride_sharing/feature/auth/driver/upload_your_documents_screen.dart';
-import 'package:ride_sharing/l10n/l10n_helper.dart';
-import 'package:ride_sharing/feature/auth/view/log_in_screen.dart';
-import 'package:ride_sharing/feature/auth/passenger/terms_of_services.dart';
-import 'package:ride_sharing/widgets/auth_links/auth_link.dart';
-import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:intl_phone_number_input/intl_phone_number_input.dart';
+import 'package:ride_sharing/feature/auth/view/log_in_screen.dart';
+import 'package:ride_sharing/widgets/auth_links/auth_link.dart';
 
 import '../../../routes/app_routes.dart';
 
@@ -20,40 +17,42 @@ class _DriverRegistrationState extends State<DriverRegistration> {
   final TextEditingController _firstNameTEController = TextEditingController();
   final TextEditingController _lastNameTEController = TextEditingController();
   final TextEditingController _passwordTEController = TextEditingController();
-  final TextEditingController _confirmPasswordTEController = TextEditingController();
+  final TextEditingController _confirmPasswordTEController =
+      TextEditingController();
   final TextEditingController _emailTEController = TextEditingController();
   final TextEditingController _addressTEController = TextEditingController();
   final TextEditingController _phoneNumberController = TextEditingController();
   final TextEditingController _birthdayController = TextEditingController();
   final TextEditingController _genderController = TextEditingController();
 
-
-
-
   bool isChecked = false;
-  PhoneNumber _phoneNumber = PhoneNumber(isoCode: 'US');
+  final PhoneNumber _phoneNumber = PhoneNumber(isoCode: 'US');
   DateTime? _selectedDate;
   final List<String> _genders = ['MALE', 'FEMALE'];
   String? _selectedGender;
 
   Future<void> _selectGender(BuildContext context) async {
     final RenderBox renderBox = context.findRenderObject() as RenderBox;
-    final Offset position = renderBox.localToGlobal(Offset.zero); // Get position of the text field
-    final double textFieldWidth = renderBox.size.width; // Width of the text field
-    final double textFieldHeight = renderBox.size.height; // Height of the text field
-    final double middleY = position.dy + (textFieldHeight / 2);// Width of the text field
+    final Offset position = renderBox.localToGlobal(
+      Offset.zero,
+    ); // Get position of the text field
+    final double textFieldWidth =
+        renderBox.size.width; // Width of the text field
+    final double textFieldHeight =
+        renderBox.size.height; // Height of the text field
+    final double middleY =
+        position.dy + (textFieldHeight / 2); // Width of the text field
     final String? selected = await showMenu<String>(
       context: context,
       position: RelativeRect.fromLTRB(
         position.dx + textFieldWidth - 24, // 24 is the width of the suffixIcon
-        middleY + 30, // Vertically center the dropdown with a slight offset (20 is the approximate height of the menu)
+        middleY +
+            30, // Vertically center the dropdown with a slight offset (20 is the approximate height of the menu)
         position.dx + textFieldWidth - 24, // Keep dropdown aligned to the right
-        0,),
+        0,
+      ),
       items: _genders.map((gender) {
-        return PopupMenuItem<String>(
-          value: gender,
-          child: Text(gender),
-        );
+        return PopupMenuItem<String>(value: gender, child: Text(gender));
       }).toList(),
     );
 
@@ -80,6 +79,7 @@ class _DriverRegistrationState extends State<DriverRegistration> {
       });
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -91,7 +91,7 @@ class _DriverRegistrationState extends State<DriverRegistration> {
           },
           child: Icon(CupertinoIcons.back, color: Colors.black),
         ),
-      //  middle: Text('Create Account'),
+        //  middle: Text('Create Account'),
         backgroundColor: Colors.white,
         border: Border(bottom: BorderSide.none),
       ),
@@ -116,8 +116,6 @@ class _DriverRegistrationState extends State<DriverRegistration> {
                 child: Form(
                   child: Column(
                     children: [
-
-
                       // PhoneNumberInput(
                       //   controller: _phoneNumberController,
                       //   onInputChanged: (PhoneNumber number) {
@@ -147,53 +145,53 @@ class _DriverRegistrationState extends State<DriverRegistration> {
                           ),
                         ),
                       ),
-                      SizedBox(height: 12.h),
-                      GestureDetector(
-                        onTap: () async {
-                          // Show dropdown when text field is tapped
-                          _selectGender(context);
-                        },
-                        child: AbsorbPointer(
-                          child: TextField(
-                            controller: _genderController,
-                            decoration: InputDecoration(
-                              prefixIcon: Icon(
-                                Icons.person,
-                                color: Color(0XFF8A8A8A),
-                                size: 24,
-                              ),
-                              suffixIcon: Icon(
-                                Icons.arrow_drop_down,
-                                color: Color(0XFF8A8A8A),
-                                size: 24,
-                              ),
-                              hintText: AppLocalization.tr.selectGenderHint,
-                              hintStyle: TextStyle(
-                                fontSize: 14,
-                                color: Color(0XFF8A8A8A),
-                              ),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                  color: Color(0XFF8A8A8A),
-                                  width: 1,
-                                ),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                  color: Color(0XFF8A8A8A),
-                                  width: 2,
-                                ),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
+                      // SizedBox(height: 12.h),
 
+                      // GestureDetector(
+                      //   onTap: () async {
+                      //     // Show dropdown when text field is tapped
+                      //     _selectGender(context);
+                      //   },
+                      //   child: AbsorbPointer(
+                      //     child: TextField(
+                      //       controller: _genderController,
+                      //       decoration: InputDecoration(
+                      //         prefixIcon: Icon(
+                      //           Icons.person,
+                      //           color: Color(0XFF8A8A8A),
+                      //           size: 24,
+                      //         ),
+                      //         suffixIcon: Icon(
+                      //           Icons.arrow_drop_down,
+                      //           color: Color(0XFF8A8A8A),
+                      //           size: 24,
+                      //         ),
+                      //         hintText: AppLocalization.tr.selectGenderHint,
+                      //         hintStyle: TextStyle(
+                      //           fontSize: 14,
+                      //           color: Color(0XFF8A8A8A),
+                      //         ),
+                      //         border: OutlineInputBorder(
+                      //           borderRadius: BorderRadius.circular(10),
+                      //         ),
+                      //         enabledBorder: OutlineInputBorder(
+                      //           borderSide: BorderSide(
+                      //             color: Color(0XFF8A8A8A),
+                      //             width: 1,
+                      //           ),
+                      //           borderRadius: BorderRadius.circular(10),
+                      //         ),
+                      //         focusedBorder: OutlineInputBorder(
+                      //           borderSide: BorderSide(
+                      //             color: Color(0XFF8A8A8A),
+                      //             width: 2,
+                      //           ),
+                      //           borderRadius: BorderRadius.circular(10),
+                      //         ),
+                      //       ),
+                      //     ),
+                      //   ),
+                      // ),
                       SizedBox(height: 12.h),
                       CustomTextField(
                         controller: _addressTEController,
@@ -263,7 +261,6 @@ class _DriverRegistrationState extends State<DriverRegistration> {
                       //     )
                       //   ],
                       // )
-
                       SizedBox(height: 17.5.sp),
                       CustomButton(
                         onPressed: () {
@@ -278,16 +275,16 @@ class _DriverRegistrationState extends State<DriverRegistration> {
                             );
                             return;
                           }
-                          if (_genderController.text.isEmpty) {
-                            Get.snackbar(
-                              'Validation Error',
-                              'Please select your gender',
-                              snackPosition: SnackPosition.BOTTOM,
-                              backgroundColor: Colors.red,
-                              colorText: Colors.white,
-                            );
-                            return;
-                          }
+                          // if (_genderController.text.isEmpty) {
+                          //   Get.snackbar(
+                          //     'Validation Error',
+                          //     'Please select your gender',
+                          //     snackPosition: SnackPosition.BOTTOM,
+                          //     backgroundColor: Colors.red,
+                          //     colorText: Colors.white,
+                          //   );
+                          //   return;
+                          // }
                           if (_addressTEController.text.trim().isEmpty) {
                             Get.snackbar(
                               'Validation Error',
@@ -303,7 +300,7 @@ class _DriverRegistrationState extends State<DriverRegistration> {
                           Get.toNamed(
                             AppRoutes.uploadDocumentsScreen,
                             arguments: {
-                              'gender': _genderController.text.toUpperCase(),
+                              // 'gender': _genderController.text.toUpperCase(),
                               'address': _addressTEController.text.trim(),
                               'dateOfBirth': _birthdayController.text.trim(),
                             },
@@ -313,24 +310,30 @@ class _DriverRegistrationState extends State<DriverRegistration> {
                       ),
                       SizedBox(height: 5.h),
                       GestureDetector(
-                        onTap: (){
+                        onTap: () {
                           Get.to(LogInScreen());
                         },
                         child: RichText(
                           text: TextSpan(
                             children: [
-                              TextSpan(text: AppLocalization.tr.haveAccountText, style: TextStyle(
-                                fontSize: 12.sp,
-                                fontWeight: FontWeight.w400,
-                                color: Color(0XFF4E4E4E),
-                              )),
-                               TextSpan(text: AppLocalization.tr.loginLink, style: TextStyle(
+                              TextSpan(
+                                text: AppLocalization.tr.haveAccountText,
+                                style: TextStyle(
+                                  fontSize: 12.sp,
+                                  fontWeight: FontWeight.w400,
+                                  color: Color(0XFF4E4E4E),
+                                ),
+                              ),
+                              TextSpan(
+                                text: AppLocalization.tr.loginLink,
+                                style: TextStyle(
                                   fontSize: 12.sp,
                                   fontWeight: FontWeight.w400,
                                   color: Colors.red,
                                   decorationThickness: 2,
-                                  decoration: TextDecoration.underline
-                              )),
+                                  decoration: TextDecoration.underline,
+                                ),
+                              ),
                             ],
                           ),
                         ),

@@ -1,5 +1,3 @@
-import 'dart:convert';
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ride_sharing/feature/auth/controller/car_information_controller.dart';
@@ -21,7 +19,7 @@ class UploadDocumentsController extends GetxController {
   final RxString errorMessage = ''.obs;
 
   // Profile data from registration screen
-  String? gender;
+  // String? gender;
   String? address;
   String? dateOfBirth;
 
@@ -31,7 +29,7 @@ class UploadDocumentsController extends GetxController {
     super.onInit();
     // Get data from navigation arguments if passed
     if (Get.arguments != null && Get.arguments is Map) {
-      gender = Get.arguments['gender'];
+      // gender = Get.arguments['gender'];
       address = Get.arguments['address'];
       dateOfBirth = Get.arguments['dateOfBirth'];
     }
@@ -100,7 +98,8 @@ class UploadDocumentsController extends GetxController {
       final nationalIdController = Get.find<NationalIdController>();
       final drivingLicenseController = Get.find<DrivingLicenseController>();
       final carInfoController = Get.find<CarInformationController>();
-      final profilePictureController = Get.find<UploadProfilePictureController>();
+      final profilePictureController =
+          Get.find<UploadProfilePictureController>();
 
       // Validate all required fields
       if (!_validateAllData(
@@ -120,26 +119,30 @@ class UploadDocumentsController extends GetxController {
           'backPicture': nationalIdController.backImageUrl.value,
         },
         'drivingLicense': {
-          'number': drivingLicenseController.licenseNumberTEController.text.trim(),
+          'number': drivingLicenseController.licenseNumberTEController.text
+              .trim(),
           'frontPicture': drivingLicenseController.frontImageUrl.value,
           'backPicture': drivingLicenseController.backImageUrl.value,
         },
         'carInformation': {
           'brand': carInfoController.carBrandTEController.text.trim(),
           'model': carInfoController.carModelTEController.text.trim(),
-          'yearOfManufacture': carInfoController.carYearTEController.text.trim(),
+          'yearOfManufacture': carInfoController.carYearTEController.text
+              .trim(),
           'licensePlate': {
-            'number': carInfoController.licensePlateNumberTEController.text.trim(),
+            'number': carInfoController.licensePlateNumberTEController.text
+                .trim(),
             'picture': carInfoController.licensePlateImageUrl.value,
           },
           'registrationCertificate': {
-            'number': carInfoController.registrationCertNumberTEController.text.trim(),
+            'number': carInfoController.registrationCertNumberTEController.text
+                .trim(),
             'frontPicture': carInfoController.regCertFrontImageUrl.value,
             'backPicture': carInfoController.regCertBackImageUrl.value,
           },
         },
         'profilePicture': profilePictureController.profileImageUrl.value,
-        'gender': gender ?? 'MALE',
+        // 'gender': gender ?? 'MALE',
         'address': address ?? '',
         'dateOfBirth': dateOfBirth ?? '',
       };
@@ -199,21 +202,28 @@ class UploadDocumentsController extends GetxController {
       _showErrorSnackbar('National ID number is required');
       return false;
     }
-    if (nationalIdController.frontImageUrl.value.isEmpty || nationalIdController.backImageUrl.value.isEmpty) {
+    if (nationalIdController.frontImageUrl.value.isEmpty ||
+        nationalIdController.backImageUrl.value.isEmpty) {
       errorMessage.value = 'Please upload both front and back of National ID';
       _showErrorSnackbar('Please upload both front and back of National ID');
       return false;
     }
 
     // Validate Driving License
-    if (drivingLicenseController.licenseNumberTEController.text.trim().isEmpty) {
+    if (drivingLicenseController.licenseNumberTEController.text
+        .trim()
+        .isEmpty) {
       errorMessage.value = 'Driving license number is required';
       _showErrorSnackbar('Driving license number is required');
       return false;
     }
-    if (drivingLicenseController.frontImageUrl.value.isEmpty || drivingLicenseController.backImageUrl.value.isEmpty) {
-      errorMessage.value = 'Please upload both front and back of Driving License';
-      _showErrorSnackbar('Please upload both front and back of Driving License');
+    if (drivingLicenseController.frontImageUrl.value.isEmpty ||
+        drivingLicenseController.backImageUrl.value.isEmpty) {
+      errorMessage.value =
+          'Please upload both front and back of Driving License';
+      _showErrorSnackbar(
+        'Please upload both front and back of Driving License',
+      );
       return false;
     }
 
@@ -243,14 +253,20 @@ class UploadDocumentsController extends GetxController {
       _showErrorSnackbar('Please upload license plate picture');
       return false;
     }
-    if (carInfoController.registrationCertNumberTEController.text.trim().isEmpty) {
+    if (carInfoController.registrationCertNumberTEController.text
+        .trim()
+        .isEmpty) {
       errorMessage.value = 'Registration certificate number is required';
       _showErrorSnackbar('Registration certificate number is required');
       return false;
     }
-    if (carInfoController.regCertFrontImageUrl.value.isEmpty || carInfoController.regCertBackImageUrl.value.isEmpty) {
-      errorMessage.value = 'Please upload both front and back of Registration Certificate';
-      _showErrorSnackbar('Please upload both front and back of Registration Certificate');
+    if (carInfoController.regCertFrontImageUrl.value.isEmpty ||
+        carInfoController.regCertBackImageUrl.value.isEmpty) {
+      errorMessage.value =
+          'Please upload both front and back of Registration Certificate';
+      _showErrorSnackbar(
+        'Please upload both front and back of Registration Certificate',
+      );
       return false;
     }
 
@@ -262,11 +278,11 @@ class UploadDocumentsController extends GetxController {
     }
 
     // Validate profile data
-    if (gender == null || gender!.isEmpty) {
-      errorMessage.value = 'Gender is required';
-      _showErrorSnackbar('Gender is required');
-      return false;
-    }
+    // if (gender == null || gender!.isEmpty) {
+    //   errorMessage.value = 'Gender is required';
+    //   _showErrorSnackbar('Gender is required');
+    //   return false;
+    // }
     if (address == null || address!.isEmpty) {
       errorMessage.value = 'Address is required';
       _showErrorSnackbar('Address is required');

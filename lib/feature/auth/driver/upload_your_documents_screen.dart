@@ -1,4 +1,3 @@
-import 'package:get/get.dart';
 import 'package:ride_sharing/custom_assets/app_string.dart';
 import 'package:ride_sharing/feature/auth/controller/car_information_controller.dart';
 import 'package:ride_sharing/feature/auth/controller/driving_license_controller.dart';
@@ -9,15 +8,20 @@ import 'package:ride_sharing/feature/auth/driver/car_information_screen.dart';
 import 'package:ride_sharing/feature/auth/driver/driving_license_screen.dart';
 import 'package:ride_sharing/feature/auth/driver/national_id_screen.dart';
 import 'package:ride_sharing/feature/auth/driver/upload_profile_picture.dart';
-import 'package:ride_sharing/feature/auth/passenger/terms_of_services.dart';
 import 'package:ride_sharing/widgets/auth_links/auth_link.dart';
 
 class UploadYourDocuments extends GetView<UploadDocumentsController> {
-   UploadYourDocuments({super.key});
+  UploadYourDocuments({super.key});
   NationalIdController nationalIdController = Get.put(NationalIdController());
-   DrivingLicenseController drivingLicenseController = Get.put(DrivingLicenseController());
-   CarInformationController carInformationController = Get.put(CarInformationController());
-   UploadProfilePictureController uploadProfilePictureController = Get.put(UploadProfilePictureController());
+  DrivingLicenseController drivingLicenseController = Get.put(
+    DrivingLicenseController(),
+  );
+  CarInformationController carInformationController = Get.put(
+    CarInformationController(),
+  );
+  UploadProfilePictureController uploadProfilePictureController = Get.put(
+    UploadProfilePictureController(),
+  );
   @override
   Widget build(BuildContext context) {
     return Scaffold(
