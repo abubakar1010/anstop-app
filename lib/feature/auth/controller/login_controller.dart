@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ride_sharing/app/utils/app_snackbar.dart';
 import 'package:ride_sharing/feature/auth/data/signin_request_model.dart';
 import 'package:ride_sharing/feature/auth/data/signin_response_model.dart';
 import 'package:ride_sharing/feature/auth/service/auth_service.dart';
@@ -66,18 +67,10 @@ class LoginController extends GetxController {
 
         // Check if user needs email verification
         if (signInResponse.data.needsVerification) {
-          // Navigate to email validation screen with pre-filled email
+          AppSnackbar.warning('Verification Required', 'Please verify your email to continue');
           Get.toNamed(
             AppRoutes.emailValidationScreen,
             arguments: {'email': emailTEController.text.trim()},
-          );
-
-          Get.snackbar(
-            'Verification Required',
-            'Please verify your email to continue',
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: Colors.orange,
-            colorText: Colors.white,
           );
           return;
         }
@@ -85,13 +78,7 @@ class LoginController extends GetxController {
         // Validate tokens before proceeding
         if (signInResponse.data.accessToken.isEmpty ||
             signInResponse.data.refreshToken.isEmpty) {
-          Get.snackbar(
-            'Login Failed',
-            'Invalid response from server. Please try again.',
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: Colors.red,
-            colorText: Colors.white,
-          );
+          AppSnackbar.error('Login Failed', 'Invalid response from server. Please try again.');
           return;
         }
 
@@ -125,25 +112,14 @@ class LoginController extends GetxController {
       } else {
         // Show error message
         errorMessage.value = response.errorMessage;
-        Get.snackbar(
+        AppSnackbar.error(
           'Login Failed',
-          response.errorMessage.isNotEmpty
-              ? response.errorMessage
-              : 'Invalid email or password',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
+          response.errorMessage.isNotEmpty ? response.errorMessage : 'Invalid email or password',
         );
       }
     } catch (e) {
       errorMessage.value = e.toString();
-      Get.snackbar(
-        'Error',
-        e.toString(),
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      AppSnackbar.error('Error', e.toString());
     } finally {
       isLoading.value = false;
     }

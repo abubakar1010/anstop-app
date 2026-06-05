@@ -25,7 +25,10 @@
       "Bash(git pull *)",
       "Bash(flutter clean *)",
       "Bash(gh repo *)",
-      "PowerShell(gh *)"
+      "PowerShell(gh *)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\ebu\" -Filter \"*.jks\" -Recurse -ErrorAction SilentlyContinue)",
+      "Bash(Select-Object FullName)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\ebu\" -Filter \"*.keystore\" -Recurse -ErrorAction SilentlyContinue)"
     ]
   }
 }
