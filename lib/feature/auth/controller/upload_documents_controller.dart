@@ -19,7 +19,6 @@ class UploadDocumentsController extends GetxController {
   final RxString errorMessage = ''.obs;
 
   // Profile data from registration screen
-  // String? gender;
   String? address;
   String? dateOfBirth;
 
@@ -29,7 +28,6 @@ class UploadDocumentsController extends GetxController {
     super.onInit();
     // Get data from navigation arguments if passed
     if (Get.arguments != null && Get.arguments is Map) {
-      // gender = Get.arguments['gender'];
       address = Get.arguments['address'];
       dateOfBirth = Get.arguments['dateOfBirth'];
     }
@@ -142,7 +140,6 @@ class UploadDocumentsController extends GetxController {
           },
         },
         'profilePicture': profilePictureController.profileImageUrl.value,
-        // 'gender': gender ?? 'MALE',
         'address': address ?? '',
         'dateOfBirth': dateOfBirth ?? '',
       };
@@ -278,11 +275,6 @@ class UploadDocumentsController extends GetxController {
     }
 
     // Validate profile data
-    // if (gender == null || gender!.isEmpty) {
-    //   errorMessage.value = 'Gender is required';
-    //   _showErrorSnackbar('Gender is required');
-    //   return false;
-    // }
     if (address == null || address!.isEmpty) {
       errorMessage.value = 'Address is required';
       _showErrorSnackbar('Address is required');
