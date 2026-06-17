@@ -23,46 +23,10 @@ class _DriverRegistrationState extends State<DriverRegistration> {
   final TextEditingController _addressTEController = TextEditingController();
   final TextEditingController _phoneNumberController = TextEditingController();
   final TextEditingController _birthdayController = TextEditingController();
-  final TextEditingController _genderController = TextEditingController();
 
   bool isChecked = false;
   final PhoneNumber _phoneNumber = PhoneNumber(isoCode: 'US');
   DateTime? _selectedDate;
-  final List<String> _genders = ['MALE', 'FEMALE'];
-  String? _selectedGender;
-
-  Future<void> _selectGender(BuildContext context) async {
-    final RenderBox renderBox = context.findRenderObject() as RenderBox;
-    final Offset position = renderBox.localToGlobal(
-      Offset.zero,
-    ); // Get position of the text field
-    final double textFieldWidth =
-        renderBox.size.width; // Width of the text field
-    final double textFieldHeight =
-        renderBox.size.height; // Height of the text field
-    final double middleY =
-        position.dy + (textFieldHeight / 2); // Width of the text field
-    final String? selected = await showMenu<String>(
-      context: context,
-      position: RelativeRect.fromLTRB(
-        position.dx + textFieldWidth - 24, // 24 is the width of the suffixIcon
-        middleY +
-            30, // Vertically center the dropdown with a slight offset (20 is the approximate height of the menu)
-        position.dx + textFieldWidth - 24, // Keep dropdown aligned to the right
-        0,
-      ),
-      items: _genders.map((gender) {
-        return PopupMenuItem<String>(value: gender, child: Text(gender));
-      }).toList(),
-    );
-
-    if (selected != null) {
-      setState(() {
-        _selectedGender = selected;
-        _genderController.text = _selectedGender!;
-      });
-    }
-  }
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -145,53 +109,6 @@ class _DriverRegistrationState extends State<DriverRegistration> {
                           ),
                         ),
                       ),
-                      // SizedBox(height: 12.h),
-
-                      // GestureDetector(
-                      //   onTap: () async {
-                      //     // Show dropdown when text field is tapped
-                      //     _selectGender(context);
-                      //   },
-                      //   child: AbsorbPointer(
-                      //     child: TextField(
-                      //       controller: _genderController,
-                      //       decoration: InputDecoration(
-                      //         prefixIcon: Icon(
-                      //           Icons.person,
-                      //           color: Color(0XFF8A8A8A),
-                      //           size: 24,
-                      //         ),
-                      //         suffixIcon: Icon(
-                      //           Icons.arrow_drop_down,
-                      //           color: Color(0XFF8A8A8A),
-                      //           size: 24,
-                      //         ),
-                      //         hintText: AppLocalization.tr.selectGenderHint,
-                      //         hintStyle: TextStyle(
-                      //           fontSize: 14,
-                      //           color: Color(0XFF8A8A8A),
-                      //         ),
-                      //         border: OutlineInputBorder(
-                      //           borderRadius: BorderRadius.circular(10),
-                      //         ),
-                      //         enabledBorder: OutlineInputBorder(
-                      //           borderSide: BorderSide(
-                      //             color: Color(0XFF8A8A8A),
-                      //             width: 1,
-                      //           ),
-                      //           borderRadius: BorderRadius.circular(10),
-                      //         ),
-                      //         focusedBorder: OutlineInputBorder(
-                      //           borderSide: BorderSide(
-                      //             color: Color(0XFF8A8A8A),
-                      //             width: 2,
-                      //           ),
-                      //           borderRadius: BorderRadius.circular(10),
-                      //         ),
-                      //       ),
-                      //     ),
-                      //   ),
-                      // ),
                       SizedBox(height: 12.h),
                       CustomTextField(
                         controller: _addressTEController,
@@ -275,16 +192,6 @@ class _DriverRegistrationState extends State<DriverRegistration> {
                             );
                             return;
                           }
-                          // if (_genderController.text.isEmpty) {
-                          //   Get.snackbar(
-                          //     'Validation Error',
-                          //     'Please select your gender',
-                          //     snackPosition: SnackPosition.BOTTOM,
-                          //     backgroundColor: Colors.red,
-                          //     colorText: Colors.white,
-                          //   );
-                          //   return;
-                          // }
                           if (_addressTEController.text.trim().isEmpty) {
                             Get.snackbar(
                               'Validation Error',
@@ -300,7 +207,6 @@ class _DriverRegistrationState extends State<DriverRegistration> {
                           Get.toNamed(
                             AppRoutes.uploadDocumentsScreen,
                             arguments: {
-                              // 'gender': _genderController.text.toUpperCase(),
                               'address': _addressTEController.text.trim(),
                               'dateOfBirth': _birthdayController.text.trim(),
                             },

@@ -52,8 +52,9 @@ class OnboardingPageSecond extends StatelessWidget {
                  ),
 
               //const SizedBox(height: 10),
-               Row(
-                 mainAxisAlignment: MainAxisAlignment.center,
+               Wrap(
+                 alignment: WrapAlignment.center,
+                 crossAxisAlignment: WrapCrossAlignment.center,
                  children: [
                    CustomFadeSlide(
                      delay: 300,
@@ -68,14 +69,12 @@ class OnboardingPageSecond extends StatelessWidget {
                    ),
                    CustomFadeSlide(
                      delay: 450,
-                     child: Center(
-                       child: Text(
-                         l10n.onboardingJourneys,
-                         style: TextStyle(
-                           fontSize: 26.sp,
-                           fontWeight: FontWeight.bold,
-                           color: AppColors.green400,
-                         ),
+                     child: Text(
+                       l10n.onboardingJourneys,
+                       style: TextStyle(
+                         fontSize: 26.sp,
+                         fontWeight: FontWeight.bold,
+                         color: AppColors.green400,
                        ),
                      ),
                    ),

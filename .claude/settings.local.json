@@ -28,7 +28,27 @@
       "PowerShell(gh *)",
       "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\ebu\" -Filter \"*.jks\" -Recurse -ErrorAction SilentlyContinue)",
       "Bash(Select-Object FullName)",
-      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\ebu\" -Filter \"*.keystore\" -Recurse -ErrorAction SilentlyContinue)"
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\ebu\" -Filter \"*.keystore\" -Recurse -ErrorAction SilentlyContinue)",
+      "PowerShell(flutter analyze *)",
+      "Skill(run)",
+      "Bash(find . -maxdepth 3 -path \"*/.claude/skills/*/SKILL.md\")",
+      "Bash(ls .claude)",
+      "Bash(ls .claude/skills)",
+      "PowerShell(Get-ChildItem *)",
+      "Bash(fvm list *)",
+      "Bash(fvm flutter *)",
+      "Bash(tee /tmp/flutter_run.log)",
+      "Bash(\"/c/Users/ebu/fvm/versions/3.35.7/bin/flutter.bat\" run *)",
+      "Bash(tee /tmp/flutter_run2.log)",
+      "PowerShell(Get-Process *)",
+      "Bash(tee /tmp/flutter_run_win.log)",
+      "Bash(tee /tmp/flutter_run_webserver.log)",
+      "Bash(tasklist)",
+      "Bash(netstat -ano)",
+      "Bash(taskkill //F //PID 14496)",
+      "Bash(tee /tmp/flutter_run_webserver2.log)",
+      "Bash(taskkill //F //PID 8056)",
+      "Bash(taskkill //F //PID 18044)"
     ]
   }
 }
