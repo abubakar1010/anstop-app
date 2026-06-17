@@ -1,5 +1,7 @@
 # Claude Code
 .claude/
+.vscode/
+.vscode
 CLAUDE.md
 
 # Miscellaneous
