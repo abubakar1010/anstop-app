@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ride_sharing/app/utils/app_snackbar.dart';
 import 'package:ride_sharing/feature/auth/service/auth_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -12,8 +13,10 @@ class CarInformationController extends GetxController {
   final TextEditingController carBrandTEController = TextEditingController();
   final TextEditingController carModelTEController = TextEditingController();
   final TextEditingController carYearTEController = TextEditingController();
-  final TextEditingController licensePlateNumberTEController = TextEditingController();
-  final TextEditingController registrationCertNumberTEController = TextEditingController();
+  final TextEditingController licensePlateNumberTEController =
+      TextEditingController();
+  final TextEditingController registrationCertNumberTEController =
+      TextEditingController();
 
   // ==================== State ====================
   final RxBool isLoading = false.obs;
@@ -21,6 +24,7 @@ class CarInformationController extends GetxController {
   final RxBool isRegCertFrontImageUploading = false.obs;
   final RxBool isRegCertBackImageUploading = false.obs;
   final RxString errorMessage = ''.obs;
+  final RxBool isUploaded = false.obs;
   final formKey = GlobalKey<FormState>();
 
   // Images
@@ -61,12 +65,9 @@ class CarInformationController extends GetxController {
 
       if (accessToken == null || accessToken.isEmpty) {
         errorMessage.value = 'Access token not found. Please login again.';
-        Get.snackbar(
+        AppSnackbar.error(
           'Error',
           'Access token not found. Please login again.',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
         );
         return;
       }
@@ -82,35 +83,23 @@ class CarInformationController extends GetxController {
           licensePlateImageUrl.value = data[0];
         } else {
           errorMessage.value = 'Failed to get image URL from response';
-          Get.snackbar(
+          AppSnackbar.error(
             'Upload Failed',
             'Failed to get image URL from response',
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: Colors.red,
-            colorText: Colors.white,
           );
         }
       } else {
         errorMessage.value = response.errorMessage;
-        Get.snackbar(
+        AppSnackbar.error(
           'Upload Failed',
           response.errorMessage.isNotEmpty
               ? response.errorMessage
               : 'Failed to upload image. Please try again.',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
         );
       }
     } catch (e) {
       errorMessage.value = e.toString();
-      Get.snackbar(
-        'Error',
-        e.toString(),
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      AppSnackbar.error('Error', e.toString());
     } finally {
       isLicensePlateImageUploading.value = false;
     }
@@ -127,12 +116,9 @@ class CarInformationController extends GetxController {
 
       if (accessToken == null || accessToken.isEmpty) {
         errorMessage.value = 'Access token not found. Please login again.';
-        Get.snackbar(
+        AppSnackbar.error(
           'Error',
           'Access token not found. Please login again.',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
         );
         return;
       }
@@ -148,35 +134,23 @@ class CarInformationController extends GetxController {
           regCertFrontImageUrl.value = data[0];
         } else {
           errorMessage.value = 'Failed to get image URL from response';
-          Get.snackbar(
+          AppSnackbar.error(
             'Upload Failed',
             'Failed to get image URL from response',
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: Colors.red,
-            colorText: Colors.white,
           );
         }
       } else {
         errorMessage.value = response.errorMessage;
-        Get.snackbar(
+        AppSnackbar.error(
           'Upload Failed',
           response.errorMessage.isNotEmpty
               ? response.errorMessage
               : 'Failed to upload image. Please try again.',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
         );
       }
     } catch (e) {
       errorMessage.value = e.toString();
-      Get.snackbar(
-        'Error',
-        e.toString(),
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      AppSnackbar.error('Error', e.toString());
     } finally {
       isRegCertFrontImageUploading.value = false;
     }
@@ -193,12 +167,9 @@ class CarInformationController extends GetxController {
 
       if (accessToken == null || accessToken.isEmpty) {
         errorMessage.value = 'Access token not found. Please login again.';
-        Get.snackbar(
+        AppSnackbar.error(
           'Error',
           'Access token not found. Please login again.',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
         );
         return;
       }
@@ -214,35 +185,23 @@ class CarInformationController extends GetxController {
           regCertBackImageUrl.value = data[0];
         } else {
           errorMessage.value = 'Failed to get image URL from response';
-          Get.snackbar(
+          AppSnackbar.error(
             'Upload Failed',
             'Failed to get image URL from response',
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: Colors.red,
-            colorText: Colors.white,
           );
         }
       } else {
         errorMessage.value = response.errorMessage;
-        Get.snackbar(
+        AppSnackbar.error(
           'Upload Failed',
           response.errorMessage.isNotEmpty
               ? response.errorMessage
               : 'Failed to upload image. Please try again.',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
         );
       }
     } catch (e) {
       errorMessage.value = e.toString();
-      Get.snackbar(
-        'Error',
-        e.toString(),
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      AppSnackbar.error('Error', e.toString());
     } finally {
       isRegCertBackImageUploading.value = false;
     }
@@ -263,7 +222,6 @@ class CarInformationController extends GetxController {
 
       // Navigate to next screen
       // Get.toNamed(AppRoutes.uploadProfilePictureScreen);
-
     } catch (e) {
       errorMessage.value = e.toString();
     } finally {
@@ -274,6 +232,54 @@ class CarInformationController extends GetxController {
   // ==================== Validation ====================
   bool validateCarDetails() {
     return formKey.currentState?.validate() ?? false;
+  }
+
+  /// Returns `null` when this section is complete, otherwise the reason why not.
+  String? validateSection() {
+    if (carBrandTEController.text.trim().isEmpty) {
+      return 'Car brand is required';
+    }
+    if (carModelTEController.text.trim().isEmpty) {
+      return 'Car model is required';
+    }
+    final year = carYearTEController.text.trim();
+    if (year.isEmpty) {
+      return 'Year of manufacture is required';
+    }
+    if (int.tryParse(year) == null) {
+      return 'Enter a valid year of manufacture';
+    }
+    if (licensePlateNumberTEController.text.trim().isEmpty) {
+      return 'License plate number is required';
+    }
+    if (registrationCertNumberTEController.text.trim().isEmpty) {
+      return 'Registration certificate number is required';
+    }
+    if (isLicensePlateImageUploading.value ||
+        isRegCertFrontImageUploading.value ||
+        isRegCertBackImageUploading.value) {
+      return 'Please wait until the car images finish uploading';
+    }
+    if (licensePlateImageUrl.value.isEmpty) {
+      return 'Please upload license plate picture';
+    }
+    if (regCertFrontImageUrl.value.isEmpty ||
+        regCertBackImageUrl.value.isEmpty) {
+      return 'Please upload both front and back of Registration Certificate';
+    }
+    return null;
+  }
+
+  /// Validates the section, records the result for the documents list and
+  /// reports the first problem to the user. Returns true when complete.
+  bool saveSection() {
+    final error = validateSection();
+    isUploaded.value = error == null;
+    if (error != null) {
+      AppSnackbar.error('Validation Error', error);
+      return false;
+    }
+    return true;
   }
 
   String? validateCarModel(String? value) {

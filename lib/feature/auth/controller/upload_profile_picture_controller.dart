@@ -1,6 +1,6 @@
 import 'dart:io';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ride_sharing/app/utils/app_snackbar.dart';
 import 'package:ride_sharing/feature/auth/service/auth_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -34,12 +34,9 @@ class UploadProfilePictureController extends GetxController {
 
       if (accessToken == null || accessToken.isEmpty) {
         errorMessage.value = 'Access token not found. Please login again.';
-        Get.snackbar(
+        AppSnackbar.error(
           'Error',
           'Access token not found. Please login again.',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
         );
         return;
       }
@@ -55,35 +52,23 @@ class UploadProfilePictureController extends GetxController {
           profileImageUrl.value = data[0];
         } else {
           errorMessage.value = 'Failed to get image URL from response';
-          Get.snackbar(
+          AppSnackbar.error(
             'Upload Failed',
             'Failed to get image URL from response',
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: Colors.red,
-            colorText: Colors.white,
           );
         }
       } else {
         errorMessage.value = response.errorMessage;
-        Get.snackbar(
+        AppSnackbar.error(
           'Upload Failed',
           response.errorMessage.isNotEmpty
               ? response.errorMessage
               : 'Failed to upload image. Please try again.',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
         );
       }
     } catch (e) {
       errorMessage.value = e.toString();
-      Get.snackbar(
-        'Error',
-        e.toString(),
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      AppSnackbar.error('Error', e.toString());
     } finally {
       isImageUploading.value = false;
     }
@@ -92,6 +77,30 @@ class UploadProfilePictureController extends GetxController {
   void removeImage() {
     profileImage.value = null;
     profileImageUrl.value = '';
+  }
+
+  // ==================== Validation ====================
+  /// Returns `null` when this section is complete, otherwise the reason why not.
+  String? validateSection() {
+    if (isImageUploading.value) {
+      return 'Please wait until your picture finishes uploading';
+    }
+    if (profileImageUrl.value.isEmpty) {
+      return 'Please upload profile picture';
+    }
+    return null;
+  }
+
+  /// Validates the section, records the result for the documents list and
+  /// reports the first problem to the user. Returns true when complete.
+  bool saveSection() {
+    final error = validateSection();
+    isUploaded.value = error == null;
+    if (error != null) {
+      AppSnackbar.error('Validation Error', error);
+      return false;
+    }
+    return true;
   }
 
   // ==================== Navigation ====================

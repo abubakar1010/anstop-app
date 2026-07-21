@@ -3,10 +3,10 @@ description: "A new Flutter project."
 
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-version: 1.0.0+6
+version: 1.0.0+7
 
 environment:
-  sdk: ^3.9.0
+  sdk: ^3.8.0
 
 dependencies:
   flutter:
@@ -36,7 +36,7 @@ dependencies:
   url_launcher: ^6.3.1
   connectivity_plus:
   lottie: ^3.3.1
-  flutter_stripe:
+  flutter_stripe: ^11.1.0
   curved_labeled_navigation_bar: ^2.0.6
   chat_bubbles: ^1.7.0
   intl_phone_number_input: ^0.7.4

@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ride_sharing/app/utils/app_snackbar.dart';
 import 'package:ride_sharing/feature/auth/service/auth_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -9,7 +10,8 @@ class DrivingLicenseController extends GetxController {
   final AuthService _authService = AuthService();
 
   // ==================== Text Controllers ====================
-  final TextEditingController licenseNumberTEController = TextEditingController();
+  final TextEditingController licenseNumberTEController =
+      TextEditingController();
 
   // ==================== State ====================
   final RxBool isLoading = false.obs;
@@ -46,12 +48,9 @@ class DrivingLicenseController extends GetxController {
 
       if (accessToken == null || accessToken.isEmpty) {
         errorMessage.value = 'Access token not found. Please login again.';
-        Get.snackbar(
+        AppSnackbar.error(
           'Error',
           'Access token not found. Please login again.',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
         );
         return;
       }
@@ -67,35 +66,23 @@ class DrivingLicenseController extends GetxController {
           frontImageUrl.value = data[0];
         } else {
           errorMessage.value = 'Failed to get image URL from response';
-          Get.snackbar(
+          AppSnackbar.error(
             'Upload Failed',
             'Failed to get image URL from response',
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: Colors.red,
-            colorText: Colors.white,
           );
         }
       } else {
         errorMessage.value = response.errorMessage;
-        Get.snackbar(
+        AppSnackbar.error(
           'Upload Failed',
           response.errorMessage.isNotEmpty
               ? response.errorMessage
               : 'Failed to upload image. Please try again.',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
         );
       }
     } catch (e) {
       errorMessage.value = e.toString();
-      Get.snackbar(
-        'Error',
-        e.toString(),
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      AppSnackbar.error('Error', e.toString());
     } finally {
       isFrontImageUploading.value = false;
     }
@@ -112,12 +99,9 @@ class DrivingLicenseController extends GetxController {
 
       if (accessToken == null || accessToken.isEmpty) {
         errorMessage.value = 'Access token not found. Please login again.';
-        Get.snackbar(
+        AppSnackbar.error(
           'Error',
           'Access token not found. Please login again.',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
         );
         return;
       }
@@ -133,35 +117,23 @@ class DrivingLicenseController extends GetxController {
           backImageUrl.value = data[0];
         } else {
           errorMessage.value = 'Failed to get image URL from response';
-          Get.snackbar(
+          AppSnackbar.error(
             'Upload Failed',
             'Failed to get image URL from response',
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: Colors.red,
-            colorText: Colors.white,
           );
         }
       } else {
         errorMessage.value = response.errorMessage;
-        Get.snackbar(
+        AppSnackbar.error(
           'Upload Failed',
           response.errorMessage.isNotEmpty
               ? response.errorMessage
               : 'Failed to upload image. Please try again.',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
         );
       }
     } catch (e) {
       errorMessage.value = e.toString();
-      Get.snackbar(
-        'Error',
-        e.toString(),
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      AppSnackbar.error('Error', e.toString());
     } finally {
       isBackImageUploading.value = false;
     }
@@ -180,6 +152,32 @@ class DrivingLicenseController extends GetxController {
   // ==================== Validation ====================
   bool validateImages() {
     return frontImage.value != null && backImage.value != null;
+  }
+
+  /// Returns `null` when this section is complete, otherwise the reason why not.
+  String? validateSection() {
+    if (licenseNumberTEController.text.trim().isEmpty) {
+      return 'Driving license number is required';
+    }
+    if (isFrontImageUploading.value || isBackImageUploading.value) {
+      return 'Please wait until the Driving License images finish uploading';
+    }
+    if (frontImageUrl.value.isEmpty || backImageUrl.value.isEmpty) {
+      return 'Please upload both front and back of Driving License';
+    }
+    return null;
+  }
+
+  /// Validates the section, records the result for the documents list and
+  /// reports the first problem to the user. Returns true when complete.
+  bool saveSection() {
+    final error = validateSection();
+    isUploaded.value = error == null;
+    if (error != null) {
+      AppSnackbar.error('Validation Error', error);
+      return false;
+    }
+    return true;
   }
 
   // ==================== Navigation ====================
