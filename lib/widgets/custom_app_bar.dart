@@ -54,7 +54,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           ((showLeading && (parentRoute?.canPop ?? false))
               ? IconButton(
             // icon: Assets.icons.backButton.svg(height: 32.h,width: 32.w),
-            icon: Icon(Icons.keyboard_return_outlined,fontWeight: FontWeight.bold,color: Colors.red,),
+            icon: Icon(Icons.keyboard_return_outlined, color: Colors.red),
             onPressed: backAction ?? () => Navigator.pop(context),
           )
               : null),
