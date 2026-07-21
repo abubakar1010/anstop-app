@@ -32,9 +32,10 @@ class DriverCustomDrawer extends StatelessWidget {
 
           // Drawer Header
           Padding(
-            padding: EdgeInsets.only(left:  32.sp, top: 50.sp,right: 32.sp),
+            padding: EdgeInsets.only(left: 16.w, top: 24.h, right: 16.w),
             child: Container(
-              height: 74.h,
+              constraints: BoxConstraints(minHeight: 74.h),
+              padding: EdgeInsets.symmetric(vertical: 8.h),
               // color: AppColors.white,
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -54,18 +55,20 @@ class DriverCustomDrawer extends StatelessWidget {
           ),
 
           // Menu items
+          // The menu card hugs its items and the whole block scrolls when the
+          // drawer is shorter than the content, so labels never get squeezed.
           Expanded(
-            child: Padding(
-              padding:  EdgeInsets.only( bottom: 220.sp,top: 32.sp,right: 32.sp,left: 32.sp),
+            child: SingleChildScrollView(
+              padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 16.h),
               child: Container(
-                height: 100.h,
-                width: 236,
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(15),
 
                 ),
                 child: ListView(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
                   padding: EdgeInsets.zero,
                   children: [
                     _drawerItem(
