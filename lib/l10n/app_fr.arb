@@ -336,5 +336,12 @@
   "dropOffNoticeTitle": "Avis de dépôt",
   "dropOffNoticeMessage": "Le chauffeur peut vous déposer dans un rayon de 500 m autour de votre destination. Acceptez-vous cela ?",
   "dropOffNoticeNo": "Non",
-  "dropOffNoticeYesAccept": "Oui, Accepter"
+  "dropOffNoticeYesAccept": "Oui, Accepter",
+
+  "locationServiceOffTitle": "La localisation est désactivée",
+  "locationServiceOffMessage": "Activez les services de localisation pour que nous puissions afficher votre position en temps réel sur la carte.",
+  "locationPermissionRequiredTitle": "Autorisation de localisation requise",
+  "locationPermissionRequiredMessage": "Nous avons besoin de votre position pour vous localiser et trouver les chauffeurs près de vous.",
+  "locationPermissionDeniedForeverMessage": "L'autorisation de localisation est définitivement refusée. Veuillez l'activer dans les paramètres de l'application.",
+  "openSettingsButton": "Ouvrir les paramètres"
 }

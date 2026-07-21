@@ -11,101 +11,96 @@ import 'package:ride_sharing/feature/auth/driver/upload_profile_picture.dart';
 import 'package:ride_sharing/widgets/auth_links/auth_link.dart';
 
 class UploadYourDocuments extends GetView<UploadDocumentsController> {
-  UploadYourDocuments({super.key});
-  NationalIdController nationalIdController = Get.put(NationalIdController());
-  DrivingLicenseController drivingLicenseController = Get.put(
-    DrivingLicenseController(),
-  );
-  CarInformationController carInformationController = Get.put(
-    CarInformationController(),
-  );
-  UploadProfilePictureController uploadProfilePictureController = Get.put(
-    UploadProfilePictureController(),
-  );
+  const UploadYourDocuments({super.key});
+
   @override
   Widget build(BuildContext context) {
+    // Registered by UploadDocumentsBinding, so the entered data outlives a
+    // trip into one of the document screens.
+    final nationalIdController = Get.find<NationalIdController>();
+    final drivingLicenseController = Get.find<DrivingLicenseController>();
+    final carInformationController = Get.find<CarInformationController>();
+    final profilePictureController = Get.find<UploadProfilePictureController>();
+
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pop(context);
-          },
+          icon: const Icon(Icons.arrow_back),
+          // Navigator, not Get.back(): see AppSnackbar.dismiss().
+          onPressed: () => Navigator.of(context).pop(),
         ),
         backgroundColor: Colors.white,
         elevation: 0,
       ),
-      bottomNavigationBar: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 20.sp, vertical: 16.sp),
-        child: Obx(
-          () => CustomButton(
-            onPressed: controller.isLoading.value
-                ? () {}
-                : () => controller.submitDriverOnboard(),
-            label: controller.isLoading.value
-                ? "Submitting..."
-                : AppString.submitButton,
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20.sp, vertical: 16.sp),
+          child: Obx(
+            () => CustomButton(
+              onPressed: controller.isLoading.value
+                  ? () {}
+                  : () => controller.submitDriverOnboard(),
+              label: controller.isLoading.value
+                  ? 'Submitting...'
+                  : AppString.submitButton,
+            ),
           ),
         ),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
+          padding: EdgeInsets.symmetric(horizontal: 20.w),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               SizedBox(height: 15.h),
               Text(
                 AppString.uploadDocumentsTitle,
-                style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w400),
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w500),
               ),
               SizedBox(height: 8.h),
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text(
-                      AppString.uploadDocumentsMessage1,
-                      style: TextStyle(fontSize: 12.sp),
-                    ),
-                    SizedBox(height: 4.h),
-                    Center(
-                      child: Text(
-                        AppString.uploadDocumentsMessage2,
-                        style: TextStyle(fontSize: 12.sp),
-                      ),
-                    ),
-                  ],
+              Text(
+                '${AppString.uploadDocumentsMessage1} '
+                '${AppString.uploadDocumentsMessage2}',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  color: AppColors.appGreyColor,
                 ),
               ),
               SizedBox(height: 29.h),
-              CustomBoxItems(
-                documentTitle: AppString.nationalIdLabel,
-                isUploaded: false,
-                onTap: () {
-                  Get.to(() => NationalIdScreen());
-                },
+              Obx(
+                () => CustomBoxItems(
+                  documentTitle: AppString.nationalIdLabel,
+                  icon: Icons.badge_outlined,
+                  isUploaded: nationalIdController.isUploaded.value,
+                  onTap: () => Get.to(() => const NationalIdScreen()),
+                ),
               ),
-              CustomBoxItems(
-                documentTitle: AppString.drivingLicenceLabel,
-                isUploaded: false,
-                onTap: () {
-                  Get.to(() => DrivingLicenseScreen());
-                },
+              Obx(
+                () => CustomBoxItems(
+                  documentTitle: AppString.drivingLicenceLabel,
+                  icon: Icons.credit_card_outlined,
+                  isUploaded: drivingLicenseController.isUploaded.value,
+                  onTap: () => Get.to(() => const DrivingLicenseScreen()),
+                ),
               ),
-              CustomBoxItems(
-                documentTitle: AppString.carInformationLabel,
-                isUploaded: false,
-                onTap: () {
-                  Get.to(() => CarInformationScreen());
-                },
+              Obx(
+                () => CustomBoxItems(
+                  documentTitle: AppString.carInformationLabel,
+                  icon: Icons.directions_car_outlined,
+                  isUploaded: carInformationController.isUploaded.value,
+                  onTap: () => Get.to(() => const CarInformationScreen()),
+                ),
               ),
-              CustomBoxItems(
-                documentTitle: AppString.yourPictureLabel,
-                isUploaded: false,
-                onTap: () {
-                  Get.to(() => UploadProfilePictureScreen());
-                },
+              Obx(
+                () => CustomBoxItems(
+                  documentTitle: AppString.yourPictureLabel,
+                  icon: Icons.person_outline,
+                  isUploaded: profilePictureController.isUploaded.value,
+                  onTap: () => Get.to(() => const UploadProfilePictureScreen()),
+                ),
               ),
               SizedBox(height: 20.sp),
             ],

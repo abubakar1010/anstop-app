@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ride_sharing/app/utils/app_snackbar.dart';
 import 'package:ride_sharing/feature/auth/controller/car_information_controller.dart';
 import 'package:ride_sharing/feature/auth/controller/driving_license_controller.dart';
 import 'package:ride_sharing/feature/auth/controller/national_id_controller.dart';
@@ -14,12 +14,9 @@ class UploadDocumentsController extends GetxController {
 
   // ==================== State ====================
   final RxBool isLoading = false.obs;
-  final RxBool isNationalIdUploaded = false.obs;
-  final RxBool isDrivingLicenseUploaded = false.obs;
   final RxString errorMessage = ''.obs;
 
   // Profile data from registration screen
-  // String? gender;
   String? address;
   String? dateOfBirth;
 
@@ -29,7 +26,6 @@ class UploadDocumentsController extends GetxController {
     super.onInit();
     // Get data from navigation arguments if passed
     if (Get.arguments != null && Get.arguments is Map) {
-      // gender = Get.arguments['gender'];
       address = Get.arguments['address'];
       dateOfBirth = Get.arguments['dateOfBirth'];
     }
@@ -55,23 +51,6 @@ class UploadDocumentsController extends GetxController {
     }
   }
 
-  void markDocumentUploaded(String documentType, bool uploaded) {
-    switch (documentType) {
-      case 'national_id':
-        isNationalIdUploaded.value = uploaded;
-        break;
-      case 'driving_license':
-        isDrivingLicenseUploaded.value = uploaded;
-        break;
-      default:
-        break;
-    }
-  }
-
-  bool checkCompletion() {
-    return isNationalIdUploaded.value && isDrivingLicenseUploaded.value;
-  }
-
   // ==================== Onboard API ====================
   Future<void> submitDriverOnboard() async {
     try {
@@ -84,12 +63,9 @@ class UploadDocumentsController extends GetxController {
 
       if (accessToken == null || accessToken.isEmpty) {
         errorMessage.value = 'Access token not found. Please login again.';
-        Get.snackbar(
+        AppSnackbar.error(
           'Error',
           'Access token not found. Please login again.',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
         );
         return;
       }
@@ -142,7 +118,6 @@ class UploadDocumentsController extends GetxController {
           },
         },
         'profilePicture': profilePictureController.profileImageUrl.value,
-        // 'gender': gender ?? 'MALE',
         'address': address ?? '',
         'dateOfBirth': dateOfBirth ?? '',
       };
@@ -154,37 +129,25 @@ class UploadDocumentsController extends GetxController {
       );
 
       if (response.isSuccess) {
-        Get.snackbar(
+        AppSnackbar.success(
           'Success',
           'Driver onboarding completed successfully!',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
         );
 
         // Navigate to driver home screen
         Get.offAllNamed(AppRoutes.driverHomeScreen);
       } else {
         errorMessage.value = response.errorMessage;
-        Get.snackbar(
+        AppSnackbar.error(
           'Onboarding Failed',
           response.errorMessage.isNotEmpty
               ? response.errorMessage
               : 'Failed to complete onboarding. Please try again.',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
         );
       }
     } catch (e) {
       errorMessage.value = e.toString();
-      Get.snackbar(
-        'Error',
-        e.toString(),
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      AppSnackbar.error('Error', e.toString());
     } finally {
       isLoading.value = false;
     }
@@ -196,123 +159,39 @@ class UploadDocumentsController extends GetxController {
     CarInformationController carInfoController,
     UploadProfilePictureController profilePictureController,
   ) {
-    // Validate National ID
-    if (nationalIdController.nidNumberTEController.text.trim().isEmpty) {
-      errorMessage.value = 'National ID number is required';
-      _showErrorSnackbar('National ID number is required');
-      return false;
-    }
-    if (nationalIdController.frontImageUrl.value.isEmpty ||
-        nationalIdController.backImageUrl.value.isEmpty) {
-      errorMessage.value = 'Please upload both front and back of National ID';
-      _showErrorSnackbar('Please upload both front and back of National ID');
-      return false;
-    }
+    // Each section owns its own rules so the list status and the submit check
+    // can never drift apart.
+    final error =
+        nationalIdController.validateSection() ??
+        drivingLicenseController.validateSection() ??
+        carInfoController.validateSection() ??
+        profilePictureController.validateSection() ??
+        _validateProfileData();
 
-    // Validate Driving License
-    if (drivingLicenseController.licenseNumberTEController.text
-        .trim()
-        .isEmpty) {
-      errorMessage.value = 'Driving license number is required';
-      _showErrorSnackbar('Driving license number is required');
+    if (error != null) {
+      errorMessage.value = error;
+      _showErrorSnackbar(error);
       return false;
     }
-    if (drivingLicenseController.frontImageUrl.value.isEmpty ||
-        drivingLicenseController.backImageUrl.value.isEmpty) {
-      errorMessage.value =
-          'Please upload both front and back of Driving License';
-      _showErrorSnackbar(
-        'Please upload both front and back of Driving License',
-      );
-      return false;
-    }
-
-    // Validate Car Information
-    if (carInfoController.carBrandTEController.text.trim().isEmpty) {
-      errorMessage.value = 'Car brand is required';
-      _showErrorSnackbar('Car brand is required');
-      return false;
-    }
-    if (carInfoController.carModelTEController.text.trim().isEmpty) {
-      errorMessage.value = 'Car model is required';
-      _showErrorSnackbar('Car model is required');
-      return false;
-    }
-    if (carInfoController.carYearTEController.text.trim().isEmpty) {
-      errorMessage.value = 'Year of manufacture is required';
-      _showErrorSnackbar('Year of manufacture is required');
-      return false;
-    }
-    if (carInfoController.licensePlateNumberTEController.text.trim().isEmpty) {
-      errorMessage.value = 'License plate number is required';
-      _showErrorSnackbar('License plate number is required');
-      return false;
-    }
-    if (carInfoController.licensePlateImageUrl.value.isEmpty) {
-      errorMessage.value = 'Please upload license plate picture';
-      _showErrorSnackbar('Please upload license plate picture');
-      return false;
-    }
-    if (carInfoController.registrationCertNumberTEController.text
-        .trim()
-        .isEmpty) {
-      errorMessage.value = 'Registration certificate number is required';
-      _showErrorSnackbar('Registration certificate number is required');
-      return false;
-    }
-    if (carInfoController.regCertFrontImageUrl.value.isEmpty ||
-        carInfoController.regCertBackImageUrl.value.isEmpty) {
-      errorMessage.value =
-          'Please upload both front and back of Registration Certificate';
-      _showErrorSnackbar(
-        'Please upload both front and back of Registration Certificate',
-      );
-      return false;
-    }
-
-    // Validate Profile Picture
-    if (profilePictureController.profileImageUrl.value.isEmpty) {
-      errorMessage.value = 'Please upload profile picture';
-      _showErrorSnackbar('Please upload profile picture');
-      return false;
-    }
-
-    // Validate profile data
-    // if (gender == null || gender!.isEmpty) {
-    //   errorMessage.value = 'Gender is required';
-    //   _showErrorSnackbar('Gender is required');
-    //   return false;
-    // }
-    if (address == null || address!.isEmpty) {
-      errorMessage.value = 'Address is required';
-      _showErrorSnackbar('Address is required');
-      return false;
-    }
-    if (dateOfBirth == null || dateOfBirth!.isEmpty) {
-      errorMessage.value = 'Date of birth is required';
-      _showErrorSnackbar('Date of birth is required');
-      return false;
-    }
-
     return true;
   }
 
+  String? _validateProfileData() {
+    if (address == null || address!.trim().isEmpty) {
+      return 'Address is required';
+    }
+    if (dateOfBirth == null || dateOfBirth!.trim().isEmpty) {
+      return 'Date of birth is required';
+    }
+    return null;
+  }
+
   void _showErrorSnackbar(String message) {
-    Get.snackbar(
-      'Validation Error',
-      message,
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.red,
-      colorText: Colors.white,
-    );
+    AppSnackbar.error('Validation Error', message);
   }
 
   // ==================== Navigation ====================
   void goBack() {
     Get.back();
-  }
-
-  void skipDocuments() {
-    // Get.toNamed(AppRoutes.carInformationScreen);
   }
 }

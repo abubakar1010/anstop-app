@@ -59,17 +59,17 @@ class OnboardingPageFirst extends StatelessWidget{
               /// Title
               CustomFadeSlide(
                 delay: 300,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                child: Wrap(
+                  alignment: WrapAlignment.center,
+                  crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
                     Text(l10n.onboardingWelcomeTo, style: TextStyle(fontSize: 26.sp, fontWeight: FontWeight.bold)),
                     SizedBox(width: 5),
-                    Container(
+                    SizedBox(
                       height: 30.h,
                       child: Image.asset(
                         AppImage.textLogo,
-
+                        fit: BoxFit.contain,
                       ),
                     ),
                   ],

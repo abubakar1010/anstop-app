@@ -5,7 +5,6 @@ class SignUpRequestModel {
   final String password;
   final String role;
   final String? phoneNumber;
-  final String? gender;
   final String? dateOfBirth;
 
   SignUpRequestModel({
@@ -15,7 +14,6 @@ class SignUpRequestModel {
     required this.password,
     required this.role,
     this.phoneNumber,
-    this.gender,
     this.dateOfBirth,
   });
 
@@ -31,9 +29,6 @@ class SignUpRequestModel {
     // Add optional fields only if they are not null
     if (phoneNumber != null && phoneNumber!.isNotEmpty) {
       data['phoneNumber'] = phoneNumber;
-    }
-    if (gender != null && gender!.isNotEmpty) {
-      data['gender'] = gender;
     }
     if (dateOfBirth != null && dateOfBirth!.isNotEmpty) {
       data['dateOfBirth'] = dateOfBirth;

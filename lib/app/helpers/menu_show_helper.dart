@@ -10,7 +10,6 @@ class MenuShowHelper {
     return "${35 + index} kg";
   });
 
-  static final List<String> genderOptions = ["Male", "Female"];
   static final List<String> subjects = [
     "French",
     "Mathematics",

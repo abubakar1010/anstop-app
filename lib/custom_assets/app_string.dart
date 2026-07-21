@@ -86,17 +86,19 @@ abstract class AppString {
   static const String nationalIdTitle = 'National ID';
   static const String nationalIdNumberLabel = 'National Id number';
   static const String uploadNationalIdFront = 'Upload your National ID picture (Front)';
+  static const String uploadNationalIdBack = 'Upload your National ID picture (Back)';
   static const String drivingLicenceTitle = 'Driving Licence';
   static const String drivingLicenseNumberLabel = 'Driving License number';
   static const String uploadDrivingLicenseFront = 'Upload your Driving License picture (Front)';
+  static const String uploadDrivingLicenseBack = 'Upload your Driving License picture (Back)';
   static const String carInformationTitle = 'Car information';
   static const String carNameLabel = 'Car name';
   static const String carModelLabel = 'Car Model';
   static const String numberPlateLabel = 'Number plate';
-  static const String uploadCarPictureFront = 'Upload your National ID picture (Front)';
-  static const String uploadCarPictureBack = 'Upload your National ID picture (Back)';
+  static const String uploadCarPictureFront = 'Upload your Registration Certificate (Front)';
+  static const String uploadCarPictureBack = 'Upload your Registration Certificate (Back)';
   static const String uploadPictureTitle = 'Upload Your Picture';
-  static const String uploadProfilePictureLabel = 'Upload your National ID picture (Front)';
+  static const String uploadProfilePictureLabel = 'Upload your picture';
 
   // Terms & Conditions
   static const String termsOfServicesTitle = 'Terms of Services';

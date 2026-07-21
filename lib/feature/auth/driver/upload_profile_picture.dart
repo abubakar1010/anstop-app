@@ -1,13 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ride_sharing/app/utils/app_snackbar.dart';
 import 'package:ride_sharing/app/helpers/image_picker_helper.dart';
 import 'package:ride_sharing/custom_assets/app_string.dart';
 import 'package:ride_sharing/feature/auth/controller/upload_profile_picture_controller.dart';
 import 'package:ride_sharing/feature/auth/passenger/terms_of_services.dart';
 import 'package:ride_sharing/widgets/auth_links/auth_link.dart';
 
-class UploadProfilePictureScreen extends GetView<UploadProfilePictureController> {
+class UploadProfilePictureScreen
+    extends GetView<UploadProfilePictureController> {
   const UploadProfilePictureScreen({super.key});
+
+  /// Pops with `Navigator` rather than `Get.back()`: GetX swallows the pop (and
+  /// throws on its own dead snackbar controller) whenever a snackbar is still
+  /// registered, which is exactly the state a failed validation leaves behind.
+  Future<void> _onSubmit(BuildContext context) async {
+    if (!controller.saveSection()) return;
+    await AppSnackbar.dismiss();
+    if (context.mounted) {
+      Navigator.of(context).pop();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,13 +35,19 @@ class UploadProfilePictureScreen extends GetView<UploadProfilePictureController>
         backgroundColor: Colors.white,
         elevation: 0,
       ),
-      bottomNavigationBar: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 20.sp, vertical: 16.sp),
-        child: CustomButton(
-          onPressed: () {
-            Get.back();
-          },
-          label: AppString.submitButton,
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20.sp, vertical: 16.sp),
+          child: Obx(
+            () => CustomButton(
+              onPressed: controller.isImageUploading.value
+                  ? () {}
+                  : () => _onSubmit(context),
+              label: controller.isImageUploading.value
+                  ? 'Uploading...'
+                  : AppString.submitButton,
+            ),
+          ),
         ),
       ),
       body: SafeArea(
@@ -41,7 +60,10 @@ class UploadProfilePictureScreen extends GetView<UploadProfilePictureController>
                 SizedBox(height: 20.h),
                 Text(
                   AppString.uploadPictureTitle,
-                  style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontSize: 20.sp,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 SizedBox(height: 29.h),
                 Align(
@@ -51,7 +73,10 @@ class UploadProfilePictureScreen extends GetView<UploadProfilePictureController>
                     child: Text(
                       AppString.uploadProfilePictureLabel,
                       textAlign: TextAlign.start,
-                      style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.normal),
+                      style: TextStyle(
+                        fontSize: 15.sp,
+                        fontWeight: FontWeight.normal,
+                      ),
                     ),
                   ),
                 ),
@@ -59,7 +84,8 @@ class UploadProfilePictureScreen extends GetView<UploadProfilePictureController>
                 Obx(
                   () => GestureDetector(
                     onTap: () async {
-                      final image = await ImagePickerHelper.pickImageWithOptions(context);
+                      final image =
+                          await ImagePickerHelper.pickImageWithOptions(context);
                       if (image != null) {
                         await controller.uploadAndSelectImage(image);
                       }
@@ -68,9 +94,7 @@ class UploadProfilePictureScreen extends GetView<UploadProfilePictureController>
                       borderWidth: 1.0,
                       borderColor: Colors.black,
                       uploadedImage: controller.profileImage.value,
-                      child: Container(
-                        color: Colors.white,
-                      ),
+                      child: Container(color: Colors.white),
                     ),
                   ),
                 ),

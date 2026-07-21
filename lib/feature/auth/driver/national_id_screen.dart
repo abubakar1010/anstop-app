@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ride_sharing/app/utils/app_snackbar.dart';
 import 'package:ride_sharing/app/helpers/image_picker_helper.dart';
 import 'package:ride_sharing/custom_assets/app_string.dart';
 import 'package:ride_sharing/feature/auth/controller/national_id_controller.dart';
@@ -8,6 +9,17 @@ import 'package:ride_sharing/widgets/auth_links/auth_link.dart';
 
 class NationalIdScreen extends GetView<NationalIdController> {
   const NationalIdScreen({super.key});
+
+  /// Pops with `Navigator` rather than `Get.back()`: GetX swallows the pop (and
+  /// throws on its own dead snackbar controller) whenever a snackbar is still
+  /// registered, which is exactly the state a failed validation leaves behind.
+  Future<void> _onSubmit(BuildContext context) async {
+    if (!controller.saveSection()) return;
+    await AppSnackbar.dismiss();
+    if (context.mounted) {
+      Navigator.of(context).pop();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,13 +34,18 @@ class NationalIdScreen extends GetView<NationalIdController> {
         backgroundColor: Colors.white,
         elevation: 0,
       ),
-      bottomNavigationBar: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 20.sp, vertical: 16.sp),
-        child: CustomButton(
-          onPressed: () {
-            Get.back();
-          },
-          label: AppString.submitButton,
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20.sp, vertical: 16.sp),
+          child: Obx(() {
+            final isUploading =
+                controller.isFrontImageUploading.value ||
+                controller.isBackImageUploading.value;
+            return CustomButton(
+              onPressed: isUploading ? () {} : () => _onSubmit(context),
+              label: isUploading ? 'Uploading...' : AppString.submitButton,
+            );
+          }),
         ),
       ),
       body: SafeArea(
@@ -41,7 +58,10 @@ class NationalIdScreen extends GetView<NationalIdController> {
                 SizedBox(height: 20.h),
                 Text(
                   AppString.nationalIdTitle,
-                  style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontSize: 20.sp,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 SizedBox(height: 29.h),
                 SizedBox(height: 12.h),
@@ -52,13 +72,14 @@ class NationalIdScreen extends GetView<NationalIdController> {
                     child: Text(
                       AppString.nationalIdNumberLabel,
                       textAlign: TextAlign.start,
-                      style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.normal),
+                      style: TextStyle(
+                        fontSize: 15.sp,
+                        fontWeight: FontWeight.normal,
+                      ),
                     ),
                   ),
                 ),
-                CustomTextField(
-                  controller: controller.nidNumberTEController,
-                ),
+                CustomTextField(controller: controller.nidNumberTEController),
                 SizedBox(height: 20.h),
                 Align(
                   alignment: Alignment.centerLeft,
@@ -67,7 +88,10 @@ class NationalIdScreen extends GetView<NationalIdController> {
                     child: Text(
                       AppString.uploadNationalIdFront,
                       textAlign: TextAlign.start,
-                      style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.normal),
+                      style: TextStyle(
+                        fontSize: 15.sp,
+                        fontWeight: FontWeight.normal,
+                      ),
                     ),
                   ),
                 ),
@@ -75,7 +99,8 @@ class NationalIdScreen extends GetView<NationalIdController> {
                 Obx(
                   () => GestureDetector(
                     onTap: () async {
-                      final image = await ImagePickerHelper.pickImageWithOptions(context);
+                      final image =
+                          await ImagePickerHelper.pickImageWithOptions(context);
                       if (image != null) {
                         await controller.uploadAndSelectFrontImage(image);
                       }
@@ -84,9 +109,7 @@ class NationalIdScreen extends GetView<NationalIdController> {
                       borderWidth: 2.0,
                       borderColor: Colors.black,
                       uploadedImage: controller.frontImage.value,
-                      child: Container(
-                        color: Colors.white,
-                      ),
+                      child: Container(color: Colors.white),
                     ),
                   ),
                 ),
@@ -96,9 +119,12 @@ class NationalIdScreen extends GetView<NationalIdController> {
                   child: Padding(
                     padding: EdgeInsets.only(left: 4.sp),
                     child: Text(
-                      "Upload Driving License (back)",
+                      AppString.uploadNationalIdBack,
                       textAlign: TextAlign.start,
-                      style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.normal),
+                      style: TextStyle(
+                        fontSize: 15.sp,
+                        fontWeight: FontWeight.normal,
+                      ),
                     ),
                   ),
                 ),
@@ -106,7 +132,8 @@ class NationalIdScreen extends GetView<NationalIdController> {
                 Obx(
                   () => GestureDetector(
                     onTap: () async {
-                      final image = await ImagePickerHelper.pickImageWithOptions(context);
+                      final image =
+                          await ImagePickerHelper.pickImageWithOptions(context);
                       if (image != null) {
                         await controller.uploadAndSelectBackImage(image);
                       }
@@ -115,9 +142,7 @@ class NationalIdScreen extends GetView<NationalIdController> {
                       borderWidth: 2.0,
                       borderColor: Colors.black,
                       uploadedImage: controller.backImage.value,
-                      child: Container(
-                        color: Colors.white,
-                      ),
+                      child: Container(color: Colors.white),
                     ),
                   ),
                 ),

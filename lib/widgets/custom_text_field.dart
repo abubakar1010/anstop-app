@@ -91,6 +91,34 @@ class _CustomTextFieldState extends State<CustomTextField> {
     });
   }
 
+  /// Message shown when the field is left empty. Falls back through
+  /// hintText -> labelText -> a generic message, so a field declared without
+  /// either one never crashes on validation.
+  String get _emptyMessage {
+    final label = widget.hintText ?? widget.labelText;
+    if (label == null || label.trim().isEmpty) {
+      return 'This field is required';
+    }
+    return 'Please ${label.trim().toLowerCase()}';
+  }
+
+  String? _defaultValidator(dynamic value) {
+    final text = (value ?? '').toString().trim();
+
+    if (text.isEmpty) {
+      return _emptyMessage;
+    }
+    if (widget.isEmail == true) {
+      return AppConstants.emailValidate.hasMatch(text)
+          ? null
+          : 'Please check your email!';
+    }
+    if (widget.isPassword && text.length < 8) {
+      return 'Password: 8 characters min!';
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -118,39 +146,17 @@ class _CustomTextFieldState extends State<CustomTextField> {
               widget.onTap?.call();
             }
           },
-          readOnly: widget.readOnly!,
-          controller: widget.controller ?? TextEditingController(),
+          readOnly: widget.readOnly ?? false,
+          controller: widget.controller,
           keyboardType: widget.keyboardType,
           inputFormatters: widget.inputFormatter,
           textInputAction: widget.textInputAction,
-          obscuringCharacter: widget.obscure!,
+          obscuringCharacter: widget.obscure ?? '*',
           autovalidateMode: AutovalidateMode.onUserInteraction,
           minLines: widget.isPassword ? 1 : (widget.minLines ?? 1),
-          maxLines: widget.isPassword ? 1 : (widget.maxLines ?? 8),
+          maxLines: widget.isPassword ? 1 : (widget.maxLines ?? 1),
 
-          validator:
-              widget.validator ??
-              (value) {
-                if (widget.isEmail == false) {
-                  if (value!.isEmpty) {
-                    return "Please  ${widget.hintText!.toLowerCase()}";
-                  } else if (widget.isPassword) {
-                    if (value.isEmpty) {
-                      return "Please  ${widget.hintText!.toLowerCase()}";
-                    } else if (value.length < 8) {
-                      return "Password: 8 characters min!";
-                    }
-                  }
-                } else {
-                  bool data = AppConstants.emailValidate.hasMatch(value!);
-                  if (value.isEmpty) {
-                    return "Please  ${widget.hintText!.toLowerCase()}";
-                  } else if (!data) {
-                    return "Please check your email!";
-                  }
-                }
-                return null;
-              },
+          validator: widget.validator ?? _defaultValidator,
 
           cursorColor: widget.cursorColor ?? AppColors.appGreyColor,
           obscureText: widget.isPassword ? obscureText : false,

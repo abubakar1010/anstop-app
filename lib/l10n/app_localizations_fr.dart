@@ -906,4 +906,26 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get dropOffNoticeYesAccept => 'Oui, Accepter';
+
+  @override
+  String get locationServiceOffTitle => 'La localisation est désactivée';
+
+  @override
+  String get locationServiceOffMessage =>
+      'Activez les services de localisation pour que nous puissions afficher votre position en temps réel sur la carte.';
+
+  @override
+  String get locationPermissionRequiredTitle =>
+      'Autorisation de localisation requise';
+
+  @override
+  String get locationPermissionRequiredMessage =>
+      'Nous avons besoin de votre position pour vous localiser et trouver les chauffeurs près de vous.';
+
+  @override
+  String get locationPermissionDeniedForeverMessage =>
+      'L\'autorisation de localisation est définitivement refusée. Veuillez l\'activer dans les paramètres de l\'application.';
+
+  @override
+  String get openSettingsButton => 'Ouvrir les paramètres';
 }

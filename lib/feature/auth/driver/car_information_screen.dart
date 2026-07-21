@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ride_sharing/app/utils/app_snackbar.dart';
 import 'package:ride_sharing/app/helpers/image_picker_helper.dart';
 import 'package:ride_sharing/custom_assets/app_string.dart';
 import 'package:ride_sharing/feature/auth/controller/car_information_controller.dart';
@@ -8,6 +9,17 @@ import 'package:ride_sharing/widgets/auth_links/auth_link.dart';
 
 class CarInformationScreen extends GetView<CarInformationController> {
   const CarInformationScreen({super.key});
+
+  /// Pops with `Navigator` rather than `Get.back()`: GetX swallows the pop (and
+  /// throws on its own dead snackbar controller) whenever a snackbar is still
+  /// registered, which is exactly the state a failed validation leaves behind.
+  Future<void> _onSubmit(BuildContext context) async {
+    if (!controller.saveSection()) return;
+    await AppSnackbar.dismiss();
+    if (context.mounted) {
+      Navigator.of(context).pop();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,6 +34,21 @@ class CarInformationScreen extends GetView<CarInformationController> {
         backgroundColor: Colors.white,
         elevation: 0,
       ),
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20.sp, vertical: 16.sp),
+          child: Obx(() {
+            final isUploading =
+                controller.isLicensePlateImageUploading.value ||
+                controller.isRegCertFrontImageUploading.value ||
+                controller.isRegCertBackImageUploading.value;
+            return CustomButton(
+              onPressed: isUploading ? () {} : () => _onSubmit(context),
+              label: isUploading ? 'Uploading...' : AppString.submitButton,
+            );
+          }),
+        ),
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
@@ -31,7 +58,10 @@ class CarInformationScreen extends GetView<CarInformationController> {
               children: [
                 Text(
                   AppString.carInformationTitle,
-                  style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontSize: 20.sp,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 SizedBox(height: 29.h),
                 Align(
@@ -41,14 +71,15 @@ class CarInformationScreen extends GetView<CarInformationController> {
                     child: Text(
                       AppString.carNameLabel,
                       textAlign: TextAlign.start,
-                      style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.normal),
+                      style: TextStyle(
+                        fontSize: 15.sp,
+                        fontWeight: FontWeight.normal,
+                      ),
                     ),
                   ),
                 ),
                 SizedBox(height: 2.h),
-                CustomTextField(
-                  controller: controller.carBrandTEController,
-                ),
+                CustomTextField(controller: controller.carBrandTEController),
                 SizedBox(height: 5.sp),
                 Align(
                   alignment: Alignment.centerLeft,
@@ -57,14 +88,15 @@ class CarInformationScreen extends GetView<CarInformationController> {
                     child: Text(
                       AppString.carModelLabel,
                       textAlign: TextAlign.start,
-                      style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.normal),
+                      style: TextStyle(
+                        fontSize: 15.sp,
+                        fontWeight: FontWeight.normal,
+                      ),
                     ),
                   ),
                 ),
                 SizedBox(height: 2.h),
-                CustomTextField(
-                  controller: controller.carModelTEController,
-                ),
+                CustomTextField(controller: controller.carModelTEController),
                 SizedBox(height: 5.h),
                 Align(
                   alignment: Alignment.centerLeft,
@@ -73,14 +105,15 @@ class CarInformationScreen extends GetView<CarInformationController> {
                     child: Text(
                       "Year of Manufacture",
                       textAlign: TextAlign.start,
-                      style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.normal),
+                      style: TextStyle(
+                        fontSize: 15.sp,
+                        fontWeight: FontWeight.normal,
+                      ),
                     ),
                   ),
                 ),
                 SizedBox(height: 2.h),
-                CustomTextField(
-                  controller: controller.carYearTEController,
-                ),
+                CustomTextField(controller: controller.carYearTEController),
                 SizedBox(height: 5.h),
                 Align(
                   alignment: Alignment.centerLeft,
@@ -89,7 +122,10 @@ class CarInformationScreen extends GetView<CarInformationController> {
                     child: Text(
                       AppString.numberPlateLabel,
                       textAlign: TextAlign.start,
-                      style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.normal),
+                      style: TextStyle(
+                        fontSize: 15.sp,
+                        fontWeight: FontWeight.normal,
+                      ),
                     ),
                   ),
                 ),
@@ -105,7 +141,10 @@ class CarInformationScreen extends GetView<CarInformationController> {
                     child: Text(
                       "Upload License Plate Picture",
                       textAlign: TextAlign.start,
-                      style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.normal),
+                      style: TextStyle(
+                        fontSize: 15.sp,
+                        fontWeight: FontWeight.normal,
+                      ),
                     ),
                   ),
                 ),
@@ -113,18 +152,19 @@ class CarInformationScreen extends GetView<CarInformationController> {
                 Obx(
                   () => GestureDetector(
                     onTap: () async {
-                      final image = await ImagePickerHelper.pickImageWithOptions(context);
+                      final image =
+                          await ImagePickerHelper.pickImageWithOptions(context);
                       if (image != null) {
-                        await controller.uploadAndSelectLicensePlateImage(image);
+                        await controller.uploadAndSelectLicensePlateImage(
+                          image,
+                        );
                       }
                     },
                     child: CustomUploadItems(
                       borderWidth: 1.0,
                       borderColor: Colors.black,
                       uploadedImage: controller.licensePlateImage.value,
-                      child: Container(
-                        color: Colors.white,
-                      ),
+                      child: Container(color: Colors.white),
                     ),
                   ),
                 ),
@@ -136,7 +176,10 @@ class CarInformationScreen extends GetView<CarInformationController> {
                     child: Text(
                       "Registration Certificate Number",
                       textAlign: TextAlign.start,
-                      style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.normal),
+                      style: TextStyle(
+                        fontSize: 15.sp,
+                        fontWeight: FontWeight.normal,
+                      ),
                     ),
                   ),
                 ),
@@ -152,7 +195,10 @@ class CarInformationScreen extends GetView<CarInformationController> {
                     child: Text(
                       AppString.uploadCarPictureFront,
                       textAlign: TextAlign.start,
-                      style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.normal),
+                      style: TextStyle(
+                        fontSize: 15.sp,
+                        fontWeight: FontWeight.normal,
+                      ),
                     ),
                   ),
                 ),
@@ -160,18 +206,19 @@ class CarInformationScreen extends GetView<CarInformationController> {
                 Obx(
                   () => GestureDetector(
                     onTap: () async {
-                      final image = await ImagePickerHelper.pickImageWithOptions(context);
+                      final image =
+                          await ImagePickerHelper.pickImageWithOptions(context);
                       if (image != null) {
-                        await controller.uploadAndSelectRegCertFrontImage(image);
+                        await controller.uploadAndSelectRegCertFrontImage(
+                          image,
+                        );
                       }
                     },
                     child: CustomUploadItems(
                       borderWidth: 1.0,
                       borderColor: Colors.black,
                       uploadedImage: controller.regCertFrontImage.value,
-                      child: Container(
-                        color: Colors.white,
-                      ),
+                      child: Container(color: Colors.white),
                     ),
                   ),
                 ),
@@ -183,7 +230,10 @@ class CarInformationScreen extends GetView<CarInformationController> {
                     child: Text(
                       AppString.uploadCarPictureBack,
                       textAlign: TextAlign.start,
-                      style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.normal),
+                      style: TextStyle(
+                        fontSize: 15.sp,
+                        fontWeight: FontWeight.normal,
+                      ),
                     ),
                   ),
                 ),
@@ -191,7 +241,8 @@ class CarInformationScreen extends GetView<CarInformationController> {
                 Obx(
                   () => GestureDetector(
                     onTap: () async {
-                      final image = await ImagePickerHelper.pickImageWithOptions(context);
+                      final image =
+                          await ImagePickerHelper.pickImageWithOptions(context);
                       if (image != null) {
                         await controller.uploadAndSelectRegCertBackImage(image);
                       }
@@ -200,20 +251,8 @@ class CarInformationScreen extends GetView<CarInformationController> {
                       borderWidth: 1.0,
                       borderColor: Colors.black,
                       uploadedImage: controller.regCertBackImage.value,
-                      child: Container(
-                        color: Colors.white,
-                      ),
+                      child: Container(color: Colors.white),
                     ),
-                  ),
-                ),
-                SizedBox(height: 55.h),
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 5.sp),
-                  child: CustomButton(
-                    onPressed: () {
-                      Get.back();
-                    },
-                    label: AppString.submitButton,
                   ),
                 ),
                 SizedBox(height: 20.h),
