@@ -897,4 +897,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dropOffNoticeYesAccept => 'Yes, Accept';
+
+  @override
+  String get locationServiceOffTitle => 'Location is turned off';
+
+  @override
+  String get locationServiceOffMessage =>
+      'Turn on location services so we can show your real-time position on the map.';
+
+  @override
+  String get locationPermissionRequiredTitle => 'Location permission required';
+
+  @override
+  String get locationPermissionRequiredMessage =>
+      'We need your location to show where you are and to find drivers near you.';
+
+  @override
+  String get locationPermissionDeniedForeverMessage =>
+      'Location permission is permanently denied. Please enable it in the app settings.';
+
+  @override
+  String get openSettingsButton => 'Open settings';
 }

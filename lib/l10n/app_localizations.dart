@@ -1825,6 +1825,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Yes, Accept'**
   String get dropOffNoticeYesAccept;
+
+  /// No description provided for @locationServiceOffTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Location is turned off'**
+  String get locationServiceOffTitle;
+
+  /// No description provided for @locationServiceOffMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on location services so we can show your real-time position on the map.'**
+  String get locationServiceOffMessage;
+
+  /// No description provided for @locationPermissionRequiredTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Location permission required'**
+  String get locationPermissionRequiredTitle;
+
+  /// No description provided for @locationPermissionRequiredMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'We need your location to show where you are and to find drivers near you.'**
+  String get locationPermissionRequiredMessage;
+
+  /// No description provided for @locationPermissionDeniedForeverMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Location permission is permanently denied. Please enable it in the app settings.'**
+  String get locationPermissionDeniedForeverMessage;
+
+  /// No description provided for @openSettingsButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Open settings'**
+  String get openSettingsButton;
 }
 
 class _AppLocalizationsDelegate

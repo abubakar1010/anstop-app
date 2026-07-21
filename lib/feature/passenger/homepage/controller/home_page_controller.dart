@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
@@ -67,15 +68,24 @@ class HomePageController extends GetxController {
   // Tracks previous driver position to compute movement bearing before route loads
   LatLng? _previousDriverPosition;
 
+  // Fallback camera position (Paris) used only until the real device
+  // position arrives — the app operates in France.
   static const CameraPosition defaultLocation = CameraPosition(
-    target: LatLng(23.8103, 90.4125),
+    target: LatLng(48.8566, 2.3522),
     zoom: 14.0,
   );
+
+  // Live position stream — keeps the passenger marker/camera on the real
+  // device location while no driver is being tracked.
+  StreamSubscription<Position>? _positionSubscription;
+  bool _followUserCamera = true;
 
   @override
   void onInit() {
     super.onInit();
-    _initializeMap();
+    // Deferred to the first frame so Get.context exists — the permission
+    // dialogs below are localized and need a BuildContext.
+    WidgetsBinding.instance.addPostFrameCallback((_) => _initializeMap());
     _setupIncompletedRideListener();
   }
 
@@ -143,8 +153,10 @@ class HomePageController extends GetxController {
 
   Future<void> _initializeMap() async {
     await _loadIcons();
-    await _requestLocationPermission();
+    final granted = await _requestLocationPermission();
+    if (!granted) return;
     await _getCurrentLocation();
+    _startLiveLocationUpdates();
   }
 
   // ─── Icon loading ──────────────────────────────────────────────────────────
@@ -310,29 +322,123 @@ class HomePageController extends GetxController {
 
   // ─── Location permission & initial position ────────────────────────────────
 
-  Future<void> _requestLocationPermission() async {
+  /// Asks for location access when the passenger lands on this screen.
+  /// Every message shown here comes from the app's localizations, so the
+  /// user sees it in the app language (French by default).
+  /// Returns true only when a real position can be read.
+  Future<bool> _requestLocationPermission() async {
+    final l10n = AppLocalizations.of(Get.context!)!;
+
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       isLoading = false;
       update();
-      return;
+      await _showLocationDialog(
+        title: l10n.locationServiceOffTitle,
+        message: l10n.locationServiceOffMessage,
+        actionLabel: l10n.openSettingsButton,
+        onAction: Geolocator.openLocationSettings,
+      );
+      return false;
     }
 
     LocationPermission permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        isLoading = false;
-        update();
-        return;
-      }
+    }
+
+    if (permission == LocationPermission.denied) {
+      isLoading = false;
+      update();
+      await _showLocationDialog(
+        title: l10n.locationPermissionRequiredTitle,
+        message: l10n.locationPermissionRequiredMessage,
+        actionLabel: l10n.okButton,
+        onAction: () async {},
+      );
+      return false;
     }
 
     if (permission == LocationPermission.deniedForever) {
       isLoading = false;
       update();
-      return;
+      await _showLocationDialog(
+        title: l10n.locationPermissionRequiredTitle,
+        message: l10n.locationPermissionDeniedForeverMessage,
+        actionLabel: l10n.openSettingsButton,
+        onAction: Geolocator.openAppSettings,
+      );
+      return false;
     }
+
+    return true;
+  }
+
+  Future<void> _showLocationDialog({
+    required String title,
+    required String message,
+    required String actionLabel,
+    required Future<void> Function() onAction,
+  }) async {
+    final l10n = AppLocalizations.of(Get.context!)!;
+    await Get.dialog(
+      AlertDialog(
+        title: Text(title),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: Text(l10n.cancelButton),
+          ),
+          TextButton(
+            onPressed: () async {
+              Get.back();
+              await onAction();
+            },
+            child: Text(actionLabel),
+          ),
+        ],
+      ),
+      barrierDismissible: false,
+    );
+  }
+
+  /// Subscribes to the device GPS so the passenger marker and the camera
+  /// follow the user in real time (updates every 10 m of movement).
+  void _startLiveLocationUpdates() {
+    _positionSubscription?.cancel();
+    _positionSubscription = Geolocator.getPositionStream(
+      locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.high,
+        distanceFilter: 10,
+      ),
+    ).listen((position) {
+      currentPosition = position;
+      _updateCurrentLocationMarker(position);
+      update();
+
+      // Don't fight the camera while a driver route is being framed.
+      if (_followUserCamera) {
+        mapController?.animateCamera(
+          CameraUpdate.newLatLng(
+            LatLng(position.latitude, position.longitude),
+          ),
+        );
+      }
+    });
+  }
+
+  void _updateCurrentLocationMarker(Position position) {
+    final l10n = AppLocalizations.of(Get.context!)!;
+    markers = {
+      ...markers.where((m) => m.markerId.value != 'current_location'),
+      Marker(
+        markerId: const MarkerId('current_location'),
+        position: LatLng(position.latitude, position.longitude),
+        infoWindow: InfoWindow(title: l10n.yourLocationMarker),
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+      ),
+    };
   }
 
   Future<void> _getCurrentLocation() async {
@@ -344,16 +450,7 @@ class HomePageController extends GetxController {
       currentPosition = position;
       isLoading = false;
 
-      final l10n = AppLocalizations.of(Get.context!)!;
-      markers = {
-        ...markers,
-        Marker(
-          markerId: const MarkerId('current_location'),
-          position: LatLng(position.latitude, position.longitude),
-          infoWindow: InfoWindow(title: l10n.yourLocationMarker),
-          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
-        ),
-      };
+      _updateCurrentLocationMarker(position);
       update();
 
       if (mapController != null) {
@@ -376,6 +473,7 @@ class HomePageController extends GetxController {
 
   void startDriverLocationTracking(LatLng pickupLocation) {
     _lastFetchedDriverLocation = null;
+    _followUserCamera = false;
     _resetRouteState();
 
     debugPrint('🟢 [POLYLINE DEBUG] startDriverLocationTracking called');
@@ -447,6 +545,7 @@ class HomePageController extends GetxController {
   void startRideToDestinationTracking(LatLng destination) {
     SocketIoService.to.offUpdateLocation();
     _lastFetchedDriverLocation = null;
+    _followUserCamera = false;
     _resetRouteState();
 
     // Replace pickup pin with destination pin
@@ -638,6 +737,7 @@ class HomePageController extends GetxController {
   void stopDriverLocationTracking() {
     SocketIoService.to.offUpdateLocation();
     _lastFetchedDriverLocation = null;
+    _followUserCamera = true;
     _resetRouteState();
     polylines = {};
     circles = {};
@@ -778,6 +878,7 @@ class HomePageController extends GetxController {
 
   @override
   void onClose() {
+    _positionSubscription?.cancel();
     mapController?.dispose();
     SocketIoService.to.offIncompletedRide();
 
