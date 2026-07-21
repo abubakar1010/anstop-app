@@ -336,5 +336,12 @@
   "dropOffNoticeTitle": "Drop-off Notice",
   "dropOffNoticeMessage": "The driver may drop you off within a 500m radius near your destination. Do you accept this?",
   "dropOffNoticeNo": "No",
-  "dropOffNoticeYesAccept": "Yes, Accept"
+  "dropOffNoticeYesAccept": "Yes, Accept",
+
+  "locationServiceOffTitle": "Location is turned off",
+  "locationServiceOffMessage": "Turn on location services so we can show your real-time position on the map.",
+  "locationPermissionRequiredTitle": "Location permission required",
+  "locationPermissionRequiredMessage": "We need your location to show where you are and to find drivers near you.",
+  "locationPermissionDeniedForeverMessage": "Location permission is permanently denied. Please enable it in the app settings.",
+  "openSettingsButton": "Open settings"
 }

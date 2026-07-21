@@ -36,7 +36,8 @@ android {
 
     defaultConfig {
         applicationId = "com.anstopcovoiturage"
-        minSdk = flutter.minSdkVersion
+        // firebase_messaging requires API 23+; flutter.minSdkVersion is still 21.
+        minSdk = maxOf(flutter.minSdkVersion, 23)
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
