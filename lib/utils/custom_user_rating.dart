@@ -76,13 +76,18 @@ class _CustomUserRatingState extends State<CustomUserRating> {
 
           SizedBox(width: 12.sp),
 
-          // Name + Rating Stars
-          Column(
+          // Name + Rating Stars — Expanded so long names/labels wrap or
+          // ellipsize instead of overflowing off the right edge.
+          Expanded(
+            child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
             children: [
               Text(
                 widget.name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontSize: 15.sp,
                   fontWeight: FontWeight.bold,
@@ -94,7 +99,10 @@ class _CustomUserRatingState extends State<CustomUserRating> {
                 onTap: (){
                   Get.to(DriverProfileView());
                 },
-                  child: Text(AppLocalization.tr.goToProfileLink,style: TextStyle(color: Colors.green,fontSize: 10.sp),
+                  child: Text(AppLocalization.tr.goToProfileLink,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(color: Colors.green,fontSize: 10.sp),
 
                   )
 
@@ -117,6 +125,7 @@ class _CustomUserRatingState extends State<CustomUserRating> {
                 }),
               ),
             ],
+          ),
           ),
 
 
