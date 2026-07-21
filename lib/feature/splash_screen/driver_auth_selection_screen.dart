@@ -5,7 +5,6 @@ import 'package:get/get.dart';
 import 'package:ride_sharing/custom_assets/app_image.dart';
 import 'package:ride_sharing/feature/auth/driver/registration.dart';
 import 'package:ride_sharing/feature/auth/view/log_in_screen.dart';
-import 'package:ride_sharing/feature/auth/view/registration.dart';
 import 'package:ride_sharing/l10n/app_localizations.dart';
 
 class DriverAuthSelectionScreen extends StatelessWidget {
@@ -17,74 +16,86 @@ class DriverAuthSelectionScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            children: [
-              SizedBox(height: 150.h),
-              Center(
-                child: Image.asset(
-                  AppImage.rafiki,
-                  height: 300.h,
-                  width: 348.w,
-                  fit: BoxFit.contain,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final double imageHeight =
+                (constraints.maxHeight * 0.32).clamp(120.0, 300.0);
+            return SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: constraints.maxHeight - 48,
                 ),
-
-              ),
-
-              const SizedBox(height: 30),
-              Text(
-                l10n.driverWelcomeTitle,
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ),
-              const SizedBox(height: 10),
-               Text(
-                l10n.driverAuthTagline,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 18.sp,
-                  color: Colors.black,
-                ),
-              ),
-              const SizedBox(height: 40),
-              ElevatedButton(
-                  onPressed: () {
-
-                    Get.to(LogInScreen());
-
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primaryColor,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 120, vertical: 15),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image.asset(
+                      AppImage.rafiki,
+                      height: imageHeight,
+                      fit: BoxFit.contain,
                     ),
-                  ),
-                  child: Text(l10n.logInButton)
-              ),
-              const SizedBox(height: 15),
-              OutlinedButton(
-                onPressed: () {
-                  Get.to(DriverRegistration());
-
-                },
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.primaryColor,
-                  side: BorderSide(color: AppColors.primaryColor),
-                  padding: const EdgeInsets.symmetric(horizontal: 110, vertical: 15),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
-                  ),
+                    const SizedBox(height: 30),
+                    Text(
+                      l10n.driverWelcomeTitle,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 24.sp,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      l10n.driverAuthTagline,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 18.sp,
+                        color: Colors.black,
+                      ),
+                    ),
+                    const SizedBox(height: 40),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Get.to(LogInScreen());
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primaryColor,
+                          foregroundColor: Colors.white,
+                          minimumSize: const Size.fromHeight(52),
+                          padding: const EdgeInsets.symmetric(vertical: 15),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                        ),
+                        child: Text(l10n.logInButton),
+                      ),
+                    ),
+                    const SizedBox(height: 15),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton(
+                        onPressed: () {
+                          Get.to(DriverRegistration());
+                        },
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppColors.primaryColor,
+                          side: BorderSide(color: AppColors.primaryColor),
+                          minimumSize: const Size.fromHeight(52),
+                          padding: const EdgeInsets.symmetric(vertical: 15),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                        ),
+                        child: Text(l10n.registerButton),
+                      ),
+                    ),
+                  ],
                 ),
-                child: Text(l10n.registerButton) ,
               ),
-            ],
-          ),
+            );
+          },
         ),
       ),
     );

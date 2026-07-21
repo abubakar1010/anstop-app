@@ -16,17 +16,31 @@ class LogInScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20.w),
+        // LayoutBuilder keeps the form vertically centred on tall screens and
+        // fully scrollable on short ones, so the login button is never cropped.
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            // Logo is capped against the available height instead of rendering
+            // at its intrinsic size, which used to push the button off screen.
+            final double logoHeight =
+                (constraints.maxHeight * 0.18).clamp(70.0, 160.0);
+            return SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 24),
             child: Form(
               key: _controller.formKey,
               child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  SizedBox(height: 66.h),
-                  Image.asset(
-                    AppImage.logoAnstop
+                  Center(
+                    child: Image.asset(
+                      AppImage.logoAnstop,
+                      height: logoHeight,
+                      fit: BoxFit.contain,
+                    ),
                   ),
                   SizedBox(height: 52.h),
                   CustomTextField(
@@ -87,7 +101,10 @@ class LogInScreen extends StatelessWidget {
                 ],
               ),
             ),
-          ),
+              ),
+            ),
+            );
+          },
         ),
       ),
     );

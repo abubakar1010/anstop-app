@@ -25,7 +25,7 @@ class RoleSelectionScreen extends StatelessWidget {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              SizedBox(height: 100.h),
+              SizedBox(height: 48.h),
               Padding(
                 padding: const EdgeInsets.all(20.0),
                 child: Column(
@@ -69,7 +69,11 @@ class RoleSelectionScreen extends StatelessWidget {
               CustomFadeSlide(
                 delay: 600,
                 child: Container(
-                  height: MediaQuery.of(context).size.height * 0.25,
+                  // minHeight (not a fixed height) so the two role buttons can
+                  // never be clipped on a short viewport.
+                  constraints: BoxConstraints(
+                    minHeight: MediaQuery.of(context).size.height * 0.25,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.only(
