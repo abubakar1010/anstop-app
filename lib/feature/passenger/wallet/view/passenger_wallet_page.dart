@@ -51,8 +51,14 @@ class _PassengerWalletPageState extends State<PassengerWalletPage> {
   @override
   void initState() {
     super.initState();
-    _walletController.getTransactions();
-    _walletController.getBalance();
+    // Deferred to after the first frame: initState runs inside the build
+    // phase, and these calls synchronously set isLoading/errorMessage (and on
+    // failure show a snackbar), which marked the Obx below dirty mid-build.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _walletController.getTransactions();
+      _walletController.getBalance();
+    });
   }
   @override
   Widget build(BuildContext context) {

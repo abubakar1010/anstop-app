@@ -11,16 +11,39 @@ import 'package:ride_sharing/widgets/custom_vertical_line.dart';
 import 'package:intl/intl.dart';
 
 
-class OngoingTripDetails extends StatelessWidget {
+class OngoingTripDetails extends StatefulWidget {
   final String rideId;
 
   const OngoingTripDetails({super.key, required this.rideId});
 
   @override
-  Widget build(BuildContext context) {
-    // Initialize controller with rideId
-    final controller = Get.put(OngoingTripController(rideId: rideId));
+  State<OngoingTripDetails> createState() => _OngoingTripDetailsState();
+}
 
+class _OngoingTripDetailsState extends State<OngoingTripDetails> {
+  late final OngoingTripController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    // Registered here rather than in build() so the controller's onInit()
+    // (which writes isLoading/trip and can fire a snackbar) runs outside the
+    // build phase — doing it in build() marked the Obx below dirty mid-build.
+    // Tagging by rideId keeps a second trip from reusing the first one's data.
+    controller = Get.put(
+      OngoingTripController(rideId: widget.rideId),
+      tag: widget.rideId,
+    );
+  }
+
+  @override
+  void dispose() {
+    Get.delete<OngoingTripController>(tag: widget.rideId);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: AppColors.white,
@@ -191,7 +214,7 @@ class OngoingTripDetails extends StatelessWidget {
                         distance: trip.distance,
                       ),
                       SupportNoteWidget(
-                        conversationId: rideId,
+                        conversationId: widget.rideId,
                         userName: trip.driverId.name,
                         userStatus: 'Driver',
                       ),

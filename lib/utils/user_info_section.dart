@@ -47,6 +47,21 @@ class UserInfoSection extends StatelessWidget {
                 width: 50.w,
                 height: 50.h,
                 fit: BoxFit.cover,
+                // Profile URLs from the API are not always real image files,
+                // so fall back to a placeholder instead of throwing.
+                errorBuilder: (context, error, stackTrace) => Icon(
+                  Icons.person,
+                  size: 30.sp,
+                  color: AppColors.togglebuttonColor,
+                ),
+                loadingBuilder: (context, child, progress) =>
+                    progress == null ? child : const Center(
+                      child: SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                    ),
               ),
             ),
           ),

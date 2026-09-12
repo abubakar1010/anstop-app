@@ -12,16 +12,16 @@ class DriverProfileView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-
     return GetBuilder<DriverProfileController>(
       init: DriverProfileController(),
       builder: (controller) {
         return Scaffold(
           backgroundColor: MessagingColors.profileBackgroundColor,
-          key: scaffoldKey,
+          // No scaffoldKey: a key built here would be replaced on every
+          // rebuild, leaving the menu button holding a stale key whose
+          // currentState is null. CustomAppBarTitle falls back to
+          // Scaffold.of(context), which always resolves the live Scaffold.
           appBar: CustomAppBarTitle(
-            scaffoldKey: scaffoldKey,
             title: AppLocalization.tr.profileTitle,
           ),
           drawer: DriverCustomDrawer(),

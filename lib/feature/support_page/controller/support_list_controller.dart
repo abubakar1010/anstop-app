@@ -34,7 +34,10 @@ class SupportListController extends GetxController {
       final response = await _supportService.getMySupportMessages();
 
       if (response.isSuccess) {
-        final supportResponse = SupportListResponse.fromJson(response.responseData);
+        final raw = response.responseData;
+        final supportResponse = SupportListResponse.fromJson(
+          raw is Map<String, dynamic> ? raw : <String, dynamic>{},
+        );
         if (supportResponse.success) {
           supportMessages.value = supportResponse.results;
           currentPage.value = supportResponse.page;
@@ -49,17 +52,23 @@ class SupportListController extends GetxController {
         errorMessage.value = response.errorMessage.isNotEmpty
             ? response.errorMessage
             : 'Failed to load support messages';
-        Get.snackbar(
-          AppLocalization.tr.errorTitle,
-          AppLocalization.tr.genericErrorMessage,
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-        );
+        _showErrorSnackbar();
       }
     } catch (e) {
       debugPrint('support_list_controller: $e');
       errorMessage.value = AppLocalization.tr.genericErrorMessage;
+      _showErrorSnackbar();
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  /// fetchSupportMessages() runs from onInit(), i.e. before the route's
+  /// Overlay exists, so showing a snackbar right away throws
+  /// "No Overlay widget found". Defer it to after the frame is built.
+  void _showErrorSnackbar() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (Get.context == null) return;
       Get.snackbar(
         AppLocalization.tr.errorTitle,
         AppLocalization.tr.genericErrorMessage,
@@ -67,9 +76,7 @@ class SupportListController extends GetxController {
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
-    } finally {
-      isLoading.value = false;
-    }
+    });
   }
 
   Future<void> refreshMessages() async {

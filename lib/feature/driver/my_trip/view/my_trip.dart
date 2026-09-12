@@ -21,9 +21,10 @@ class MyTripPage extends StatefulWidget {
   State<MyTripPage> createState() => _MyTripPageState();
 }
 
-final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-
 class _MyTripPageState extends State<MyTripPage> {
+  // Instance field, not a file-level global — see the note in my_ride.dart.
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
   bool isOngoing = true;
 
   @override

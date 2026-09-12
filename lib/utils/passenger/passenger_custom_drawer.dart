@@ -68,46 +68,50 @@ class PassengerCustomDrawer extends StatelessWidget {
                     _drawerItem(
                       imagePath: AppImage.notification,
                       text: AppLocalization.tr.notificationMenuItem,
-                      onTap: () {},
+                      onTap: () => _closeDrawerThen(
+                        context,
+                        () => Get.toNamed(AppRoutes.notificationScreen),
+                      ),
                     ),
 
                     _drawerItem(
                       imagePath: AppImage.carDrawer,
                       text: AppLocalization.tr.myRideMenuItem,
-                      onTap: () {
-                      //  Get.to(MyRidePage());
-                        Get.toNamed(AppRoutes.passengerMyRideScreen);
-                        },
+                      onTap: () => _closeDrawerThen(
+                        context,
+                        () => Get.toNamed(AppRoutes.passengerMyRideScreen),
+                      ),
                     ),
 
                     _drawerItem(
                       imagePath: AppImage.walletDrawer,
                       text: AppLocalization.tr.walletMenuItem,
-                      onTap: () {
-                       // Get.to(PassengerWalletPage());
-                        Get.toNamed(AppRoutes.passengerWalletScreen);
-
-                      },
+                      onTap: () => _closeDrawerThen(
+                        context,
+                        () => Get.toNamed(AppRoutes.passengerWalletScreen),
+                      ),
                     ),
                     _drawerItem(
                       imagePath: AppImage.support,
                       text: AppLocalization.tr.supportMenuItem,
-                      onTap: () {
-                        Get.toNamed(AppRoutes.supportListScreen);
-                      },
+                      onTap: () => _closeDrawerThen(
+                        context,
+                        () => Get.toNamed(AppRoutes.supportListScreen),
+                      ),
                     ),
                     _drawerItem(
                       imagePath: AppImage.settings,
                       text: AppLocalization.tr.settingsMenuItem,
-                      onTap: () {
-                        Get.to(SettingsScreen());
-
-                      },
+                      onTap: () => _closeDrawerThen(
+                        context,
+                        () => Get.to(SettingsScreen()),
+                      ),
                      ),
                     _drawerItem(
                       imagePath: AppImage.logout,
                       text: AppLocalization.tr.logoutMenuItem,
                       onTap: () async {
+                        Scaffold.maybeOf(context)?.closeDrawer();
                         // Show the logout dialog
                         final result = await LogoutDialog.show(context);
 
@@ -129,13 +133,27 @@ class PassengerCustomDrawer extends StatelessWidget {
           Padding(
             padding: EdgeInsets.all(8.sp),
             child: CustomButton(
-                onPressed: () => _handleSwitchToDriver(context),
+                onPressed: () => _closeDrawerThen(
+                  context,
+                  () => _handleSwitchToDriver(context),
+                ),
              title: Text(AppLocalization.tr.switchToDriverButton,style: TextStyle(color: AppColors.white),),
             ),
           )
         ],
       ),
     );
+  }
+
+  /// Closes the drawer before running [action].
+  ///
+  /// Navigating straight from a drawer item leaves the drawer open underneath
+  /// the pushed route. On coming back the Scaffold still considers it open, so
+  /// the menu button's openDrawer() is a no-op and the drawer "randomly"
+  /// stops working.
+  void _closeDrawerThen(BuildContext context, VoidCallback action) {
+    Scaffold.maybeOf(context)?.closeDrawer();
+    action();
   }
 
   Future<void> _handleSwitchToDriver(BuildContext context) async {

@@ -73,28 +73,28 @@ class DriverCustomDrawer extends StatelessWidget {
                     _drawerItem(
                       imagePath: AppImage.notification,
                       text: AppLocalization.tr.notificationMenuItem,
-                      onTap: () {
-                      //  Get.to(NotificationScreen());
-                        Get.toNamed(AppRoutes.notificationScreen);
-                      },
+                      onTap: () => _closeDrawerThen(
+                        context,
+                        () => Get.toNamed(AppRoutes.notificationScreen),
+                      ),
                     ),
 
                     _drawerItem(
                       imagePath: AppImage.carDrawer,
                       text: AppLocalization.tr.myTripsMenuItem,
-                      onTap: () {
-                      //  Get.to(MyTripPage());
-                        Get.toNamed(AppRoutes.passengerMyRideScreen);
-                        },
+                      onTap: () => _closeDrawerThen(
+                        context,
+                        () => Get.toNamed(AppRoutes.passengerMyRideScreen),
+                      ),
                     ),
 
                     _drawerItem(
                       imagePath: AppImage.walletDrawer,
                       text: AppLocalization.tr.myEarningsMenuItem,
-                      onTap: () {
-                      //  Get.to(DriverWalletPage());
-                        Get.toNamed(AppRoutes.driverWalletScreen);
-                      },
+                      onTap: () => _closeDrawerThen(
+                        context,
+                        () => Get.toNamed(AppRoutes.driverWalletScreen),
+                      ),
                     ),
                     _drawerItem(
                       imagePath: AppImage.invite,
@@ -104,22 +104,24 @@ class DriverCustomDrawer extends StatelessWidget {
                     _drawerItem(
                       imagePath: AppImage.support,
                       text: AppLocalization.tr.supportMenuItem,
-                      onTap: () {
-                        Get.toNamed(AppRoutes.supportListScreen);
-                      },
+                      onTap: () => _closeDrawerThen(
+                        context,
+                        () => Get.toNamed(AppRoutes.supportListScreen),
+                      ),
                     ),
                     _drawerItem(
                       imagePath: AppImage.settings,
                       text: AppLocalization.tr.settingsMenuItem,
-                      onTap: () {
-                        Get.to(SettingsScreen());
-
-                      },
+                      onTap: () => _closeDrawerThen(
+                        context,
+                        () => Get.to(SettingsScreen()),
+                      ),
                     ),
                     _drawerItem(
                       imagePath: AppImage.logout,
                       text: AppLocalization.tr.logoutMenuItem,
                       onTap: () async {
+                        Scaffold.maybeOf(context)?.closeDrawer();
                         // Show the logout dialog
                         final result = await LogoutDialog.show(context);
 
@@ -141,16 +143,27 @@ class DriverCustomDrawer extends StatelessWidget {
           Padding(
             padding: EdgeInsets.all(8.sp),
             child: CustomButton(
-              onPressed: (){
-                 //  Get.to(HomePage());
-                Get.toNamed(AppRoutes.passengerHomeScreen);
-              },
+              onPressed: () => _closeDrawerThen(
+                context,
+                () => Get.toNamed(AppRoutes.passengerHomeScreen),
+              ),
               title: Text(AppLocalization.tr.switchToPassengerButton,style: TextStyle(color: AppColors.white),),
             ),
           )
         ],
       ),
     );
+  }
+
+  /// Closes the drawer before running [action].
+  ///
+  /// Navigating straight from a drawer item leaves the drawer open underneath
+  /// the pushed route. On coming back the Scaffold still considers it open, so
+  /// the menu button's openDrawer() is a no-op and the drawer "randomly"
+  /// stops working.
+  void _closeDrawerThen(BuildContext context, VoidCallback action) {
+    Scaffold.maybeOf(context)?.closeDrawer();
+    action();
   }
 
   Widget _drawerItem({

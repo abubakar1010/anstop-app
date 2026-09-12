@@ -93,11 +93,11 @@ class _NotificationScreenState extends State<NotificationScreen> {
         systemOverlayStyle: SystemUiOverlayStyle.dark,
         leading: IconButton(
           icon: const Icon(
-            Icons.menu,
+            Icons.arrow_back,
             color: NotificationColors.menuIconColor,
             size: 24,
           ),
-          onPressed: () {},
+          onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           AppLocalization.tr.notificationTitle,
