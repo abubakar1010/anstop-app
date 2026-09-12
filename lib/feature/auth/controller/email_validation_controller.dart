@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:ride_sharing/feature/auth/data/forgot_password_request_model.dart';
 import 'package:ride_sharing/feature/auth/service/auth_service.dart';
 import 'package:ride_sharing/routes/app_routes.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
 
 class EmailValidationController extends GetxController {
   // ==================== Text Controllers ====================
@@ -69,12 +70,11 @@ class EmailValidationController extends GetxController {
             },
           );
         } else {
-          errorMessage.value = response.errorMessage;
+          debugPrint('email_validation_controller: ${response.errorMessage}');
+          errorMessage.value = AppLocalization.tr.genericErrorMessage;
           Get.snackbar(
-            'Error',
-            response.errorMessage.isNotEmpty
-                ? response.errorMessage
-                : 'Failed to send reset email',
+            AppLocalization.tr.errorTitle,
+            AppLocalization.tr.genericErrorMessage,
             snackPosition: SnackPosition.BOTTOM,
             backgroundColor: Colors.red,
             colorText: Colors.white,
@@ -92,10 +92,11 @@ class EmailValidationController extends GetxController {
         );
       }
     } catch (e) {
-      errorMessage.value = e.toString();
+      debugPrint('email_validation_controller: $e');
+      errorMessage.value = AppLocalization.tr.genericErrorMessage;
       Get.snackbar(
-        'Error',
-        e.toString(),
+        AppLocalization.tr.errorTitle,
+        AppLocalization.tr.genericErrorMessage,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,
@@ -112,10 +113,10 @@ class EmailValidationController extends GetxController {
 
   String? validateEmailField(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Email is required';
+      return AppLocalization.tr.emailRequiredError;
     }
     if (!GetUtils.isEmail(value)) {
-      return 'Enter a valid email';
+      return AppLocalization.tr.invalidEmailError;
     }
     return null;
   }

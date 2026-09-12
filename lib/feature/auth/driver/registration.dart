@@ -4,6 +4,7 @@ import 'package:ride_sharing/feature/auth/view/log_in_screen.dart';
 import 'package:ride_sharing/widgets/auth_links/auth_link.dart';
 
 import '../../../routes/app_routes.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
 
 class DriverRegistration extends StatefulWidget {
   const DriverRegistration({super.key});
@@ -184,7 +185,7 @@ class _DriverRegistrationState extends State<DriverRegistration> {
                           // Validate required fields
                           if (_birthdayController.text.isEmpty) {
                             Get.snackbar(
-                              'Validation Error',
+                              AppLocalization.tr.validationErrorTitle,
                               'Please select your birthday',
                               snackPosition: SnackPosition.BOTTOM,
                               backgroundColor: Colors.red,
@@ -194,7 +195,7 @@ class _DriverRegistrationState extends State<DriverRegistration> {
                           }
                           if (_addressTEController.text.trim().isEmpty) {
                             Get.snackbar(
-                              'Validation Error',
+                              AppLocalization.tr.validationErrorTitle,
                               'Please enter your address',
                               snackPosition: SnackPosition.BOTTOM,
                               backgroundColor: Colors.red,
@@ -212,7 +213,7 @@ class _DriverRegistrationState extends State<DriverRegistration> {
                             },
                           );
                         },
-                        label: "Next",
+                        label: AppLocalization.tr.nextButton,
                       ),
                       SizedBox(height: 5.h),
                       GestureDetector(

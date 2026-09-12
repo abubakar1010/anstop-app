@@ -34,7 +34,7 @@ class CancelDriverWidget extends StatelessWidget {
               children: [
                 // Space between the icon and the text
                 Text(
-                  'Cancel Now',
+                  AppLocalization.tr.cancelNowButton,
                   style: TextStyle(
                     color: Colors.white, // Text color
                   ),

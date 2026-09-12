@@ -5,6 +5,7 @@ import 'package:ride_sharing/feature/auth/data/forgot_password_request_model.dar
 import 'package:ride_sharing/feature/auth/data/verify_otp_request_model.dart';
 import 'package:ride_sharing/feature/auth/service/auth_service.dart';
 import 'package:ride_sharing/routes/app_routes.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
 
 class OtpVerificationController extends GetxController {
   // ==================== Text Controllers ====================
@@ -67,8 +68,8 @@ class OtpVerificationController extends GetxController {
     if (otpController.text.isEmpty) {
       errorMessage.value = 'Please enter OTP';
       Get.snackbar(
-        'Error',
-        'Please enter OTP',
+        AppLocalization.tr.errorTitle,
+        AppLocalization.tr.pleaseEnterOtpMessage,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,
@@ -79,8 +80,8 @@ class OtpVerificationController extends GetxController {
     if (otpController.text.length < 6) {
       errorMessage.value = 'Please enter valid 6-digit OTP';
       Get.snackbar(
-        'Error',
-        'Please enter valid 6-digit OTP',
+        AppLocalization.tr.errorTitle,
+        AppLocalization.tr.invalidOtpMessage,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,
@@ -91,8 +92,8 @@ class OtpVerificationController extends GetxController {
     if (userEmail.value.isEmpty) {
       errorMessage.value = 'Email not found';
       Get.snackbar(
-        'Error',
-        'Email not found. Please try again.',
+        AppLocalization.tr.errorTitle,
+        AppLocalization.tr.emailNotFoundMessage,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,
@@ -135,8 +136,8 @@ class OtpVerificationController extends GetxController {
         } else {
           // Email verification flow - navigate to login screen
           Get.snackbar(
-            'Success',
-            'Email verified successfully!',
+            AppLocalization.tr.successTitle,
+            AppLocalization.tr.emailVerifiedMessage,
             snackPosition: SnackPosition.BOTTOM,
             backgroundColor: Colors.green,
             colorText: Colors.white,
@@ -146,22 +147,22 @@ class OtpVerificationController extends GetxController {
         }
       } else {
         // Show error message
-        errorMessage.value = response.errorMessage;
+        debugPrint('otp_verification_controller: ${response.errorMessage}');
+        errorMessage.value = AppLocalization.tr.genericErrorMessage;
         Get.snackbar(
-          'Verification Failed',
-          response.errorMessage.isNotEmpty
-              ? response.errorMessage
-              : 'Invalid OTP. Please try again.',
+          AppLocalization.tr.verificationFailedTitle,
+          AppLocalization.tr.genericErrorMessage,
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.red,
           colorText: Colors.white,
         );
       }
     } catch (e) {
-      errorMessage.value = e.toString();
+      debugPrint('otp_verification_controller: $e');
+      errorMessage.value = AppLocalization.tr.genericErrorMessage;
       Get.snackbar(
-        'Error',
-        e.toString(),
+        AppLocalization.tr.errorTitle,
+        AppLocalization.tr.genericErrorMessage,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,
@@ -186,8 +187,8 @@ class OtpVerificationController extends GetxController {
       if (response.isSuccess) {
         startTimer();
         Get.snackbar(
-          'OTP Sent',
-          'A new OTP has been sent to your email.',
+          AppLocalization.tr.otpSentTitle,
+          AppLocalization.tr.otpResentMessage,
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.green,
           colorText: Colors.white,
@@ -198,7 +199,8 @@ class OtpVerificationController extends GetxController {
             : 'Failed to resend OTP. Please try again.';
       }
     } catch (e) {
-      errorMessage.value = e.toString();
+      debugPrint('otp_verification_controller: $e');
+      errorMessage.value = AppLocalization.tr.genericErrorMessage;
     } finally {
       isLoading.value = false;
     }

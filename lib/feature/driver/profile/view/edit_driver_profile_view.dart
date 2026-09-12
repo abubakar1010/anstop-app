@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:ride_sharing/widgets/auth_links/auth_link.dart';
 import 'package:ride_sharing/feature/driver/profile/controller/edit_driver_profile_controller.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
 
 class EditDriverProfileView extends StatelessWidget {
   const EditDriverProfileView({super.key});
@@ -20,7 +21,7 @@ class EditDriverProfileView extends StatelessWidget {
               onPressed: () => Get.back(),
             ),
             title: Text(
-              'Edit Profile',
+              AppLocalization.tr.editProfileButton,
               style: TextStyle(
                 color: Colors.black,
                 fontSize: 18.sp,
@@ -85,7 +86,7 @@ class EditDriverProfileView extends StatelessWidget {
                                   color: const Color(0XFF8A8A8A),
                                   size: 24.sp,
                                 ),
-                                hintText: 'First Name',
+                                hintText: AppLocalization.tr.firstNameLabel,
                                 hintextSize: 14.sp,
                                 hintextColor: const Color(0XFF8A8A8A),
                               ),
@@ -99,7 +100,7 @@ class EditDriverProfileView extends StatelessWidget {
                                   color: const Color(0XFF8A8A8A),
                                   size: 24.sp,
                                 ),
-                                hintText: 'Last Name',
+                                hintText: AppLocalization.tr.lastNameLabel,
                                 hintextSize: 14.sp,
                                 hintextColor: const Color(0XFF8A8A8A),
                               ),

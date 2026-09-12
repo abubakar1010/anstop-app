@@ -2,6 +2,8 @@ import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ride_sharing/feature/driver/profile/service/driver_profile_service.dart';
 import 'package:ride_sharing/feature/driver/profile/data/user_profile_model.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
+import 'package:flutter/foundation.dart';
 
 class DriverProfileController extends GetxController {
   // ==================== Services ====================
@@ -40,13 +42,15 @@ class DriverProfileController extends GetxController {
         final profileResponse = UserProfileResponse.fromJson(response.responseData);
         profileData.value = profileResponse.data;
       } else {
-        errorMessage.value = response.errorMessage;
+        debugPrint('driver_profile_controller: ${response.errorMessage}');
+        errorMessage.value = AppLocalization.tr.genericErrorMessage;
         if (response.statusCode == 401) {
           isAccountInactive.value = true;
         }
       }
     } catch (e) {
-      errorMessage.value = e.toString();
+      debugPrint('driver_profile_controller: $e');
+      errorMessage.value = AppLocalization.tr.genericErrorMessage;
     } finally {
       isLoading.value = false;
     }

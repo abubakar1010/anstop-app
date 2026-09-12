@@ -35,7 +35,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get onboardingWelcomeTo => 'Bienvenue sur';
 
   @override
-  String get onboardingAppName => 'nom de l\'application';
+  String get onboardingAppName => 'ANSTOP';
 
   @override
   String get onboardingTagline => 'Le covoiturage local, fiable et abordable.';
@@ -217,6 +217,10 @@ class AppLocalizationsFr extends AppLocalizations {
       'Téléchargez votre carte d\'identité nationale (recto)';
 
   @override
+  String get uploadNationalIdBack =>
+      'Téléchargez votre carte d\'identité nationale (verso)';
+
+  @override
   String get drivingLicenceTitle => 'Permis de conduire';
 
   @override
@@ -225,6 +229,10 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get uploadDrivingLicenseFront =>
       'Téléchargez votre permis de conduire (recto)';
+
+  @override
+  String get uploadDrivingLicenseBack =>
+      'Téléchargez votre permis de conduire (verso)';
 
   @override
   String get carInformationTitle => 'Informations sur la voiture';
@@ -239,19 +247,16 @@ class AppLocalizationsFr extends AppLocalizations {
   String get numberPlateLabel => 'Plaque d\'immatriculation';
 
   @override
-  String get uploadCarPictureFront =>
-      'Téléchargez votre carte d\'identité nationale (recto)';
+  String get uploadCarPictureFront => 'Téléchargez votre carte grise (recto)';
 
   @override
-  String get uploadCarPictureBack =>
-      'Téléchargez votre carte d\'identité nationale (verso)';
+  String get uploadCarPictureBack => 'Téléchargez votre carte grise (verso)';
 
   @override
   String get uploadPictureTitle => 'Téléchargez votre photo';
 
   @override
-  String get uploadProfilePictureLabel =>
-      'Téléchargez votre carte d\'identité nationale (recto)';
+  String get uploadProfilePictureLabel => 'Téléchargez votre photo';
 
   @override
   String get termsOfServicesTitle => 'Conditions d\'utilisation';
@@ -620,7 +625,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get logoutButton => 'Se déconnecter';
 
   @override
-  String get notificationTitle => 'Notification';
+  String get notificationTitle => 'Notifications';
 
   @override
   String get notificationPaymentSuccess => 'Paiement réussi !';
@@ -670,7 +675,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get supportOtherIssue => 'Autre problème';
 
   @override
-  String get supportTitle => 'Support';
+  String get supportTitle => 'Assistance';
 
   @override
   String get supportMessage1 => 'Si vous avez un problème';
@@ -701,10 +706,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get termsOfServiceTitle => 'Conditions d\'utilisation';
 
   @override
-  String get notificationMenuItem => 'Notification';
+  String get notificationMenuItem => 'Notifications';
 
   @override
-  String get supportMenuItem => 'Support';
+  String get supportMenuItem => 'Assistance';
 
   @override
   String get logoutMenuItem => 'Se déconnecter';
@@ -928,4 +933,594 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get openSettingsButton => 'Ouvrir les paramètres';
+
+  @override
+  String get errorTitle => 'Erreur';
+
+  @override
+  String get successTitle => 'Succès';
+
+  @override
+  String get infoTitle => 'Info';
+
+  @override
+  String get uploadFailedTitle => 'Échec du téléchargement';
+
+  @override
+  String get loginFailedTitle => 'Échec de la connexion';
+
+  @override
+  String get verificationRequiredTitle => 'Vérification requise';
+
+  @override
+  String get otpSentTitle => 'Code envoyé';
+
+  @override
+  String get paymentConfirmedTitle => 'Paiement confirmé';
+
+  @override
+  String get tripAcceptedTitle => 'Trajet accepté';
+
+  @override
+  String get arrivedTitle => 'Arrivé';
+
+  @override
+  String get sessionExpiredMessage =>
+      'Session expirée. Veuillez vous reconnecter.';
+
+  @override
+  String get pleaseLoginToContinueMessage =>
+      'Veuillez vous connecter pour continuer';
+
+  @override
+  String get invalidServerResponseMessage =>
+      'Réponse invalide du serveur. Veuillez réessayer.';
+
+  @override
+  String get verifyEmailToContinueMessage =>
+      'Veuillez vérifier votre e-mail pour continuer';
+
+  @override
+  String get emailNotFoundMessage => 'E-mail introuvable. Veuillez réessayer.';
+
+  @override
+  String get emailVerifiedMessage => 'E-mail vérifié avec succès !';
+
+  @override
+  String get otpResentMessage =>
+      'Un nouveau code a été envoyé à votre adresse e-mail.';
+
+  @override
+  String get pleaseEnterOtpMessage => 'Veuillez saisir le code';
+
+  @override
+  String get invalidOtpMessage => 'Veuillez saisir un code valide à 6 chiffres';
+
+  @override
+  String get passwordResetSuccessMessage =>
+      'Mot de passe réinitialisé. Veuillez vous connecter.';
+
+  @override
+  String get pleaseAgreeToTermsMessage =>
+      'Veuillez accepter les conditions générales';
+
+  @override
+  String get driverOnboardingSuccessMessage =>
+      'Inscription du conducteur terminée avec succès !';
+
+  @override
+  String get emailRequiredError => 'L\'e-mail est requis';
+
+  @override
+  String get invalidEmailError => 'Saisissez une adresse e-mail valide';
+
+  @override
+  String get passwordRequiredError => 'Le mot de passe est requis';
+
+  @override
+  String get passwordTooShortError =>
+      'Le mot de passe doit contenir au moins 6 caractères';
+
+  @override
+  String get confirmPasswordRequiredError =>
+      'La confirmation du mot de passe est requise';
+
+  @override
+  String get passwordsDoNotMatchError =>
+      'Les mots de passe ne correspondent pas';
+
+  @override
+  String get phoneRequiredError => 'Le numéro de téléphone est requis';
+
+  @override
+  String get invalidPhoneError => 'Saisissez un numéro de téléphone valide';
+
+  @override
+  String get firstNameRequiredError => 'Le prénom est requis';
+
+  @override
+  String get lastNameRequiredError => 'Le nom de famille est requis';
+
+  @override
+  String get nameRequiredError => 'Le nom est requis';
+
+  @override
+  String get addressRequiredError => 'L\'adresse est requise';
+
+  @override
+  String get dateOfBirthRequiredError => 'La date de naissance est requise';
+
+  @override
+  String get currentPasswordRequiredError =>
+      'Le mot de passe actuel est requis';
+
+  @override
+  String get newPasswordRequiredError => 'Le nouveau mot de passe est requis';
+
+  @override
+  String get newPasswordMustDifferError =>
+      'Le nouveau mot de passe doit être différent de l\'actuel';
+
+  @override
+  String get subjectRequiredError => 'Le sujet est requis';
+
+  @override
+  String get messageRequiredError => 'Le message est requis';
+
+  @override
+  String get amountRequiredError => 'Le montant est requis';
+
+  @override
+  String get invalidAmountError => 'Veuillez saisir un montant valide';
+
+  @override
+  String get carNameRequiredError => 'Le nom de la voiture est requis';
+
+  @override
+  String get carModelRequiredError => 'Le modèle de la voiture est requis';
+
+  @override
+  String get numberPlateRequiredError =>
+      'La plaque d\'immatriculation est requise';
+
+  @override
+  String get registrationCertNumberRequiredError =>
+      'Le numéro de carte grise est requis';
+
+  @override
+  String get carNumberRequiredError => 'Le numéro de la voiture est requis';
+
+  @override
+  String get carColorRequiredError => 'La couleur de la voiture est requise';
+
+  @override
+  String get yearOfManufactureRequiredError =>
+      'L\'année de fabrication est requise';
+
+  @override
+  String get invalidYearOfManufactureError =>
+      'Saisissez une année de fabrication valide';
+
+  @override
+  String get carImagesUploadingMessage =>
+      'Veuillez patienter jusqu\'à la fin du téléchargement des photos du véhicule';
+
+  @override
+  String get uploadLicensePlateRequiredMessage =>
+      'Veuillez télécharger la photo de la plaque d\'immatriculation';
+
+  @override
+  String get uploadRegistrationCertBothSidesMessage =>
+      'Veuillez télécharger le recto et le verso de la carte grise';
+
+  @override
+  String get drivingLicenseNumberRequiredError =>
+      'Le numéro de permis de conduire est requis';
+
+  @override
+  String get drivingLicenseImagesUploadingMessage =>
+      'Veuillez patienter jusqu\'à la fin du téléchargement des photos du permis de conduire';
+
+  @override
+  String get uploadDrivingLicenseBothSidesMessage =>
+      'Veuillez télécharger le recto et le verso du permis de conduire';
+
+  @override
+  String get nationalIdNumberRequiredError =>
+      'Le numéro de carte d\'identité nationale est requis';
+
+  @override
+  String get nationalIdImagesUploadingMessage =>
+      'Veuillez patienter jusqu\'à la fin du téléchargement des photos de la carte d\'identité';
+
+  @override
+  String get uploadNationalIdBothSidesMessage =>
+      'Veuillez télécharger le recto et le verso de la carte d\'identité nationale';
+
+  @override
+  String get profilePictureUploadingMessage =>
+      'Veuillez patienter jusqu\'à la fin du téléchargement de votre photo';
+
+  @override
+  String get uploadProfilePictureRequiredMessage =>
+      'Veuillez télécharger votre photo de profil';
+
+  @override
+  String get imageUrlMissingMessage =>
+      'Impossible de récupérer l\'URL de l\'image';
+
+  @override
+  String get imagePickFailedMessage => 'Échec de la sélection de l\'image';
+
+  @override
+  String get imageUploadFailedMessage => 'Échec du téléchargement de l\'image';
+
+  @override
+  String get navigateToPassengerMessage =>
+      'Naviguez jusqu\'au lieu de prise en charge';
+
+  @override
+  String get passengerNotifiedMessage => 'Le passager a été informé';
+
+  @override
+  String get passengerCompletedPaymentMessage =>
+      'Le passager a effectué le paiement';
+
+  @override
+  String get noChangesToSaveMessage => 'Aucune modification à enregistrer';
+
+  @override
+  String get tripDetailsLoadErrorMessage =>
+      'Une erreur s\'est produite lors du chargement des détails du trajet';
+
+  @override
+  String get receiptDownloadedMessage => 'Reçu téléchargé avec succès';
+
+  @override
+  String get pdfGeneratedMessage => 'PDF généré avec succès';
+
+  @override
+  String get invoiceDownloadedMessage => 'Facture téléchargée avec succès';
+
+  @override
+  String get pleaseEnterAddressMessage => 'Veuillez saisir une adresse';
+
+  @override
+  String get pleaseSelectAddressMessage =>
+      'Veuillez sélectionner une adresse parmi les suggestions';
+
+  @override
+  String get addressSavedMessage => 'Adresse enregistrée avec succès';
+
+  @override
+  String get selectPickupAndDestinationMessage =>
+      'Veuillez sélectionner le lieu de prise en charge et la destination';
+
+  @override
+  String get paymentCompletedMessage => 'Paiement effectué avec succès';
+
+  @override
+  String get fundsAddedMessage => 'Fonds ajoutés avec succès';
+
+  @override
+  String get depositCompletedMessage => 'Dépôt effectué avec succès';
+
+  @override
+  String get withdrawalSuccessMessage => 'Retrait effectué avec succès';
+
+  @override
+  String get messageSendFailedMessage => 'Échec de l\'envoi du message';
+
+  @override
+  String get notificationsClearedMessage =>
+      'Toutes les notifications ont été effacées';
+
+  @override
+  String get thankYouForFeedbackMessage => 'Merci pour votre retour !';
+
+  @override
+  String get genericErrorMessage =>
+      'Une erreur s\'est produite. Veuillez réessayer.';
+
+  @override
+  String get networkErrorMessage =>
+      'Veuillez vérifier votre connexion et réessayer.';
+
+  @override
+  String invalidYearRangeError(String maxYear) {
+    return 'Saisissez une année entre 1900 et $maxYear';
+  }
+
+  @override
+  String get onboardingFailedTitle => 'Échec de l\'inscription';
+
+  @override
+  String get resetFailedTitle => 'Échec de la réinitialisation';
+
+  @override
+  String get registrationFailedTitle => 'Échec de l\'inscription';
+
+  @override
+  String get verificationFailedTitle => 'Échec de la vérification';
+
+  @override
+  String get invalidCredentialsMessage => 'E-mail ou mot de passe incorrect';
+
+  @override
+  String get retryButton => 'Réessayer';
+
+  @override
+  String get nextButton => 'Suivant';
+
+  @override
+  String get uploadButton => 'Télécharger';
+
+  @override
+  String get newBadge => 'Nouveau';
+
+  @override
+  String get mediaTitle => 'Médias';
+
+  @override
+  String get messagesTitle => 'Messages';
+
+  @override
+  String get childrenLabel => 'Enfants';
+
+  @override
+  String get quantityLabel => 'Quantité';
+
+  @override
+  String get detailsLabel => 'Détails';
+
+  @override
+  String get durationLabel => 'Durée';
+
+  @override
+  String get amountLabel => 'Montant';
+
+  @override
+  String get pickupLabel => 'Prise en charge';
+
+  @override
+  String get transactionsTitle => 'Transactions';
+
+  @override
+  String get withdrawButton => 'Retirer';
+
+  @override
+  String get youMarkerLabel => 'Vous';
+
+  @override
+  String get editProfileButton => 'Modifier le profil';
+
+  @override
+  String get noTransactionsMessage => 'Aucune transaction trouvée';
+
+  @override
+  String get withdrawRequestSuccessTitle => 'Demande de retrait envoyée';
+
+  @override
+  String get goToMyWalletButton => 'Aller à mon portefeuille';
+
+  @override
+  String get availableBalanceLabel => 'Solde disponible';
+
+  @override
+  String get addMoneyTitle => 'Ajouter de l\'argent';
+
+  @override
+  String get enterAmountLabel => 'Saisir le montant';
+
+  @override
+  String get withdrawRequestTitle => 'Demande de retrait';
+
+  @override
+  String get bankNameLabel => 'Nom de la banque';
+
+  @override
+  String get accountNumberLabel => 'Numéro de compte';
+
+  @override
+  String get enterAmountHint => 'Saisissez le montant';
+
+  @override
+  String get enterBankNameHint => 'Saisissez le nom de la banque';
+
+  @override
+  String get enterAccountNumberHint => 'Saisissez le numéro de compte';
+
+  @override
+  String get yearOfManufactureLabel => 'Année de fabrication';
+
+  @override
+  String get uploadLicensePlateLabel =>
+      'Téléchargez la photo de la plaque d\'immatriculation';
+
+  @override
+  String get registrationCertNumberLabel => 'Numéro de carte grise';
+
+  @override
+  String get uploadingButton => 'Téléchargement...';
+
+  @override
+  String get submittingButton => 'Envoi...';
+
+  @override
+  String get firstNameLabel => 'Prénom';
+
+  @override
+  String get lastNameLabel => 'Nom de famille';
+
+  @override
+  String get selectImageSourceTitle => 'Choisir la source de l\'image';
+
+  @override
+  String get chooseFromGalleryOption => 'Choisir dans la galerie';
+
+  @override
+  String get takeAPhotoOption => 'Prendre une photo';
+
+  @override
+  String get selectPhotoTitle => 'Choisir une photo';
+
+  @override
+  String get cameraOption => 'Appareil photo';
+
+  @override
+  String get galleryOption => 'Galerie';
+
+  @override
+  String get iAgreeWithLabel => 'J\'accepte';
+
+  @override
+  String get privacyPolicyInlineLabel => 'la politique de confidentialité.';
+
+  @override
+  String get serverErrorTitle => 'Erreur du serveur';
+
+  @override
+  String get serverUnavailableMessage =>
+      'Le serveur est indisponible. Veuillez réessayer plus tard.';
+
+  @override
+  String get paymentErrorTitle => 'Erreur de paiement';
+
+  @override
+  String get paymentSuccessfulTitle => 'Paiement réussi';
+
+  @override
+  String get paymentUnexpectedErrorMessage =>
+      'Une erreur inattendue est survenue lors du paiement';
+
+  @override
+  String get loginRequiredTitle => 'Connexion requise';
+
+  @override
+  String get switchToDriverModeMessage =>
+      'Veuillez vous déconnecter puis vous reconnecter pour passer en mode conducteur.';
+
+  @override
+  String get goToLoginButton => 'Aller à la connexion';
+
+  @override
+  String get rideAcceptedTitle => 'Course acceptée !';
+
+  @override
+  String get navigateToPickupMessage =>
+      'Naviguez jusqu\'au lieu de prise en charge';
+
+  @override
+  String get onATripLabel => 'Vous êtes en course';
+
+  @override
+  String get didYouReceivePaymentQuestion =>
+      'Avez-vous reçu le paiement de cette course ?';
+
+  @override
+  String get paymentReceivedYesButton => 'Oui, paiement reçu';
+
+  @override
+  String get keepOnlineLine1 => 'Restez en ligne,';
+
+  @override
+  String get keepOnlineLine2 => 'et voyez vos gains grimper !';
+
+  @override
+  String get stayOnlineButton => 'Rester en ligne';
+
+  @override
+  String get selectCancellationReasonLabel =>
+      'Veuillez sélectionner le motif d\'annulation';
+
+  @override
+  String get sorryForCancellationMessage =>
+      'Nous sommes désolés de voir votre annulation !';
+
+  @override
+  String get cancelNowButton => 'Annuler maintenant';
+
+  @override
+  String get selectCarBookForLabel => 'Réserver la voiture pour...';
+
+  @override
+  String get friendPhoneNumberHint => 'N° de téléphone de l\'ami';
+
+  @override
+  String get paymentMethodLabel => 'Moyen de paiement';
+
+  @override
+  String get addedImportantThingsLabel => 'Options ajoutées';
+
+  @override
+  String get findCarButton => 'Trouver une voiture';
+
+  @override
+  String get findingNearbyCarsLabel => 'Recherche de voitures à proximité...';
+
+  @override
+  String get rideRequestSentMessage =>
+      'Nous avons envoyé votre demande aux chauffeurs à proximité';
+
+  @override
+  String get noRidesFoundMessage => 'Aucune course trouvée';
+
+  @override
+  String get giveYourRatingsLabel => 'Donnez votre note';
+
+  @override
+  String get thankYouFeedbackAndTipMessage =>
+      'Merci pour votre retour et votre pourboire !';
+
+  @override
+  String get complaintSubmittedMessage2 =>
+      'Votre réclamation a été envoyée. Nous l\'examinerons et reviendrons vers vous rapidement.';
+
+  @override
+  String get backToSupportButton => 'Retour à l\'assistance';
+
+  @override
+  String get enterSubjectHint => 'Saisissez le sujet';
+
+  @override
+  String get noSupportMessagesTitle => 'Aucun message d\'assistance';
+
+  @override
+  String get createSupportPromptMessage =>
+      'Appuyez sur le bouton ci-dessous pour créer une demande';
+
+  @override
+  String get addSupportButton => 'Nouvelle demande';
+
+  @override
+  String get noMessagesYetMessage =>
+      'Aucun message.\nDémarrez une conversation !';
+
+  @override
+  String get beginningOfConversationLabel => 'Début de la conversation';
+
+  @override
+  String get andConjunction => 'et';
+
+  @override
+  String get withdrawConfirmQuestion =>
+      'Voulez-vous vraiment effectuer un retrait\nmaintenant ?';
+
+  @override
+  String get withdrawRequestSuccessMessage =>
+      'Votre demande de retrait a bien été envoyée.\nVous recevrez l\'argent sous 24 heures.';
+
+  @override
+  String get paymentNotReceivedButton => 'Non, ou montant\ndifférent reçu';
+
+  @override
+  String get tripCompletedCongratsMessage =>
+      'Félicitations, vous avez terminé une nouvelle course.';
+
+  @override
+  String get stayConnectedMessage =>
+      'N\'attendez plus : restez connecté, enchaînez les\ncourses et voyez vos gains décoller !';
+
+  @override
+  String get iWillPickYouUpLabel => 'Je viens vous chercher';
 }

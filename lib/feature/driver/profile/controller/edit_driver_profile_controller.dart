@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ride_sharing/feature/driver/profile/service/driver_profile_service.dart';
 import 'package:ride_sharing/feature/driver/profile/data/user_profile_model.dart';
 import 'package:ride_sharing/feature/auth/service/auth_service.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
 
 class EditDriverProfileController extends GetxController {
   // ==================== Services ====================
@@ -69,8 +70,8 @@ class EditDriverProfileController extends GetxController {
       }
     } catch (e) {
       Get.snackbar(
-        'Error',
-        'Failed to pick image',
+        AppLocalization.tr.errorTitle,
+        AppLocalization.tr.imagePickFailedMessage,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,
@@ -107,8 +108,8 @@ class EditDriverProfileController extends GetxController {
           }
         } else {
           Get.snackbar(
-            'Error',
-            'Failed to upload image',
+            AppLocalization.tr.errorTitle,
+            AppLocalization.tr.imageUploadFailedMessage,
             snackPosition: SnackPosition.BOTTOM,
             backgroundColor: Colors.red,
             colorText: Colors.white,
@@ -138,8 +139,8 @@ class EditDriverProfileController extends GetxController {
 
       if (body.isEmpty) {
         Get.snackbar(
-          'Info',
-          'No changes to save',
+          AppLocalization.tr.infoTitle,
+          AppLocalization.tr.noChangesToSaveMessage,
           snackPosition: SnackPosition.BOTTOM,
         );
         return;
@@ -162,22 +163,22 @@ class EditDriverProfileController extends GetxController {
          Get.toNamed(AppRoutes.driverProfileScreen);
         // Navigate back and refresh profile
       } else {
-        errorMessage.value = response.errorMessage;
+        debugPrint('edit_driver_profile_controller: ${response.errorMessage}');
+        errorMessage.value = AppLocalization.tr.genericErrorMessage;
         Get.snackbar(
-          'Error',
-          response.errorMessage.isNotEmpty
-              ? response.errorMessage
-              : 'Failed to update profile',
+          AppLocalization.tr.errorTitle,
+          AppLocalization.tr.genericErrorMessage,
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.red,
           colorText: Colors.white,
         );
       }
     } catch (e) {
-      errorMessage.value = e.toString();
+      debugPrint('edit_driver_profile_controller: $e');
+      errorMessage.value = AppLocalization.tr.genericErrorMessage;
       Get.snackbar(
-        'Error',
-        e.toString(),
+        AppLocalization.tr.errorTitle,
+        AppLocalization.tr.genericErrorMessage,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,

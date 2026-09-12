@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
 
 class CustomUploadItems extends StatelessWidget {
   final Widget child;
@@ -50,7 +51,7 @@ class CustomUploadItems extends StatelessWidget {
                     ),
                     SizedBox(height: 5.sp),
                     Text(
-                      'Upload',
+                      AppLocalization.tr.uploadButton,
                       style: TextStyle(
                         color: borderColor,
                         fontSize: 16,

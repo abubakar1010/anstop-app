@@ -71,7 +71,7 @@ class SupportListScreen extends GetView<SupportListController> {
                       SizedBox(height: 16.h),
                       ElevatedButton(
                         onPressed: () => controller.fetchSupportMessages(),
-                        child: const Text('Retry'),
+                        child: Text(AppLocalization.tr.retryButton),
                       ),
                     ],
                   ),
@@ -90,7 +90,7 @@ class SupportListScreen extends GetView<SupportListController> {
                       ),
                       SizedBox(height: 16.h),
                       Text(
-                        'No support messages yet',
+                        AppLocalization.tr.noSupportMessagesTitle,
                         style: TextStyle(
                           fontSize: 16.sp,
                           color: const Color(0xFF666666),
@@ -98,7 +98,7 @@ class SupportListScreen extends GetView<SupportListController> {
                       ),
                       SizedBox(height: 8.h),
                       Text(
-                        'Tap the button below to create a new support request',
+                        AppLocalization.tr.createSupportPromptMessage,
                         style: TextStyle(
                           fontSize: 14.sp,
                           color: const Color(0xFF999999),
@@ -144,7 +144,7 @@ class SupportListScreen extends GetView<SupportListController> {
                   ),
                 ),
                 child: Text(
-                  'Add Support',
+                  AppLocalization.tr.addSupportButton,
                   style: TextStyle(
                     fontSize: 17.sp,
                     fontWeight: FontWeight.w600,

@@ -39,7 +39,7 @@ class _CancelTaxiScreenState extends State<CancelTaxiScreen> {
           SizedBox(height: 20.sp),
           Center(
             child: Text(
-              'Please select the reason for cancellation',
+              AppLocalization.tr.selectCancellationReasonLabel,
               style: TextStyle(color: AppColors.appGreyColor),
             ),
           ),
@@ -137,7 +137,7 @@ class _CancelTaxiScreenState extends State<CancelTaxiScreen> {
               Padding(
                 padding: EdgeInsets.all(10),
                 child: Text(
-                  'We are sorry to see your cancellation trip!',
+                  AppLocalization.tr.sorryForCancellationMessage,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontWeight: FontWeight.bold,

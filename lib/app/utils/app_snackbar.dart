@@ -53,7 +53,7 @@ class AppSnackbar {
     required Duration duration,
   }) async {
     await _waitForOverlay();
-    if (Get.overlayContext == null) return;
+    if (!_overlayReady()) return;
 
     try {
       // Replace whatever is currently on screen rather than waiting it out.
@@ -61,7 +61,7 @@ class AppSnackbar {
       // away - queueing behind the first one's full display makes the button
       // look unresponsive.
       await dismiss();
-      if (Get.overlayContext == null) return;
+      if (!_overlayReady()) return;
 
       Get.snackbar(
         title,
@@ -82,8 +82,27 @@ class AppSnackbar {
   /// Waits until GetX has an overlay to attach to (it has none while the very
   /// first frame is still being built).
   static Future<void> _waitForOverlay() async {
-    if (Get.overlayContext != null) return;
+    if (_overlayReady()) return;
     await _nextFrame();
+  }
+
+  /// Whether GetX can actually mount a snackbar right now.
+  ///
+  /// A non-null `Get.overlayContext` is not enough. GetX resolves it by
+  /// visiting the navigator overlay's first child, handing back the private
+  /// `_Theater` element, and `SnackbarController._configureOverlay` then calls
+  /// `Overlay.of(...)` on it. If that element has been unmounted - the tree was
+  /// rebuilt between queueing and showing, e.g. the keyboard dismissing during
+  /// a failed submit - the lookup finds no OverlayState and throws
+  /// "No Overlay widget found".
+  ///
+  /// That throw cannot be caught at the call site: `Get.snackbar` only enqueues
+  /// the job, and `_SnackBarQueue` runs it later in its own async context, so
+  /// the error surfaces as an unhandled exception. It has to be prevented here.
+  static bool _overlayReady() {
+    final BuildContext? context = Get.overlayContext;
+    if (context == null || !context.mounted) return false;
+    return Overlay.maybeOf(context) != null;
   }
 
   static Future<void> _nextFrame() {

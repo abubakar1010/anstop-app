@@ -13,13 +13,15 @@ import 'package:ride_sharing/l10n/app_localizations.dart';
 import 'package:ride_sharing/feature/passenger/payment/view/passenger_payment_screen.dart';
 import 'package:ride_sharing/feature/passenger/trip_details/data/get_trip_details_model.dart';
 import 'package:ride_sharing/feature/passenger/trip_details/service/trip_details_service.dart';
+import 'package:ride_sharing/services/location_service.dart';
+import 'package:ride_sharing/services/map_camera_mixin.dart';
 import 'package:ride_sharing/services/socket_services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:ride_sharing/custom_assets/app_string.dart';
+import 'package:ride_sharing/services/app_config.dart';
 
-class HomePageController extends GetxController {
+class HomePageController extends GetxController
+    with MapCameraMixin, WidgetsBindingObserver {
   final TextEditingController locationTEController = TextEditingController();
-  GoogleMapController? mapController;
   Position? currentPosition;
   bool isLoading = true;
   Set<Marker> markers = {};
@@ -68,25 +70,33 @@ class HomePageController extends GetxController {
   // Tracks previous driver position to compute movement bearing before route loads
   LatLng? _previousDriverPosition;
 
-  // Fallback camera position (Paris) used only until the real device
-  // position arrives — the app operates in France.
-  static const CameraPosition defaultLocation = CameraPosition(
-    target: LatLng(48.8566, 2.3522),
-    zoom: 14.0,
-  );
-
   // Live position stream — keeps the passenger marker/camera on the real
   // device location while no driver is being tracked.
   StreamSubscription<Position>? _positionSubscription;
   bool _followUserCamera = true;
 
+  // The access dialogs are shown once per screen visit. A retry triggered by
+  // the app coming back to the foreground stays silent, so a user who left
+  // permission off isn't met with the same dialog after every app switch.
+  bool _hasExplainedAccess = false;
+
   @override
   void onInit() {
     super.onInit();
+    WidgetsBinding.instance.addObserver(this);
     // Deferred to the first frame so Get.context exists — the permission
     // dialogs below are localized and need a BuildContext.
     WidgetsBinding.instance.addPostFrameCallback((_) => _initializeMap());
     _setupIncompletedRideListener();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state != AppLifecycleState.resumed) return;
+    // The user may have just granted permission — or switched location on —
+    // in Settings. Without this retry the map would stay on the fallback
+    // camera for the rest of the session.
+    if (_positionSubscription == null) _startLocationTracking();
   }
 
   Future<void> _setupIncompletedRideListener() async {
@@ -153,8 +163,24 @@ class HomePageController extends GetxController {
 
   Future<void> _initializeMap() async {
     await _loadIcons();
-    final granted = await _requestLocationPermission();
-    if (!granted) return;
+    await _startLocationTracking();
+  }
+
+  /// Gets access, a first fix and the live stream running. Safe to call again
+  /// — that is how a permission granted later in Settings is picked up.
+  Future<void> _startLocationTracking() async {
+    final LocationAccess access = await LocationService.requestAccess();
+
+    if (access != LocationAccess.granted) {
+      isLoading = false;
+      update();
+      if (!_hasExplainedAccess) {
+        _hasExplainedAccess = true;
+        await LocationService.showAccessDialog(access);
+      }
+      return;
+    }
+
     await _getCurrentLocation();
     _startLiveLocationUpdates();
   }
@@ -322,151 +348,64 @@ class HomePageController extends GetxController {
 
   // ─── Location permission & initial position ────────────────────────────────
 
-  /// Asks for location access when the passenger lands on this screen.
-  /// Every message shown here comes from the app's localizations, so the
-  /// user sees it in the app language (French by default).
-  /// Returns true only when a real position can be read.
-  Future<bool> _requestLocationPermission() async {
-    final l10n = AppLocalizations.of(Get.context!)!;
-
-    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      isLoading = false;
-      update();
-      await _showLocationDialog(
-        title: l10n.locationServiceOffTitle,
-        message: l10n.locationServiceOffMessage,
-        actionLabel: l10n.openSettingsButton,
-        onAction: Geolocator.openLocationSettings,
-      );
-      return false;
-    }
-
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-    }
-
-    if (permission == LocationPermission.denied) {
-      isLoading = false;
-      update();
-      await _showLocationDialog(
-        title: l10n.locationPermissionRequiredTitle,
-        message: l10n.locationPermissionRequiredMessage,
-        actionLabel: l10n.okButton,
-        onAction: () async {},
-      );
-      return false;
-    }
-
-    if (permission == LocationPermission.deniedForever) {
-      isLoading = false;
-      update();
-      await _showLocationDialog(
-        title: l10n.locationPermissionRequiredTitle,
-        message: l10n.locationPermissionDeniedForeverMessage,
-        actionLabel: l10n.openSettingsButton,
-        onAction: Geolocator.openAppSettings,
-      );
-      return false;
-    }
-
-    return true;
-  }
-
-  Future<void> _showLocationDialog({
-    required String title,
-    required String message,
-    required String actionLabel,
-    required Future<void> Function() onAction,
-  }) async {
-    final l10n = AppLocalizations.of(Get.context!)!;
-    await Get.dialog(
-      AlertDialog(
-        title: Text(title),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: Text(l10n.cancelButton),
-          ),
-          TextButton(
-            onPressed: () async {
-              Get.back();
-              await onAction();
-            },
-            child: Text(actionLabel),
-          ),
-        ],
-      ),
-      barrierDismissible: false,
-    );
-  }
-
   /// Subscribes to the device GPS so the passenger marker and the camera
   /// follow the user in real time (updates every 10 m of movement).
   void _startLiveLocationUpdates() {
     _positionSubscription?.cancel();
-    _positionSubscription = Geolocator.getPositionStream(
-      locationSettings: const LocationSettings(
-        accuracy: LocationAccuracy.high,
-        distanceFilter: 10,
-      ),
-    ).listen((position) {
-      currentPosition = position;
-      _updateCurrentLocationMarker(position);
-      update();
+    _positionSubscription = LocationService.positionStream().listen(
+      (position) {
+        currentPosition = position;
+        isLoading = false;
+        _updateCurrentLocationMarker(position);
+        update();
 
-      // Don't fight the camera while a driver route is being framed.
-      if (_followUserCamera) {
-        mapController?.animateCamera(
-          CameraUpdate.newLatLng(
-            LatLng(position.latitude, position.longitude),
-          ),
-        );
-      }
-    });
+        // Don't fight the camera while a driver route is being framed.
+        if (_followUserCamera) {
+          followCameraTo(LatLng(position.latitude, position.longitude));
+        }
+      },
+      onError: (Object error) {
+        debugPrint('HomePageController: position stream failed — $error');
+        _positionSubscription?.cancel();
+        _positionSubscription = null;
+      },
+    );
   }
 
   void _updateCurrentLocationMarker(Position position) {
-    final l10n = AppLocalizations.of(Get.context!)!;
+    // Position updates arrive from a stream, which can outlive the context.
+    // A missing label must not cost us the marker and the camera move.
+    final BuildContext? context = Get.context;
+    final String label = context == null
+        ? ''
+        : AppLocalizations.of(context)?.yourLocationMarker ?? '';
+
     markers = {
       ...markers.where((m) => m.markerId.value != 'current_location'),
       Marker(
         markerId: const MarkerId('current_location'),
         position: LatLng(position.latitude, position.longitude),
-        infoWindow: InfoWindow(title: l10n.yourLocationMarker),
+        infoWindow: InfoWindow(title: label),
         icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
       ),
     };
   }
 
   Future<void> _getCurrentLocation() async {
-    try {
-      Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-      );
+    final Position? position = await LocationService.readPosition();
 
-      currentPosition = position;
-      isLoading = false;
-
-      _updateCurrentLocationMarker(position);
+    isLoading = false;
+    if (position == null) {
+      // The live stream below is still the app's second chance at a fix.
       update();
-
-      if (mapController != null) {
-        mapController!.animateCamera(
-          CameraUpdate.newCameraPosition(
-            CameraPosition(
-              target: LatLng(position.latitude, position.longitude),
-              zoom: 15.0,
-            ),
-          ),
-        );
-      }
-    } catch (e) {
-      isLoading = false;
-      update();
+      return;
     }
+
+    currentPosition = position;
+    _updateCurrentLocationMarker(position);
+    update();
+
+    moveCameraTo(LatLng(position.latitude, position.longitude));
   }
 
   // ─── Driver location tracking + polyline ──────────────────────────────────
@@ -782,7 +721,7 @@ class HomePageController extends GetxController {
         'https://maps.googleapis.com/maps/api/directions/json?'
         'origin=${origin.latitude},${origin.longitude}'
         '&destination=${destination.latitude},${destination.longitude}'
-        '&key=${AppString.googleMapsKey}&mode=driving',
+        '&key=${AppConfig.googleMapsApiKey}&mode=driving',
       );
 
       final response = await http.get(url);
@@ -878,8 +817,9 @@ class HomePageController extends GetxController {
 
   @override
   void onClose() {
+    WidgetsBinding.instance.removeObserver(this);
     _positionSubscription?.cancel();
-    mapController?.dispose();
+    disposeMapController();
     SocketIoService.to.offIncompletedRide();
 
     super.onClose();

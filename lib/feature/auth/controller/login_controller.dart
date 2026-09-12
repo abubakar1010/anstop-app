@@ -9,6 +9,7 @@ import 'package:ride_sharing/feature/auth/service/auth_service.dart';
 import 'package:ride_sharing/routes/app_routes.dart';
 import 'package:ride_sharing/services/fcm_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
 
 class LoginController extends GetxController {
   // ==================== Text Controllers ====================
@@ -67,7 +68,7 @@ class LoginController extends GetxController {
 
         // Check if user needs email verification
         if (signInResponse.data.needsVerification) {
-          AppSnackbar.warning('Verification Required', 'Please verify your email to continue');
+          AppSnackbar.warning(AppLocalization.tr.verificationRequiredTitle, AppLocalization.tr.verifyEmailToContinueMessage);
           Get.toNamed(
             AppRoutes.emailValidationScreen,
             arguments: {'email': emailTEController.text.trim()},
@@ -78,16 +79,22 @@ class LoginController extends GetxController {
         // Validate tokens before proceeding
         if (signInResponse.data.accessToken.isEmpty ||
             signInResponse.data.refreshToken.isEmpty) {
-          AppSnackbar.error('Login Failed', 'Invalid response from server. Please try again.');
+          AppSnackbar.error(AppLocalization.tr.loginFailedTitle, AppLocalization.tr.invalidServerResponseMessage);
           return;
         }
 
         // Save tokens and user data to shared preferences
          await _saveUserData(signInResponse.data);
         if (signInResponse.data.accessToken.isNotEmpty) {
-          await _fcmService.initFCM(
-            accessToken: signInResponse.data.accessToken,
-          );
+          // Push registration is best-effort and must never block sign-in: the
+          // user is already authenticated and their tokens are saved by here.
+          try {
+            await _fcmService.initFCM(
+              accessToken: signInResponse.data.accessToken,
+            );
+          } catch (e) {
+            debugPrint('FCM init failed, continuing sign-in: $e');
+          }
         }else{
           debugPrint("No access token for fcm token");
         }
@@ -111,15 +118,17 @@ class LoginController extends GetxController {
         }
       } else {
         // Show error message
-        errorMessage.value = response.errorMessage;
+        debugPrint('login_controller: ${response.errorMessage}');
+        errorMessage.value = AppLocalization.tr.genericErrorMessage;
         AppSnackbar.error(
-          'Login Failed',
-          response.errorMessage.isNotEmpty ? response.errorMessage : 'Invalid email or password',
+          AppLocalization.tr.loginFailedTitle,
+          AppLocalization.tr.genericErrorMessage,
         );
       }
     } catch (e) {
-      errorMessage.value = e.toString();
-      AppSnackbar.error('Error', e.toString());
+      debugPrint('login_controller: $e');
+      errorMessage.value = AppLocalization.tr.genericErrorMessage;
+      AppSnackbar.error(AppLocalization.tr.errorTitle, AppLocalization.tr.genericErrorMessage);
     } finally {
       isLoading.value = false;
     }
@@ -230,20 +239,20 @@ class LoginController extends GetxController {
 
   String? validateEmail(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Email is required';
+      return AppLocalization.tr.emailRequiredError;
     }
     if (!GetUtils.isEmail(value)) {
-      return 'Enter a valid email';
+      return AppLocalization.tr.invalidEmailError;
     }
     return null;
   }
 
   String? validatePassword(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Password is required';
+      return AppLocalization.tr.passwordRequiredError;
     }
     if (value.length < 6) {
-      return 'Password must be at least 6 characters';
+      return AppLocalization.tr.passwordTooShortError;
     }
     return null;
   }

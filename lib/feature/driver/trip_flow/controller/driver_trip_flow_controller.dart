@@ -1,5 +1,7 @@
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
+import 'package:flutter/foundation.dart';
 
 class DriverTripFlowController extends GetxController {
   // ==================== State ====================
@@ -50,13 +52,14 @@ class DriverTripFlowController extends GetxController {
       tripStatus.value = 'accepted';
 
       Get.snackbar(
-        'Trip Accepted',
-        'Navigate to passenger location',
+        AppLocalization.tr.tripAcceptedTitle,
+        AppLocalization.tr.navigateToPassengerMessage,
         snackPosition: SnackPosition.BOTTOM,
       );
 
     } catch (e) {
-      errorMessage.value = e.toString();
+      debugPrint('driver_trip_flow_controller: $e');
+      errorMessage.value = AppLocalization.tr.genericErrorMessage;
     } finally {
       isLoading.value = false;
     }
@@ -72,7 +75,8 @@ class DriverTripFlowController extends GetxController {
       // Get.back();
 
     } catch (e) {
-      errorMessage.value = e.toString();
+      debugPrint('driver_trip_flow_controller: $e');
+      errorMessage.value = AppLocalization.tr.genericErrorMessage;
     } finally {
       isLoading.value = false;
     }
@@ -89,7 +93,8 @@ class DriverTripFlowController extends GetxController {
       tripStatus.value = 'started';
 
     } catch (e) {
-      errorMessage.value = e.toString();
+      debugPrint('driver_trip_flow_controller: $e');
+      errorMessage.value = AppLocalization.tr.genericErrorMessage;
     } finally {
       isLoading.value = false;
     }
@@ -105,13 +110,14 @@ class DriverTripFlowController extends GetxController {
       tripStatus.value = 'arrived';
 
       Get.snackbar(
-        'Arrived',
-        'Passenger has been notified',
+        AppLocalization.tr.arrivedTitle,
+        AppLocalization.tr.passengerNotifiedMessage,
         snackPosition: SnackPosition.BOTTOM,
       );
 
     } catch (e) {
-      errorMessage.value = e.toString();
+      debugPrint('driver_trip_flow_controller: $e');
+      errorMessage.value = AppLocalization.tr.genericErrorMessage;
     } finally {
       isLoading.value = false;
     }
@@ -131,7 +137,8 @@ class DriverTripFlowController extends GetxController {
       _showCompletionDialog();
 
     } catch (e) {
-      errorMessage.value = e.toString();
+      debugPrint('driver_trip_flow_controller: $e');
+      errorMessage.value = AppLocalization.tr.genericErrorMessage;
     } finally {
       isLoading.value = false;
     }

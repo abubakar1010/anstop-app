@@ -61,10 +61,10 @@ class CreateSupportScreen extends GetView<CreateSupportController> {
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: CustomTextField(
                   controller: controller.subjectController,
-                  hintText: 'Enter subject',
+                  hintText: AppLocalization.tr.enterSubjectHint,
                   hintextColor: const Color(0xFF1E1E1E),
                   hintextSize: 16.sp,
-                  validator: (value) => controller.validateSubject(value as String?),
+                  validator: (value) => controller.validateSubject(value),
                   prefixIcon: const Icon(
                     Icons.subject,
                     color: Color(0xFF191A44),

@@ -4,10 +4,13 @@ import 'package:geolocator/geolocator.dart';
 import 'package:flutter/material.dart';
 import 'package:ride_sharing/l10n/app_localizations.dart';
 import 'package:ride_sharing/services/api_client.dart';
+import 'package:ride_sharing/services/location_service.dart';
+import 'package:ride_sharing/services/map_camera_mixin.dart';
 import 'package:ride_sharing/services/api_urls.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
 
-class SetLocationController extends GetxController {
+class SetLocationController extends GetxController with MapCameraMixin {
   final TextEditingController locationTEController = TextEditingController();
 
   // Controllers for GooglePlaceAutoCompleteTextField
@@ -15,7 +18,6 @@ class SetLocationController extends GetxController {
   final TextEditingController latitudeController = TextEditingController();
   final TextEditingController longitudeController = TextEditingController();
 
-  GoogleMapController? mapController;
   Position? currentPosition;
   bool isLoading = true;
   bool isSubmitting = false;
@@ -34,12 +36,6 @@ class SetLocationController extends GetxController {
 
   // List of saved bookmarks (for BOOKMARK type)
   List<Map<String, dynamic>> savedBookmarks = [];
-
-  // Default location (Dhaka, Bangladesh)
-  static const CameraPosition defaultLocation = CameraPosition(
-    target: LatLng(23.8103, 90.4125),
-    zoom: 14.0,
-  );
 
   @override
   void onInit() {
@@ -163,59 +159,34 @@ class SetLocationController extends GetxController {
       ),
     );
 
-    // Move camera to saved location
-    if (mapController != null) {
-      mapController!.animateCamera(
-        CameraUpdate.newCameraPosition(
-          CameraPosition(
-            target: LatLng(lat, lng),
-            zoom: 15.0,
-          ),
-        ),
-      );
-    }
+    // Queued if the map isn't built yet, and replayed on creation.
+    moveCameraTo(LatLng(lat, lng));
 
     update();
   }
 
   Future<void> _initializeMap() async {
-    await _requestLocationPermission();
+    final LocationAccess access = await LocationService.requestAccess();
+    if (access != LocationAccess.granted) {
+      isLoading = false;
+      update();
+      await LocationService.showAccessDialog(access);
+      return;
+    }
     await _getCurrentLocation();
   }
 
-  Future<void> _requestLocationPermission() async {
-    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      isLoading = false;
-      update();
-      return;
-    }
-
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        isLoading = false;
-        update();
-        return;
-      }
-    }
-
-    if (permission == LocationPermission.deniedForever) {
-      isLoading = false;
-      update();
-      return;
-    }
-  }
-
   Future<void> _getCurrentLocation() async {
-    try {
-      Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-      );
+    final Position? position = await LocationService.readPosition();
 
+    isLoading = false;
+    if (position == null) {
+      update();
+      return;
+    }
+
+    try {
       currentPosition = position;
-      isLoading = false;
 
       // Only add current location marker if we don't have a saved address
       // (saved address takes priority)
@@ -230,22 +201,12 @@ class SetLocationController extends GetxController {
           ),
         );
 
-        // Move camera to current location (Check if mapController is null)
-        if (mapController != null) {
-          mapController!.animateCamera(
-            CameraUpdate.newCameraPosition(
-              CameraPosition(
-                target: LatLng(position.latitude, position.longitude),
-                zoom: 15.0,
-              ),
-            ),
-          );
-        }
+        moveCameraTo(LatLng(position.latitude, position.longitude));
       }
 
       update();
     } catch (e) {
-      isLoading = false;
+      debugPrint('SetLocationController: could not apply position — $e');
       update();
     }
   }
@@ -254,8 +215,8 @@ class SetLocationController extends GetxController {
   void onSetLocationTapped() {
     if (addressController.text.isEmpty) {
       Get.snackbar(
-        'Error',
-        'Please enter an address',
+        AppLocalization.tr.errorTitle,
+        AppLocalization.tr.pleaseEnterAddressMessage,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,
@@ -265,8 +226,8 @@ class SetLocationController extends GetxController {
 
     if (latitudeController.text.isEmpty || longitudeController.text.isEmpty) {
       Get.snackbar(
-        'Error',
-        'Please select an address from the suggestions',
+        AppLocalization.tr.errorTitle,
+        AppLocalization.tr.pleaseSelectAddressMessage,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,
@@ -312,8 +273,8 @@ class SetLocationController extends GetxController {
   Future<void> onConfirmAddressTapped() async {
     if (addressController.text.isEmpty) {
       Get.snackbar(
-        'Error',
-        'Please enter an address',
+        AppLocalization.tr.errorTitle,
+        AppLocalization.tr.pleaseEnterAddressMessage,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,
@@ -323,8 +284,8 @@ class SetLocationController extends GetxController {
 
     if (latitudeController.text.isEmpty || longitudeController.text.isEmpty) {
       Get.snackbar(
-        'Error',
-        'Please select an address from the suggestions',
+        AppLocalization.tr.errorTitle,
+        AppLocalization.tr.pleaseSelectAddressMessage,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,
@@ -341,8 +302,8 @@ class SetLocationController extends GetxController {
 
       if (accessToken.isEmpty) {
         Get.snackbar(
-          'Error',
-          'Please login to continue',
+          AppLocalization.tr.errorTitle,
+          AppLocalization.tr.pleaseLoginToContinueMessage,
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.red,
           colorText: Colors.white,
@@ -367,8 +328,8 @@ class SetLocationController extends GetxController {
 
       if (response.isSuccess) {
         Get.snackbar(
-          'Success',
-          'Address saved successfully',
+          AppLocalization.tr.successTitle,
+          AppLocalization.tr.addressSavedMessage,
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.green,
           colorText: Colors.white,
@@ -378,10 +339,8 @@ class SetLocationController extends GetxController {
         Get.back();
       } else {
         Get.snackbar(
-          'Error',
-          response.errorMessage.isNotEmpty
-              ? response.errorMessage
-              : 'Failed to save address',
+          AppLocalization.tr.errorTitle,
+          AppLocalization.tr.genericErrorMessage,
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.red,
           colorText: Colors.white,
@@ -389,8 +348,8 @@ class SetLocationController extends GetxController {
       }
     } catch (e) {
       Get.snackbar(
-        'Error',
-        e.toString(),
+        AppLocalization.tr.errorTitle,
+        AppLocalization.tr.genericErrorMessage,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,
@@ -417,17 +376,7 @@ class SetLocationController extends GetxController {
         ),
       );
 
-      // Move camera to selected location
-      if (mapController != null) {
-        mapController!.animateCamera(
-          CameraUpdate.newCameraPosition(
-            CameraPosition(
-              target: LatLng(lat, lng),
-              zoom: 15.0,
-            ),
-          ),
-        );
-      }
+      moveCameraTo(LatLng(lat, lng));
 
       update();
     }
@@ -435,21 +384,11 @@ class SetLocationController extends GetxController {
 
   @override
   void onClose() {
-    mapController?.dispose();
+    disposeMapController();
     addressController.dispose();
     latitudeController.dispose();
     longitudeController.dispose();
     super.onClose();
-  }
-
-  // This function is called from the GoogleMap widget when the map is created
-  void onMapCreated(GoogleMapController controller) {
-    mapController = controller;
-
-    // If we have saved location data, apply it now that the map is ready
-    if (savedLatitude != null && savedLongitude != null) {
-      _updateMapWithSavedAddress(savedLatitude!, savedLongitude!, savedAddressName ?? '');
-    }
   }
 }
 

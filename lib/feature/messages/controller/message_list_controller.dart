@@ -1,4 +1,6 @@
 import 'package:get/get.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
+import 'package:flutter/foundation.dart';
 
 class MessageListController extends GetxController {
   // ==================== State ====================
@@ -28,7 +30,8 @@ class MessageListController extends GetxController {
       unreadCount.value = 0;
 
     } catch (e) {
-      errorMessage.value = e.toString();
+      debugPrint('message_list_controller: $e');
+      errorMessage.value = AppLocalization.tr.genericErrorMessage;
     } finally {
       isLoading.value = false;
     }

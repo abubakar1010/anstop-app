@@ -1,4 +1,6 @@
 import 'package:get/get.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
+import 'package:flutter/foundation.dart';
 
 class NotificationController extends GetxController {
   // ==================== State ====================
@@ -27,7 +29,8 @@ class NotificationController extends GetxController {
       unreadCount.value = 0;
 
     } catch (e) {
-      errorMessage.value = e.toString();
+      debugPrint('notification_controller: $e');
+      errorMessage.value = AppLocalization.tr.genericErrorMessage;
     } finally {
       isLoading.value = false;
     }
@@ -48,7 +51,8 @@ class NotificationController extends GetxController {
       }
 
     } catch (e) {
-      errorMessage.value = e.toString();
+      debugPrint('notification_controller: $e');
+      errorMessage.value = AppLocalization.tr.genericErrorMessage;
     }
   }
 
@@ -63,13 +67,14 @@ class NotificationController extends GetxController {
       unreadCount.value = 0;
 
       Get.snackbar(
-        'Success',
-        'All notifications cleared',
+        AppLocalization.tr.successTitle,
+        AppLocalization.tr.notificationsClearedMessage,
         snackPosition: SnackPosition.BOTTOM,
       );
 
     } catch (e) {
-      errorMessage.value = e.toString();
+      debugPrint('notification_controller: $e');
+      errorMessage.value = AppLocalization.tr.genericErrorMessage;
     } finally {
       isLoading.value = false;
     }

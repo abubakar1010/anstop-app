@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../utils/app_colors.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
 
 class PrivacyAndTermsHelper extends StatelessWidget {
   PrivacyAndTermsHelper({super.key});
@@ -27,9 +28,9 @@ class PrivacyAndTermsHelper extends StatelessWidget {
                 color: AppColors.appGreyColor,
               ),
               children: [
-                const TextSpan(text: "I agree with "),
+                TextSpan(text: "${AppLocalization.tr.iAgreeWithLabel} "),
                 TextSpan(
-                  text: "terms of services ",
+                  text: "${AppLocalization.tr.termsOfServicesTitle} ",
                   style: TextStyle(
                     color: AppColors.primaryColor,
                   ),
@@ -38,9 +39,9 @@ class PrivacyAndTermsHelper extends StatelessWidget {
                       //Get.toNamed(AppRoutes.termsScreen);
                     },
                 ),
-                const TextSpan(text: "and "),
+                TextSpan(text: "${AppLocalization.tr.andConjunction} "),
                 TextSpan(
-                  text: "privacy policy.",
+                  text: AppLocalization.tr.privacyPolicyInlineLabel,
                   style: TextStyle(
                     color: AppColors.primaryColor,
                   ),

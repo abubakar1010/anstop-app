@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:ride_sharing/custom_assets/app_image.dart';
-import 'package:ride_sharing/custom_assets/app_string.dart';
 import 'package:ride_sharing/feature/passenger/trip_details/controller/completed_trip_controller.dart';
 import 'package:ride_sharing/utils/user_info_section.dart';
 import 'package:ride_sharing/widgets/auth_links/auth_link.dart';
@@ -29,7 +28,7 @@ class CompletedTripDetails extends StatelessWidget {
             Navigator.of(context).pop();
           },
         ),
-        title: Text(AppString.tripDetailsTitle),
+        title: Text(AppLocalization.tr.tripDetailsTitle),
         centerTitle: true,
       ),
 
@@ -67,7 +66,7 @@ class CompletedTripDetails extends StatelessWidget {
                       "https://media.wired.com/photos/59269cd37034dc5f91bec0f1/191:100/w_1280,c_limit/GoogleMapTA.jpg",
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) {
-                        return Center(child: Text(AppString.mapImageNotAvailable));
+                        return Center(child: Text(AppLocalization.tr.mapImageNotAvailable));
                       },
                     ),
                   ),
@@ -92,7 +91,7 @@ class CompletedTripDetails extends StatelessWidget {
                           ),
                           Row(
                             children: [
-                              Text(AppString.completedStatus, style: TextStyle(color: Colors.green),),
+                              Text(AppLocalization.tr.completedStatus, style: TextStyle(color: Colors.green),),
                               Spacer(),
                               Text(formattedTime),
                             ],
@@ -111,7 +110,7 @@ class CompletedTripDetails extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(AppString.yourTripLabel, style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),),
+                        Text(AppLocalization.tr.yourTripLabel, style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),),
                         SizedBox(height: 8.sp,),
                         Row(children: [
                           Container(
@@ -134,7 +133,7 @@ class CompletedTripDetails extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              AppString.distanceLabel, style: TextStyle(
+                              AppLocalization.tr.distanceLabel, style: TextStyle(
                                 fontSize: 18.sp, color: Colors.black
                             ),
                             ),
@@ -156,7 +155,7 @@ class CompletedTripDetails extends StatelessWidget {
                       padding: EdgeInsets.symmetric(horizontal: 16.sp),
                       child: Row(
                         children: [
-                          Text(AppString.rideValueLabel),
+                          Text(AppLocalization.tr.rideValueLabel),
                           Spacer(),
                           Text('\$${trip.fare.toStringAsFixed(2)}'),
                         ],

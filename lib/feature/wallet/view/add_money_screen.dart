@@ -1,5 +1,6 @@
 import 'package:ride_sharing/feature/wallet/controller/wallet_controller.dart';
 import 'package:ride_sharing/widgets/auth_links/auth_link.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
 
 class AddMoneyScreen extends StatelessWidget {
   const AddMoneyScreen({super.key});
@@ -18,7 +19,7 @@ class AddMoneyScreen extends StatelessWidget {
               onPressed: () => Get.back(),
             ),
             title: Text(
-              'Add Money',
+              AppLocalization.tr.addMoneyTitle,
               style: TextStyle(
                 color: AppColors.blackShade300,
                 fontSize: 25.sp,
@@ -37,7 +38,7 @@ class AddMoneyScreen extends StatelessWidget {
                   children: [
                     SizedBox(height: 40.h),
                     Text(
-                      'Enter Amount',
+                      AppLocalization.tr.enterAmountLabel,
                       style: TextStyle(
                         fontSize: 16.sp,
                         fontWeight: FontWeight.w400,

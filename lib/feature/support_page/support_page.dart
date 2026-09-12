@@ -1,6 +1,7 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:ride_sharing/app/utils/app_colors.dart';
 import 'package:ride_sharing/widgets/auth_links/auth_link.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
 
 class SupportPage extends StatefulWidget {
   const SupportPage({Key? key}) : super(key: key);
@@ -244,8 +245,8 @@ class _SupportPageState extends State<SupportPage> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     alignment: Alignment.center,
-                    child: const Text(
-                      "Back to Home",
+                    child: Text(
+                      AppLocalization.tr.backToHomeButton,
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 16,
@@ -259,8 +260,8 @@ class _SupportPageState extends State<SupportPage> {
 
                 GestureDetector(
                   onTap: () => Navigator.pop(context),
-                  child: const Text(
-                    "Cancel",
+                  child: Text(
+                    AppLocalization.tr.cancelButton,
                     style: TextStyle(
                       fontSize: 15,
                       color: Colors.red,

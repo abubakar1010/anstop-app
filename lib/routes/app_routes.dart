@@ -63,7 +63,6 @@ import 'package:ride_sharing/feature/messages/view/chat_screen.dart';
 import 'package:ride_sharing/feature/messages/view/message_list_screen.dart';
 import 'package:ride_sharing/feature/notification/binding/notification_binding.dart';
 import 'package:ride_sharing/feature/notification/view/notification_screen.dart';
-import 'package:ride_sharing/feature/settings/binding/change_language_binding.dart';
 import 'package:ride_sharing/feature/settings/binding/change_password_binding.dart';
 import 'package:ride_sharing/feature/settings/binding/legal_pages_binding.dart';
 import 'package:ride_sharing/feature/settings/binding/settings_binding.dart';
@@ -390,11 +389,7 @@ abstract class AppRoutes {
       page: () => ChangePasswordScreen(),
       binding: ChangePasswordBinding(),
     ),
-    GetPage(
-      name: changeLanguageScreen,
-      page: () => ChangeLanguageScreen(),
-      binding: ChangeLanguageBinding(),
-    ),
+    GetPage(name: changeLanguageScreen, page: () => ChangeLanguageScreen()),
     GetPage(
       name: legalPagesScreen,
       page: () => LegalPagesScreen(),

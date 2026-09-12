@@ -50,14 +50,14 @@ class _FindNearbyCarsBottomSheetState extends State<FindNearbyCarsBottomSheet> {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Text(
-              'Finding nearby cars..',
+              AppLocalization.tr.findingNearbyCarsLabel,
               style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold),
             ),
           ),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Text(
-              'We have sent your ride request to the nearby drivers',
+              AppLocalization.tr.rideRequestSentMessage,
               style: TextStyle(fontSize: 8.sp),
             ),
           ),
@@ -237,7 +237,7 @@ class _FindNearbyCarsBottomSheetState extends State<FindNearbyCarsBottomSheet> {
 
                       // Space between the icon and the text
                       Text(
-                        'Cancel Now',
+                        AppLocalization.tr.cancelNowButton,
                         style: TextStyle(
                           color: Colors.white, // Text color
                         ),

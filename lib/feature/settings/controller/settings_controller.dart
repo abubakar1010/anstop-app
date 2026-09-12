@@ -4,6 +4,7 @@ import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../routes/app_routes.dart';
 import '../service/settings_service.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
 
 class SettingsController extends GetxController {
   // ==================== State ====================
@@ -64,7 +65,8 @@ class SettingsController extends GetxController {
       // Get.offAllNamed(AppRoutes.loginScreen);
 
     } catch (e) {
-      errorMessage.value = e.toString();
+      debugPrint('settings_controller: $e');
+      errorMessage.value = AppLocalization.tr.genericErrorMessage;
     } finally {
       isLoading.value = false;
     }
@@ -85,11 +87,12 @@ class SettingsController extends GetxController {
         _logger.i('Account deletion scheduled successfully');
         return true;
       } else {
-        errorMessage.value = response.errorMessage;
+        debugPrint('settings_controller: ${response.errorMessage}');
+        errorMessage.value = AppLocalization.tr.genericErrorMessage;
         _logger.e('Delete account failed — error: ${response.errorMessage}');
         Get.snackbar(
-          'Error',
-          response.errorMessage,
+          AppLocalization.tr.errorTitle,
+          AppLocalization.tr.genericErrorMessage,
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: const Color(0xFFD32F2F),
           colorText: const Color(0xFFFFFFFF),
@@ -97,7 +100,8 @@ class SettingsController extends GetxController {
         return false;
       }
     } catch (e, stackTrace) {
-      errorMessage.value = e.toString();
+      debugPrint('settings_controller: $e');
+      errorMessage.value = AppLocalization.tr.genericErrorMessage;
       _logger.e('Exception during delete account', error: e, stackTrace: stackTrace);
       return false;
     } finally {

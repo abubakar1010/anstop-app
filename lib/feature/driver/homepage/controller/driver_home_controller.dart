@@ -12,15 +12,18 @@ import 'package:ride_sharing/feature/driver/homepage/service/driver_location_ser
 import 'package:ride_sharing/feature/driver/trip_flow/model/ride_request_model.dart';
 import 'package:ride_sharing/feature/driver/trip_flow/view/trip_completion_payment_dialogs.dart';
 import 'package:ride_sharing/feature/driver/trip_flow/view/driver_trip_flow.dart';
+import 'package:ride_sharing/services/location_service.dart';
+import 'package:ride_sharing/services/map_camera_mixin.dart';
 import 'package:ride_sharing/services/socket_services.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:ride_sharing/custom_assets/app_string.dart';
+import 'package:ride_sharing/services/app_config.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
 
-class DriverHomeScreenController extends GetxController with WidgetsBindingObserver {
+class DriverHomeScreenController extends GetxController
+    with MapCameraMixin, WidgetsBindingObserver {
   final Logger _logger = Logger();
   final TextEditingController locationTEController = TextEditingController();
-  GoogleMapController? mapController;
   Position? currentPosition;
   bool isLoading = true;
   Set<Marker> markers = {};
@@ -92,10 +95,8 @@ class DriverHomeScreenController extends GetxController with WidgetsBindingObser
   //   image faces west  → set to  90.0
   static const double _imageNorthOffsetDegrees = 0.0;
 
-  static const CameraPosition defaultLocation = CameraPosition(
-    target: LatLng(23.8103, 90.4125),
-    zoom: 14.0,
-  );
+  // Shown once per screen visit — a retry on resume stays silent.
+  bool _hasExplainedAccess = false;
 
   @override
   void onInit() {
@@ -111,6 +112,10 @@ class DriverHomeScreenController extends GetxController with WidgetsBindingObser
     if (state == AppLifecycleState.resumed) {
       _logger.i('App resumed — checking socket connection');
       _reconnectSocketIfNeeded();
+
+      // Permission may have been granted in Settings while we were away;
+      // without this the map stays on the fallback camera all session.
+      if (currentPosition == null) _initializeMap();
     }
   }
 
@@ -250,7 +255,7 @@ class DriverHomeScreenController extends GetxController with WidgetsBindingObser
         markerId: const MarkerId('driver_location'),
         position: LatLng(currentPosition!.latitude, currentPosition!.longitude),
         icon: rotatedIcon,
-        infoWindow: const InfoWindow(title: 'You'),
+        infoWindow: InfoWindow(title: AppLocalization.tr.youMarkerLabel),
         anchor: const Offset(0.5, 0.5),
         flat: true,
       ),
@@ -326,7 +331,7 @@ class DriverHomeScreenController extends GetxController with WidgetsBindingObser
       markerId: const MarkerId('driver_location'),
       position: position,
       icon: rotatedIcon,
-      infoWindow: const InfoWindow(title: 'You'),
+      infoWindow: InfoWindow(title: AppLocalization.tr.youMarkerLabel),
       anchor: const Offset(0.5, 0.5),
       flat: true,
     );
@@ -400,8 +405,8 @@ class DriverHomeScreenController extends GetxController with WidgetsBindingObser
         update();
 
         Get.snackbar(
-          'Payment Confirmed',
-          'The passenger has completed the payment',
+          AppLocalization.tr.paymentConfirmedTitle,
+          AppLocalization.tr.passengerCompletedPaymentMessage,
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.green,
           colorText: Colors.white,
@@ -621,7 +626,7 @@ class DriverHomeScreenController extends GetxController with WidgetsBindingObser
         markerId: const MarkerId('destination_location'),
         position: LatLng(destinationLat, destinationLng),
         icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
-        infoWindow: InfoWindow(title: 'Destination', snippet: destinationName),
+        infoWindow: InfoWindow(title: AppLocalization.tr.destination, snippet: destinationName),
       ),
     );
     _logger.i('Destination marker added. Total markers: ${markers.length}');
@@ -687,7 +692,7 @@ class DriverHomeScreenController extends GetxController with WidgetsBindingObser
         markerId: const MarkerId('pickup_location'),
         position: LatLng(pickupLat, pickupLng),
         icon: _pickupMarkerIcon ?? BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
-        infoWindow: InfoWindow(title: 'Pickup', snippet: pickupName),
+        infoWindow: InfoWindow(title: AppLocalization.tr.pickupLabel, snippet: pickupName),
       ),
     );
     _logger.i('Pickup marker added. Total markers: ${markers.length}');
@@ -718,7 +723,7 @@ class DriverHomeScreenController extends GetxController with WidgetsBindingObser
 
       final url = Uri.parse(
         'https://maps.googleapis.com/maps/api/directions/json?'
-        'origin=$origin&destination=$destination&key=${AppString.googleMapsKey}&mode=driving',
+        'origin=$origin&destination=$destination&key=${AppConfig.googleMapsApiKey}&mode=driving',
       );
 
       _logger.i('Fetching route from pickup to destination via Google Directions API');
@@ -798,7 +803,7 @@ class DriverHomeScreenController extends GetxController with WidgetsBindingObser
 
       final url = Uri.parse(
         'https://maps.googleapis.com/maps/api/directions/json?'
-        'origin=$origin&destination=$destination&key=${AppString.googleMapsKey}&mode=driving',
+        'origin=$origin&destination=$destination&key=${AppConfig.googleMapsApiKey}&mode=driving',
       );
 
       _logger.i('Fetching route from Google Directions API: $url');
@@ -1020,12 +1025,10 @@ class DriverHomeScreenController extends GetxController with WidgetsBindingObser
     _stopIdleLocationTracking();
     _locationSubscription?.cancel();
 
-    _locationSubscription = Geolocator.getPositionStream(
-      locationSettings: const LocationSettings(
-        accuracy: LocationAccuracy.high,
-        distanceFilter: 1,
-      ),
-    ).listen((Position position) async {
+    _locationSubscription =
+        LocationService.positionStream(distanceFilter: 1).listen((
+      Position position,
+    ) async {
       _logger.i('🚗 [GPS] lat=${position.latitude.toStringAsFixed(6)}, lng=${position.longitude.toStringAsFixed(6)}, accuracy=${position.accuracy.toStringAsFixed(1)}m');
       _logger.i('🚗 [GPS] routePoints=${_currentRoutePoints.length}, currentBearing=${_currentBearing.toStringAsFixed(1)}°');
 
@@ -1078,7 +1081,7 @@ class DriverHomeScreenController extends GetxController with WidgetsBindingObser
             markerId: const MarkerId('driver_location'),
             position: currentLatLng,
             icon: icon,
-            infoWindow: const InfoWindow(title: 'You'),
+            infoWindow: InfoWindow(title: AppLocalization.tr.youMarkerLabel),
             anchor: const Offset(0.5, 0.5),
             flat: true,
           ),
@@ -1255,12 +1258,10 @@ class DriverHomeScreenController extends GetxController with WidgetsBindingObser
     _idleLocationSubscription?.cancel();
     _previousIdlePosition = null;
 
-    _idleLocationSubscription = Geolocator.getPositionStream(
-      locationSettings: const LocationSettings(
-        accuracy: LocationAccuracy.high,
-        distanceFilter: 5,
-      ),
-    ).listen((Position position) async {
+    _idleLocationSubscription =
+        LocationService.positionStream(distanceFilter: 5).listen((
+      Position position,
+    ) async {
       currentPosition = position;
       final currentLatLng = LatLng(position.latitude, position.longitude);
 
@@ -1346,40 +1347,26 @@ class DriverHomeScreenController extends GetxController with WidgetsBindingObser
   }
 
   Future<void> _initializeMap() async {
-    await _requestLocationPermission();
-    await _getCurrentLocation();
-  }
-
-  Future<void> _requestLocationPermission() async {
-    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
+    final LocationAccess access = await LocationService.requestAccess();
+    if (access != LocationAccess.granted) {
       isLoading = false;
       update();
-      return;
-    }
-
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        isLoading = false;
-        update();
-        return;
+      if (!_hasExplainedAccess) {
+        _hasExplainedAccess = true;
+        await LocationService.showAccessDialog(access);
       }
-    }
-
-    if (permission == LocationPermission.deniedForever) {
-      isLoading = false;
-      update();
       return;
     }
+    await _getCurrentLocation();
   }
 
   Future<void> _getCurrentLocation() async {
     try {
-      Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-      );
+      final Position? position = await LocationService.readPosition();
+      if (position == null) {
+        _logger.w('No position available for the driver map');
+        return;
+      }
 
       currentPosition = position;
 
@@ -1391,13 +1378,17 @@ class DriverHomeScreenController extends GetxController with WidgetsBindingObser
           markerId: const MarkerId('driver_location'),
           position: LatLng(position.latitude, position.longitude),
           icon: rotatedIcon,
-          infoWindow: const InfoWindow(title: 'You'),
+          infoWindow: InfoWindow(title: AppLocalization.tr.youMarkerLabel),
           anchor: const Offset(0.5, 0.5),
           flat: true,
         ),
       };
 
       update(); // markers + position updated
+
+      // Queued when the map isn't built yet, so the camera can't be left
+      // behind by whichever of the two arrives first.
+      moveCameraTo(LatLng(position.latitude, position.longitude));
     } catch (e) {
       debugPrint('Location error: $e');
     } finally {
@@ -1453,7 +1444,7 @@ class DriverHomeScreenController extends GetxController with WidgetsBindingObser
   @override
   void onClose() {
     WidgetsBinding.instance.removeObserver(this);
-    mapController?.dispose();
+    disposeMapController();
     _locationSubscription?.cancel();
     _idleLocationSubscription?.cancel();
     _simulationTimer?.cancel();

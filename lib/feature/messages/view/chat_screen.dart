@@ -104,7 +104,7 @@ class ChatScreen extends GetView<ChatController> {
                       const SizedBox(height: 16),
                       ElevatedButton(
                         onPressed: controller.refreshMessages,
-                        child: const Text('Retry'),
+                        child: Text(AppLocalization.tr.retryButton),
                       ),
                     ],
                   ),
@@ -112,9 +112,9 @@ class ChatScreen extends GetView<ChatController> {
               }
 
               if (controller.messages.isEmpty) {
-                return const Center(
+                return Center(
                   child: Text(
-                    'No messages yet.\nStart a conversation!',
+                    AppLocalization.tr.noMessagesYetMessage,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: MessagingColors.secondaryText,
@@ -350,7 +350,7 @@ class ChatScreen extends GetView<ChatController> {
               borderRadius: BorderRadius.circular(16),
             ),
             child: Text(
-              'Beginning of conversation',
+              AppLocalization.tr.beginningOfConversationLabel,
               style: TextStyle(
                 color: MessagingColors.secondaryText,
                 fontSize: 12,

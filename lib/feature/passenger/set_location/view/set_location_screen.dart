@@ -5,12 +5,11 @@ import 'package:get/get.dart';
 import 'package:google_places_flutter/google_places_flutter.dart';
 import 'package:google_places_flutter/model/prediction.dart';
 import 'package:ride_sharing/feature/passenger/set_location/controller/set_location_controller.dart';
+import 'package:ride_sharing/widgets/app_google_map.dart';
 import 'package:ride_sharing/widgets/auth_links/auth_link.dart';
 import 'package:ride_sharing/widgets/home_links/home_links.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:ride_sharing/app/utils/app_colors.dart';
-import 'package:ride_sharing/l10n/l10n_helper.dart';
-import 'package:ride_sharing/custom_assets/app_string.dart';
+import 'package:ride_sharing/services/app_config.dart';
 
 class SetLocationScreen extends StatelessWidget {
   const SetLocationScreen({Key? key}) : super(key: key);
@@ -22,9 +21,8 @@ class SetLocationScreen extends StatelessWidget {
         builder: (controller) {
           return Stack(
             children: [
-              GoogleMap(
-                initialCameraPosition: SetLocationController.defaultLocation,
-                onMapCreated: controller.onMapCreated,
+              AppGoogleMap(
+                camera: controller,
                 markers: controller.markers,
               ),
               if (controller.isLoading)
@@ -148,7 +146,7 @@ class SetLocationScreen extends StatelessWidget {
                     Expanded(
                       child: GooglePlaceAutoCompleteTextField(
                         textEditingController: controller.addressController,
-                        googleAPIKey: AppString.googleMapsKey,
+                        googleAPIKey: AppConfig.googleMapsApiKey,
                         inputDecoration: InputDecoration(
                           border: InputBorder.none,
                           hintText: AppLocalization.tr.whereAreYouHeadedHint,
@@ -352,7 +350,7 @@ class SetLocationScreen extends StatelessWidget {
                     Expanded(
                       child: GooglePlaceAutoCompleteTextField(
                         textEditingController: controller.addressController,
-                        googleAPIKey: AppString.googleMapsKey,
+                        googleAPIKey: AppConfig.googleMapsApiKey,
                         inputDecoration: InputDecoration(
                           border: InputBorder.none,
                           hintText: AppLocalization.tr.whereAreYouHeadedHint,

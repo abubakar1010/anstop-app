@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:ride_sharing/feature/auth/data/reset_password_request_model.dart';
 import 'package:ride_sharing/feature/auth/service/auth_service.dart';
 import 'package:ride_sharing/routes/app_routes.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
 
 class ResetPasswordController extends GetxController {
   // ==================== Text Controllers ====================
@@ -66,8 +67,8 @@ class ResetPasswordController extends GetxController {
 
       if (response.isSuccess) {
         Get.snackbar(
-          'Success',
-          'Password reset successfully. Please log in.',
+          AppLocalization.tr.successTitle,
+          AppLocalization.tr.passwordResetSuccessMessage,
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.green,
           colorText: Colors.white,
@@ -78,18 +79,19 @@ class ResetPasswordController extends GetxController {
             ? response.errorMessage
             : 'Failed to reset password. Please try again.';
         Get.snackbar(
-          'Reset Failed',
-          errorMessage.value,
+          AppLocalization.tr.resetFailedTitle,
+          AppLocalization.tr.genericErrorMessage,
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.red,
           colorText: Colors.white,
         );
       }
     } catch (e) {
-      errorMessage.value = e.toString();
+      debugPrint('reset_password_controller: $e');
+      errorMessage.value = AppLocalization.tr.genericErrorMessage;
       Get.snackbar(
-        'Error',
-        e.toString(),
+        AppLocalization.tr.errorTitle,
+        AppLocalization.tr.genericErrorMessage,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,
@@ -106,20 +108,20 @@ class ResetPasswordController extends GetxController {
 
   String? validateNewPassword(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Password is required';
+      return AppLocalization.tr.passwordRequiredError;
     }
     if (value.length < 6) {
-      return 'Password must be at least 6 characters';
+      return AppLocalization.tr.passwordTooShortError;
     }
     return null;
   }
 
   String? validateConfirmPassword(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Confirm password is required';
+      return AppLocalization.tr.confirmPasswordRequiredError;
     }
     if (value != newPasswordTEController.text) {
-      return 'Passwords do not match';
+      return AppLocalization.tr.passwordsDoNotMatchError;
     }
     return null;
   }

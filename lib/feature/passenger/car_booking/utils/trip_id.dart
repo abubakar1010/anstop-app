@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:ride_sharing/l10n/l10n_helper.dart';
 import 'package:ride_sharing/widgets/auth_links/auth_link.dart';
 
 class TripIdWidget extends StatelessWidget {

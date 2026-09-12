@@ -35,7 +35,7 @@ class ResetPasswordScreen extends GetView<ResetPasswordController> {
                     prefixIcon: const Icon(Icons.key, color: Color(0XFF191A44)),
                     isPassword: true,
                     isObscureText: true,
-                    validator: (v) => controller.validateNewPassword(v as String?),
+                    validator: (v) => controller.validateNewPassword(v),
                   ),
                   SizedBox(height: 16.h),
                   CustomTextField(
@@ -46,7 +46,7 @@ class ResetPasswordScreen extends GetView<ResetPasswordController> {
                     prefixIcon: const Icon(Icons.key, color: Color(0XFF191A44)),
                     isPassword: true,
                     isObscureText: true,
-                    validator: (v) => controller.validateConfirmPassword(v as String?),
+                    validator: (v) => controller.validateConfirmPassword(v),
                   ),
                   SizedBox(height: 32.h),
                   Obx(() => CustomButton(

@@ -19,6 +19,7 @@ import 'package:ride_sharing/utils/user_info_section.dart';
 import 'package:ride_sharing/widgets/custom_horizontal_line.dart';
 import 'package:ride_sharing/l10n/app_localizations.dart';
 import 'package:get/get.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
 
 class BookingCarsBottomSheet extends StatefulWidget {
   final String driverName;
@@ -216,7 +217,7 @@ class _BookingCarsBottomSheetState extends State<BookingCarsBottomSheet> {
                 SizedBox(width: 2.sp,),
                 GestureDetector(
                   onTap:() {Get.to(PassengerPaymentScreen(rideId: widget.rideId, driverId: widget.driverId));},
-                    child: Text('Pay via wallet',style: TextStyle(fontSize: 20.sp),
+                    child: Text(AppLocalization.tr.payViaWalletLabel,style: TextStyle(fontSize: 20.sp),
                     )
                 )
               ],

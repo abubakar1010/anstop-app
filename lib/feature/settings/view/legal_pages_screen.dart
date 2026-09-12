@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:get/get.dart';
 import '../controller/legal_pages_controller.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
 
 class LegalPagesScreen extends GetView<LegalPagesController> {
   const LegalPagesScreen({super.key});
@@ -39,7 +40,7 @@ class LegalPagesScreen extends GetView<LegalPagesController> {
                 SizedBox(height: 16.h),
                 ElevatedButton(
                   onPressed: () => controller.fetchLegalDocument(),
-                  child: const Text('Retry'),
+                  child: Text(AppLocalization.tr.retryButton),
                 ),
               ],
             ),

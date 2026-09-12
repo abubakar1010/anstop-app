@@ -1,4 +1,6 @@
 import 'package:get/get.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
+import 'package:flutter/foundation.dart';
 
 class DriverCompletedTripController extends GetxController {
   // ==================== State ====================
@@ -29,7 +31,8 @@ class DriverCompletedTripController extends GetxController {
       }
 
     } catch (e) {
-      errorMessage.value = e.toString();
+      debugPrint('driver_completed_trip_controller: $e');
+      errorMessage.value = AppLocalization.tr.genericErrorMessage;
     } finally {
       isLoading.value = false;
     }
@@ -43,13 +46,14 @@ class DriverCompletedTripController extends GetxController {
       await Future.delayed(const Duration(seconds: 1));
 
       Get.snackbar(
-        'Success',
-        'Receipt downloaded successfully',
+        AppLocalization.tr.successTitle,
+        AppLocalization.tr.receiptDownloadedMessage,
         snackPosition: SnackPosition.BOTTOM,
       );
 
     } catch (e) {
-      errorMessage.value = e.toString();
+      debugPrint('driver_completed_trip_controller: $e');
+      errorMessage.value = AppLocalization.tr.genericErrorMessage;
     } finally {
       isLoading.value = false;
     }

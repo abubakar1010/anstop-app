@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../app/utils/app_colors.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
 
 
 class MediaGridScreen extends StatelessWidget {
@@ -30,8 +31,8 @@ class MediaGridScreen extends StatelessWidget {
           ),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          'Media',
+        title: Text(
+          AppLocalization.tr.mediaTitle,
           style: TextStyle(
             color: MessagingColors.primaryText,
             fontSize: 18,

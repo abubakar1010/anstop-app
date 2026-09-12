@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image/image.dart' as img;
 import 'package:path_provider/path_provider.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
 
 class ImagePickerHelper {
   static final ImagePicker _picker = ImagePicker();
@@ -13,14 +14,14 @@ class ImagePickerHelper {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text("Select Image Source",),
+          title: Text(AppLocalization.tr.selectImageSourceTitle,),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
                 leading: Icon(Icons.photo_library,),
                 title: Text(
-                  "Choose from Gallery",
+                  AppLocalization.tr.chooseFromGalleryOption,
 
                 ),
                 onTap: () async {
@@ -31,7 +32,7 @@ class ImagePickerHelper {
               ListTile(
                 leading: Icon(Icons.camera_alt, ),
                 title: Text(
-                  "Take a Photo",
+                  AppLocalization.tr.takeAPhotoOption,
 
                 ),
                 onTap: () async {

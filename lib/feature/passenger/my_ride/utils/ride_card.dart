@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:ride_sharing/app/utils/app_colors.dart';
 import 'package:ride_sharing/custom_assets/app_image.dart';
-import 'package:ride_sharing/custom_assets/app_string.dart';
 import 'package:ride_sharing/widgets/auth_links/auth_link.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
@@ -88,7 +87,7 @@ class MyRideCardWidget extends StatelessWidget {
                   height: 15.h,
                 ),
                 CustomButton(onPressed:onViewDetails,
-                title: Text(AppString.viewDetailsButton,style: TextStyle(color: Colors.black),),
+                title: Text(AppLocalization.tr.viewDetailsButton,style: TextStyle(color: Colors.black),),
                   height: 40,
                   backgroundColor: AppColors.white,
                   bordersColor: Colors.grey,

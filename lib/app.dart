@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import 'package:ride_sharing/app/theme/app_theme.dart';
 import 'package:ride_sharing/l10n/app_localizations.dart';
 import 'package:ride_sharing/routes/app_routes.dart';
+import 'package:ride_sharing/services/locale_service.dart';
 
 class RideSharingApp extends StatelessWidget {
   const RideSharingApp({super.key});
@@ -45,11 +46,12 @@ class RideSharingApp extends StatelessWidget {
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
           ],
-          locale: const Locale('fr'),
-          supportedLocales: const [
-            Locale('fr'), // French
-            Locale('en'), // English
-          ],
+          // No `locale:` here on purpose. GetMaterialApp assigns any non-null
+          // value straight onto Get.locale in a one-shot initState that runs
+          // *after* main() restored the saved choice, so passing one pins every
+          // cold start to that language and silently discards the user's pick.
+          fallbackLocale: LocaleService.defaultLocale,
+          supportedLocales: LocaleService.supportedLocales,
         //  darkTheme: AppThemeData.darkThemeData,
           debugShowCheckedModeBanner: false,
           initialRoute: AppRoutes.splashScreen, // Initial route

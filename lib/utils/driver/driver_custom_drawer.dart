@@ -3,7 +3,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:ride_sharing/app/utils/app_colors.dart';
 import 'package:ride_sharing/custom_assets/app_image.dart';
 import 'package:ride_sharing/feature/driver/profile/controller/driver_profile_controller.dart';
-import 'package:ride_sharing/l10n/l10n_helper.dart';
 import 'package:ride_sharing/feature/driver/homepage/view/driver_homescreen.dart';
 import 'package:ride_sharing/feature/driver/my_trip/view/my_trip.dart';
 import 'package:ride_sharing/feature/driver/wallet/view/driver_wallet_page.dart';

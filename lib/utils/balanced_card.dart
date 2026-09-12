@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../app/utils/app_colors.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
 
 
 class BalanceCard extends StatelessWidget {
@@ -46,8 +47,8 @@ class BalanceCard extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Available Balance',
+              Text(
+                AppLocalization.tr.availableBalanceLabel,
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 14,

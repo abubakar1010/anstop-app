@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../app/utils/app_colors.dart';
 import '../widgets/widgets.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
 
 
 class ChatsListTileWidget extends StatelessWidget {
@@ -100,7 +101,7 @@ class ChatsListTileWidget extends StatelessWidget {
           ? CustomText(
               textAlign: TextAlign.start,
               fontSize: 12.sp,
-              text: 'New',
+              text: AppLocalization.tr.newBadge,
               fontWeight: FontWeight.w600,
              // fontName: FontFamily.uncut,
             )

@@ -1,5 +1,4 @@
 import 'package:ride_sharing/feature/auth/view/reset_password_screen.dart';
-import 'package:ride_sharing/l10n/l10n_helper.dart';
 import 'package:ride_sharing/widgets/auth_links/auth_link.dart';
 import 'package:ride_sharing/feature/auth/controller/otp_verification_controller.dart';
 

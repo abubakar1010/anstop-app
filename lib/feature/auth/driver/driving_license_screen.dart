@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ride_sharing/app/utils/app_snackbar.dart';
 import 'package:ride_sharing/app/helpers/image_picker_helper.dart';
-import 'package:ride_sharing/custom_assets/app_string.dart';
 import 'package:ride_sharing/feature/auth/controller/driving_license_controller.dart';
 import 'package:ride_sharing/feature/auth/passenger/terms_of_services.dart';
 import 'package:ride_sharing/widgets/auth_links/auth_link.dart';
@@ -43,7 +42,7 @@ class DrivingLicenseScreen extends GetView<DrivingLicenseController> {
                 controller.isBackImageUploading.value;
             return CustomButton(
               onPressed: isUploading ? () {} : () => _onSubmit(context),
-              label: isUploading ? 'Uploading...' : AppString.submitButton,
+              label: isUploading ? 'Uploading...' : AppLocalization.tr.submitButton,
             );
           }),
         ),
@@ -57,7 +56,7 @@ class DrivingLicenseScreen extends GetView<DrivingLicenseController> {
               children: [
                 SizedBox(height: 20.h),
                 Text(
-                  AppString.drivingLicenceTitle,
+                  AppLocalization.tr.drivingLicenceTitle,
                   style: TextStyle(
                     fontSize: 20.sp,
                     fontWeight: FontWeight.bold,
@@ -70,7 +69,7 @@ class DrivingLicenseScreen extends GetView<DrivingLicenseController> {
                   child: Padding(
                     padding: EdgeInsets.only(left: 4.sp),
                     child: Text(
-                      AppString.drivingLicenseNumberLabel,
+                      AppLocalization.tr.drivingLicenseNumberLabel,
                       textAlign: TextAlign.start,
                       style: TextStyle(
                         fontSize: 15.sp,
@@ -88,7 +87,7 @@ class DrivingLicenseScreen extends GetView<DrivingLicenseController> {
                   child: Padding(
                     padding: EdgeInsets.only(left: 4.sp),
                     child: Text(
-                      AppString.uploadDrivingLicenseFront,
+                      AppLocalization.tr.uploadDrivingLicenseFront,
                       textAlign: TextAlign.start,
                       style: TextStyle(
                         fontSize: 15.sp,
@@ -121,7 +120,7 @@ class DrivingLicenseScreen extends GetView<DrivingLicenseController> {
                   child: Padding(
                     padding: EdgeInsets.only(left: 4.sp),
                     child: Text(
-                      AppString.uploadDrivingLicenseBack,
+                      AppLocalization.tr.uploadDrivingLicenseBack,
                       textAlign: TextAlign.start,
                       style: TextStyle(
                         fontSize: 15.sp,

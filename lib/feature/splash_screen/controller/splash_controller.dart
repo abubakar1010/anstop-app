@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ride_sharing/feature/auth/service/auth_service.dart';
 import 'package:ride_sharing/routes/app_routes.dart';
 import 'package:ride_sharing/services/fcm_service.dart';
+import 'package:ride_sharing/services/locale_service.dart';
 
 class SplashController extends GetxController {
   // ==================== State ====================
@@ -22,17 +23,16 @@ class SplashController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    isFrench.value = Get.locale?.languageCode == 'fr';
+    isFrench.value = LocaleService.isFrench;
     _initialize();
   }
 
   // ==================== UI Actions ====================
   Future<void> toggleLanguage(bool value) async {
     isFrench.value = value;
-    final locale = value ? const Locale('fr') : const Locale('en');
-    Get.updateLocale(locale);
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('locale', locale.languageCode);
+    await LocaleService.setLocale(
+      value ? const Locale('fr') : const Locale('en'),
+    );
   }
 
   // ==================== Business Logic ====================

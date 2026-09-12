@@ -4,7 +4,6 @@ import 'package:get/get.dart';
 import 'package:ride_sharing/custom_assets/app_image.dart';
 import 'package:ride_sharing/feature/auth/controller/login_controller.dart';
 import 'package:ride_sharing/widgets/auth_links/auth_link.dart';
-import '../../../l10n/l10n_helper.dart';
 import '../../../routes/app_routes.dart';
 
 class LogInScreen extends StatelessWidget {

@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:ride_sharing/app/utils/app_snackbar.dart';
 import 'package:ride_sharing/feature/auth/service/auth_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
 
 class CarInformationController extends GetxController {
   // ==================== Services ====================
@@ -66,8 +67,8 @@ class CarInformationController extends GetxController {
       if (accessToken == null || accessToken.isEmpty) {
         errorMessage.value = 'Access token not found. Please login again.';
         AppSnackbar.error(
-          'Error',
-          'Access token not found. Please login again.',
+          AppLocalization.tr.errorTitle,
+          AppLocalization.tr.sessionExpiredMessage,
         );
         return;
       }
@@ -84,22 +85,22 @@ class CarInformationController extends GetxController {
         } else {
           errorMessage.value = 'Failed to get image URL from response';
           AppSnackbar.error(
-            'Upload Failed',
-            'Failed to get image URL from response',
+            AppLocalization.tr.uploadFailedTitle,
+            AppLocalization.tr.imageUrlMissingMessage,
           );
         }
       } else {
-        errorMessage.value = response.errorMessage;
+        debugPrint('car_information_controller: ${response.errorMessage}');
+        errorMessage.value = AppLocalization.tr.genericErrorMessage;
         AppSnackbar.error(
-          'Upload Failed',
-          response.errorMessage.isNotEmpty
-              ? response.errorMessage
-              : 'Failed to upload image. Please try again.',
+          AppLocalization.tr.uploadFailedTitle,
+          AppLocalization.tr.genericErrorMessage,
         );
       }
     } catch (e) {
-      errorMessage.value = e.toString();
-      AppSnackbar.error('Error', e.toString());
+      debugPrint('car_information_controller: $e');
+      errorMessage.value = AppLocalization.tr.genericErrorMessage;
+      AppSnackbar.error(AppLocalization.tr.errorTitle, AppLocalization.tr.genericErrorMessage);
     } finally {
       isLicensePlateImageUploading.value = false;
     }
@@ -117,8 +118,8 @@ class CarInformationController extends GetxController {
       if (accessToken == null || accessToken.isEmpty) {
         errorMessage.value = 'Access token not found. Please login again.';
         AppSnackbar.error(
-          'Error',
-          'Access token not found. Please login again.',
+          AppLocalization.tr.errorTitle,
+          AppLocalization.tr.sessionExpiredMessage,
         );
         return;
       }
@@ -135,22 +136,22 @@ class CarInformationController extends GetxController {
         } else {
           errorMessage.value = 'Failed to get image URL from response';
           AppSnackbar.error(
-            'Upload Failed',
-            'Failed to get image URL from response',
+            AppLocalization.tr.uploadFailedTitle,
+            AppLocalization.tr.imageUrlMissingMessage,
           );
         }
       } else {
-        errorMessage.value = response.errorMessage;
+        debugPrint('car_information_controller: ${response.errorMessage}');
+        errorMessage.value = AppLocalization.tr.genericErrorMessage;
         AppSnackbar.error(
-          'Upload Failed',
-          response.errorMessage.isNotEmpty
-              ? response.errorMessage
-              : 'Failed to upload image. Please try again.',
+          AppLocalization.tr.uploadFailedTitle,
+          AppLocalization.tr.genericErrorMessage,
         );
       }
     } catch (e) {
-      errorMessage.value = e.toString();
-      AppSnackbar.error('Error', e.toString());
+      debugPrint('car_information_controller: $e');
+      errorMessage.value = AppLocalization.tr.genericErrorMessage;
+      AppSnackbar.error(AppLocalization.tr.errorTitle, AppLocalization.tr.genericErrorMessage);
     } finally {
       isRegCertFrontImageUploading.value = false;
     }
@@ -168,8 +169,8 @@ class CarInformationController extends GetxController {
       if (accessToken == null || accessToken.isEmpty) {
         errorMessage.value = 'Access token not found. Please login again.';
         AppSnackbar.error(
-          'Error',
-          'Access token not found. Please login again.',
+          AppLocalization.tr.errorTitle,
+          AppLocalization.tr.sessionExpiredMessage,
         );
         return;
       }
@@ -186,22 +187,22 @@ class CarInformationController extends GetxController {
         } else {
           errorMessage.value = 'Failed to get image URL from response';
           AppSnackbar.error(
-            'Upload Failed',
-            'Failed to get image URL from response',
+            AppLocalization.tr.uploadFailedTitle,
+            AppLocalization.tr.imageUrlMissingMessage,
           );
         }
       } else {
-        errorMessage.value = response.errorMessage;
+        debugPrint('car_information_controller: ${response.errorMessage}');
+        errorMessage.value = AppLocalization.tr.genericErrorMessage;
         AppSnackbar.error(
-          'Upload Failed',
-          response.errorMessage.isNotEmpty
-              ? response.errorMessage
-              : 'Failed to upload image. Please try again.',
+          AppLocalization.tr.uploadFailedTitle,
+          AppLocalization.tr.genericErrorMessage,
         );
       }
     } catch (e) {
-      errorMessage.value = e.toString();
-      AppSnackbar.error('Error', e.toString());
+      debugPrint('car_information_controller: $e');
+      errorMessage.value = AppLocalization.tr.genericErrorMessage;
+      AppSnackbar.error(AppLocalization.tr.errorTitle, AppLocalization.tr.genericErrorMessage);
     } finally {
       isRegCertBackImageUploading.value = false;
     }
@@ -223,7 +224,8 @@ class CarInformationController extends GetxController {
       // Navigate to next screen
       // Get.toNamed(AppRoutes.uploadProfilePictureScreen);
     } catch (e) {
-      errorMessage.value = e.toString();
+      debugPrint('car_information_controller: $e');
+      errorMessage.value = AppLocalization.tr.genericErrorMessage;
     } finally {
       isLoading.value = false;
     }
@@ -235,37 +237,34 @@ class CarInformationController extends GetxController {
   }
 
   /// Returns `null` when this section is complete, otherwise the reason why not.
+  ///
+  /// Delegates to the same per-field validators the text fields use, so the
+  /// red text under a field and the message on Submit can never disagree.
   String? validateSection() {
-    if (carBrandTEController.text.trim().isEmpty) {
-      return 'Car brand is required';
-    }
-    if (carModelTEController.text.trim().isEmpty) {
-      return 'Car model is required';
-    }
-    final year = carYearTEController.text.trim();
-    if (year.isEmpty) {
-      return 'Year of manufacture is required';
-    }
-    if (int.tryParse(year) == null) {
-      return 'Enter a valid year of manufacture';
-    }
-    if (licensePlateNumberTEController.text.trim().isEmpty) {
-      return 'License plate number is required';
-    }
-    if (registrationCertNumberTEController.text.trim().isEmpty) {
-      return 'Registration certificate number is required';
-    }
+    return validateCarName(carBrandTEController.text) ??
+        validateCarModel(carModelTEController.text) ??
+        validateCarYear(carYearTEController.text) ??
+        validateLicensePlate(licensePlateNumberTEController.text) ??
+        validateRegistrationCertNumber(
+          registrationCertNumberTEController.text,
+        ) ??
+        _validateImages();
+  }
+
+  /// Image rules live outside [validateSection]'s field checks because no
+  /// single text field can express them.
+  String? _validateImages() {
     if (isLicensePlateImageUploading.value ||
         isRegCertFrontImageUploading.value ||
         isRegCertBackImageUploading.value) {
-      return 'Please wait until the car images finish uploading';
+      return AppLocalization.tr.carImagesUploadingMessage;
     }
     if (licensePlateImageUrl.value.isEmpty) {
-      return 'Please upload license plate picture';
+      return AppLocalization.tr.uploadLicensePlateRequiredMessage;
     }
     if (regCertFrontImageUrl.value.isEmpty ||
         regCertBackImageUrl.value.isEmpty) {
-      return 'Please upload both front and back of Registration Certificate';
+      return AppLocalization.tr.uploadRegistrationCertBothSidesMessage;
     }
     return null;
   }
@@ -276,39 +275,77 @@ class CarInformationController extends GetxController {
     final error = validateSection();
     isUploaded.value = error == null;
     if (error != null) {
-      AppSnackbar.error('Validation Error', error);
+      AppSnackbar.error(AppLocalization.tr.validationErrorTitle, error);
       return false;
     }
     return true;
   }
 
+  /// Re-syncs the documents-list status with what is actually in the form.
+  ///
+  /// Called when the user leaves the screen without pressing Submit. Unlike
+  /// [saveSection] it stays silent: the user did not ask to submit, so an
+  /// incomplete form is not an error worth interrupting them over - but the
+  /// checkmark on the list must still tell the truth.
+  void refreshSectionStatus() {
+    isUploaded.value = validateSection() == null;
+  }
+
+  String? validateCarName(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return AppLocalization.tr.carNameRequiredError;
+    }
+    return null;
+  }
+
   String? validateCarModel(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Car model is required';
+    if (value == null || value.trim().isEmpty) {
+      return AppLocalization.tr.carModelRequiredError;
+    }
+    return null;
+  }
+
+  String? validateLicensePlate(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return AppLocalization.tr.numberPlateRequiredError;
+    }
+    return null;
+  }
+
+  String? validateRegistrationCertNumber(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return AppLocalization.tr.registrationCertNumberRequiredError;
     }
     return null;
   }
 
   String? validateCarNumber(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Car number is required';
+      return AppLocalization.tr.carNumberRequiredError;
     }
     return null;
   }
 
   String? validateCarColor(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Car color is required';
+      return AppLocalization.tr.carColorRequiredError;
     }
     return null;
   }
 
   String? validateCarYear(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Car year is required';
+    final text = value?.trim() ?? '';
+    if (text.isEmpty) {
+      return AppLocalization.tr.yearOfManufactureRequiredError;
     }
-    if (int.tryParse(value) == null) {
-      return 'Enter a valid year';
+    final year = int.tryParse(text);
+    if (year == null) {
+      return AppLocalization.tr.invalidYearOfManufactureError;
+    }
+    // Allow next year so a brand-new model year is not rejected.
+    final maxYear = DateTime.now().year + 1;
+    if (year < 1900 || year > maxYear) {
+      return AppLocalization.tr.invalidYearRangeError('$maxYear');
     }
     return null;
   }

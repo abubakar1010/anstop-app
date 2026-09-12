@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:logger/logger.dart';
 import '../data/legal_document_model.dart';
 import '../service/settings_service.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
 
 class LegalPagesController extends GetxController {
   final _logger = Logger();
@@ -66,19 +67,20 @@ class LegalPagesController extends GetxController {
             : 'Failed to load document';
         _logger.e('API error — statusCode: ${response.statusCode}, error: ${errorMessage.value}');
         Get.snackbar(
-          'Error',
-          errorMessage.value,
+          AppLocalization.tr.errorTitle,
+          AppLocalization.tr.genericErrorMessage,
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.red,
           colorText: Colors.white,
         );
       }
     } catch (e, stackTrace) {
-      errorMessage.value = e.toString();
+      debugPrint('legal_pages_controller: $e');
+      errorMessage.value = AppLocalization.tr.genericErrorMessage;
       _logger.e('Exception during fetch', error: e, stackTrace: stackTrace);
       Get.snackbar(
-        'Error',
-        e.toString(),
+        AppLocalization.tr.errorTitle,
+        AppLocalization.tr.genericErrorMessage,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,

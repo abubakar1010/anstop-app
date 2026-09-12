@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import 'package:ride_sharing/app/utils/app_snackbar.dart';
 import 'package:ride_sharing/feature/auth/service/auth_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
+import 'package:flutter/foundation.dart';
 
 class UploadProfilePictureController extends GetxController {
   // ==================== Services ====================
@@ -35,8 +37,8 @@ class UploadProfilePictureController extends GetxController {
       if (accessToken == null || accessToken.isEmpty) {
         errorMessage.value = 'Access token not found. Please login again.';
         AppSnackbar.error(
-          'Error',
-          'Access token not found. Please login again.',
+          AppLocalization.tr.errorTitle,
+          AppLocalization.tr.sessionExpiredMessage,
         );
         return;
       }
@@ -53,22 +55,22 @@ class UploadProfilePictureController extends GetxController {
         } else {
           errorMessage.value = 'Failed to get image URL from response';
           AppSnackbar.error(
-            'Upload Failed',
-            'Failed to get image URL from response',
+            AppLocalization.tr.uploadFailedTitle,
+            AppLocalization.tr.imageUrlMissingMessage,
           );
         }
       } else {
-        errorMessage.value = response.errorMessage;
+        debugPrint('upload_profile_picture_controller: ${response.errorMessage}');
+        errorMessage.value = AppLocalization.tr.genericErrorMessage;
         AppSnackbar.error(
-          'Upload Failed',
-          response.errorMessage.isNotEmpty
-              ? response.errorMessage
-              : 'Failed to upload image. Please try again.',
+          AppLocalization.tr.uploadFailedTitle,
+          AppLocalization.tr.genericErrorMessage,
         );
       }
     } catch (e) {
-      errorMessage.value = e.toString();
-      AppSnackbar.error('Error', e.toString());
+      debugPrint('upload_profile_picture_controller: $e');
+      errorMessage.value = AppLocalization.tr.genericErrorMessage;
+      AppSnackbar.error(AppLocalization.tr.errorTitle, AppLocalization.tr.genericErrorMessage);
     } finally {
       isImageUploading.value = false;
     }
@@ -83,10 +85,10 @@ class UploadProfilePictureController extends GetxController {
   /// Returns `null` when this section is complete, otherwise the reason why not.
   String? validateSection() {
     if (isImageUploading.value) {
-      return 'Please wait until your picture finishes uploading';
+      return AppLocalization.tr.profilePictureUploadingMessage;
     }
     if (profileImageUrl.value.isEmpty) {
-      return 'Please upload profile picture';
+      return AppLocalization.tr.uploadProfilePictureRequiredMessage;
     }
     return null;
   }
@@ -97,7 +99,7 @@ class UploadProfilePictureController extends GetxController {
     final error = validateSection();
     isUploaded.value = error == null;
     if (error != null) {
-      AppSnackbar.error('Validation Error', error);
+      AppSnackbar.error(AppLocalization.tr.validationErrorTitle, error);
       return false;
     }
     return true;

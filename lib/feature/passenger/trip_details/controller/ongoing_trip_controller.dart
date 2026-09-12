@@ -2,6 +2,8 @@ import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:ride_sharing/feature/passenger/trip_details/data/get_trip_details_model.dart';
 import 'package:ride_sharing/feature/passenger/trip_details/service/trip_details_service.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
+import 'package:flutter/foundation.dart';
 
 class OngoingTripController extends GetxController {
   // ==================== State ====================
@@ -49,21 +51,21 @@ class OngoingTripController extends GetxController {
         final tripDetailsModel = GetTripDetailsModel.fromJson(response.responseData);
         trip.value = tripDetailsModel.data;
       } else {
-        errorMessage.value = response.errorMessage;
+        debugPrint('ongoing_trip_controller: ${response.errorMessage}');
+        errorMessage.value = AppLocalization.tr.genericErrorMessage;
         Get.snackbar(
-          'Error',
-          response.errorMessage.isNotEmpty
-              ? response.errorMessage
-              : 'Failed to load trip details',
+          AppLocalization.tr.errorTitle,
+          AppLocalization.tr.genericErrorMessage,
           snackPosition: SnackPosition.BOTTOM,
         );
       }
 
     } catch (e) {
-      errorMessage.value = e.toString();
+      debugPrint('ongoing_trip_controller: $e');
+      errorMessage.value = AppLocalization.tr.genericErrorMessage;
       Get.snackbar(
-        'Error',
-        'An error occurred while loading trip details',
+        AppLocalization.tr.errorTitle,
+        AppLocalization.tr.tripDetailsLoadErrorMessage,
         snackPosition: SnackPosition.BOTTOM,
       );
     } finally {
@@ -88,7 +90,8 @@ class OngoingTripController extends GetxController {
       // }
 
     } catch (e) {
-      errorMessage.value = e.toString();
+      debugPrint('ongoing_trip_controller: $e');
+      errorMessage.value = AppLocalization.tr.genericErrorMessage;
     } finally {
       isLoading.value = false;
     }

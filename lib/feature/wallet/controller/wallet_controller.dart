@@ -10,6 +10,7 @@ import 'package:ride_sharing/services/stripe/stripe_helper.dart';
 import 'package:ride_sharing/services/stripe/stripe_config.dart';
 
 import '../../../services/api_client.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
 
 class WalletController extends GetxController {
   // ==================== Services ====================
@@ -102,10 +103,11 @@ class WalletController extends GetxController {
         errorMessage.value = paymentResult.message ?? 'Payment failed';
       }
     } catch (e) {
-      errorMessage.value = e.toString();
+      debugPrint('wallet_controller: $e');
+      errorMessage.value = AppLocalization.tr.genericErrorMessage;
       Get.snackbar(
-        'Error',
-        e.toString(),
+        AppLocalization.tr.errorTitle,
+        AppLocalization.tr.genericErrorMessage,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,
@@ -137,8 +139,8 @@ class WalletController extends GetxController {
 
       if (response.isSuccess) {
         Get.snackbar(
-          'Success',
-          'Deposit completed successfully',
+          AppLocalization.tr.successTitle,
+          AppLocalization.tr.depositCompletedMessage,
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.green,
           colorText: Colors.white,
@@ -147,30 +149,30 @@ class WalletController extends GetxController {
         // Navigate back with success result
         Get.back(result: true);
       } else {
-        errorMessage.value = response.errorMessage;
+        debugPrint('wallet_controller: ${response.errorMessage}');
+        errorMessage.value = AppLocalization.tr.genericErrorMessage;
         Get.snackbar(
-          'Error',
-          response.errorMessage.isNotEmpty
-              ? response.errorMessage
-              : 'Failed to record transaction',
+          AppLocalization.tr.errorTitle,
+          AppLocalization.tr.genericErrorMessage,
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.red,
           colorText: Colors.white,
         );
       }
     } catch (e) {
-      errorMessage.value = e.toString();
+      debugPrint('wallet_controller: $e');
+      errorMessage.value = AppLocalization.tr.genericErrorMessage;
     }
   }
 
   // ==================== Validation ====================
   String? validateAmount(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Amount is required';
+      return AppLocalization.tr.amountRequiredError;
     }
     final amount = double.tryParse(value);
     if (amount == null || amount <= 0) {
-      return 'Please enter a valid amount';
+      return AppLocalization.tr.invalidAmountError;
     }
     return null;
   }
@@ -190,7 +192,7 @@ class WalletController extends GetxController {
         const msg = 'Not authenticated';
         errorMessage.value = msg;
         Get.snackbar(
-          'Error',
+          AppLocalization.tr.errorTitle,
           msg,
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.red,
@@ -216,7 +218,7 @@ class WalletController extends GetxController {
       logger.e(e);
 
       Get.snackbar(
-        'Error',
+        AppLocalization.tr.errorTitle,
         msg,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
@@ -243,8 +245,8 @@ class WalletController extends GetxController {
         balance.value = response.responseData['data']['balance'] ?? 0;
       } else {
         Get.snackbar(
-          'Error',
-          response.errorMessage,
+          AppLocalization.tr.errorTitle,
+          AppLocalization.tr.genericErrorMessage,
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.red,
           colorText: Colors.white,
@@ -252,8 +254,8 @@ class WalletController extends GetxController {
       }
     } catch (e) {
       Get.snackbar(
-        'Error',
-        e.toString(),
+        AppLocalization.tr.errorTitle,
+        AppLocalization.tr.genericErrorMessage,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,
@@ -292,12 +294,11 @@ class WalletController extends GetxController {
         await getTransactions();
         return true;
       } else {
-        errorMessage.value = response.errorMessage;
+        debugPrint('wallet_controller: ${response.errorMessage}');
+        errorMessage.value = AppLocalization.tr.genericErrorMessage;
         Get.snackbar(
-          'Error',
-          response.errorMessage.isNotEmpty
-              ? response.errorMessage
-              : 'Failed to create withdrawal request',
+          AppLocalization.tr.errorTitle,
+          AppLocalization.tr.genericErrorMessage,
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.red,
           colorText: Colors.white,
@@ -305,10 +306,11 @@ class WalletController extends GetxController {
         return false;
       }
     } catch (e) {
-      errorMessage.value = e.toString();
+      debugPrint('wallet_controller: $e');
+      errorMessage.value = AppLocalization.tr.genericErrorMessage;
       Get.snackbar(
-        'Error',
-        e.toString(),
+        AppLocalization.tr.errorTitle,
+        AppLocalization.tr.genericErrorMessage,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,

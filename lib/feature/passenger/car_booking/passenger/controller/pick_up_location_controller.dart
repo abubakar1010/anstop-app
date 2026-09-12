@@ -7,14 +7,15 @@ import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:flutter/material.dart';
 import 'package:ride_sharing/l10n/l10n_helper.dart';
+import 'package:ride_sharing/services/location_service.dart';
 import 'package:ride_sharing/services/logger.dart';
-import 'package:ride_sharing/custom_assets/app_string.dart';
+import 'package:ride_sharing/services/map_camera_mixin.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ride_sharing/feature/passenger/car_booking/service/ride_request_service.dart';
 
-import '../../../../../l10n/app_localizations.dart';
+import 'package:ride_sharing/services/app_config.dart';
 
-class PickUpLocationController extends GetxController {
+class PickUpLocationController extends GetxController with MapCameraMixin {
   final _logger = logger(PickUpLocationController);
 
   final TextEditingController locationTEController = TextEditingController();
@@ -29,7 +30,6 @@ class PickUpLocationController extends GetxController {
   final TextEditingController destinationLatitudeController = TextEditingController();
   final TextEditingController destinationLongitudeController = TextEditingController();
 
-  GoogleMapController? mapController;
   Position? currentPosition;
   bool isLoading = true;
   bool isCalculatingFare = false;
@@ -51,12 +51,6 @@ class PickUpLocationController extends GetxController {
 
   final RideRequestService _rideRequestService = RideRequestService();
 
-  // Default location (Dhaka, Bangladesh)
-  static const CameraPosition defaultLocation = CameraPosition(
-    target: LatLng(23.8103, 90.4125),
-    zoom: 14.0,
-  );
-
   @override
   void onInit() {
     super.onInit();
@@ -68,7 +62,7 @@ class PickUpLocationController extends GetxController {
     const testInput = 'Paris';
     final uri = Uri.parse(
       'https://maps.googleapis.com/maps/api/place/autocomplete/json'
-      '?input=$testInput&key=${AppString.googleMapsKey}&language=en',
+      '?input=$testInput&key=${AppConfig.googleMapsApiKey}&language=en',
     );
     try {
       final response = await http.get(uri);
@@ -84,43 +78,27 @@ class PickUpLocationController extends GetxController {
   }
 
   Future<void> _initializeMap() async {
-    await _requestLocationPermission();
+    final LocationAccess access = await LocationService.requestAccess();
+    if (access != LocationAccess.granted) {
+      isLoading = false;
+      update();
+      await LocationService.showAccessDialog(access);
+      return;
+    }
     await _getCurrentLocation();
   }
 
-  Future<void> _requestLocationPermission() async {
-    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      isLoading = false;
-      update();
-      return;
-    }
-
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        isLoading = false;
-        update();
-        return;
-      }
-    }
-
-    if (permission == LocationPermission.deniedForever) {
-      isLoading = false;
-      update();
-      return;
-    }
-  }
-
   Future<void> _getCurrentLocation() async {
-    try {
-      Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-      );
+    final Position? position = await LocationService.readPosition();
 
+    isLoading = false;
+    if (position == null) {
+      update();
+      return;
+    }
+
+    try {
       currentPosition = position;
-      isLoading = false;
 
       // Pre-fill pickup with current GPS location as default
       pickUpLatitudeController.text = position.latitude.toString();
@@ -147,7 +125,6 @@ class PickUpLocationController extends GetxController {
         pickUpAddressController.text = 'Current Location';
       }
 
-      final l10n = AppLocalizations.of(Get.context!)!;
       markers.add(
         Marker(
           markerId: MarkerId('current_location'),
@@ -158,19 +135,9 @@ class PickUpLocationController extends GetxController {
       );
       update();
 
-      // Move camera to current location
-      if (mapController != null) {
-        mapController!.animateCamera(
-          CameraUpdate.newCameraPosition(
-            CameraPosition(
-              target: LatLng(position.latitude, position.longitude),
-              zoom: 15.0,
-            ),
-          ),
-        );
-      }
+      moveCameraTo(LatLng(position.latitude, position.longitude));
     } catch (e) {
-      isLoading = false;
+      _logger.e('Failed to apply current location: $e');
       update();
     }
   }
@@ -213,8 +180,8 @@ class PickUpLocationController extends GetxController {
   Future<bool> calculateFare() async {
     if (!areLocationsSet()) {
       Get.snackbar(
-        'Error',
-        'Please select both pickup and destination locations',
+        AppLocalization.tr.errorTitle,
+        AppLocalization.tr.selectPickupAndDestinationMessage,
         snackPosition: SnackPosition.BOTTOM,
       );
       return false;
@@ -250,8 +217,8 @@ class PickUpLocationController extends GetxController {
         return true;
       } else {
         Get.snackbar(
-          'Error',
-          response.errorMessage.isNotEmpty ? response.errorMessage : 'Failed to calculate fare',
+          AppLocalization.tr.errorTitle,
+          AppLocalization.tr.genericErrorMessage,
           snackPosition: SnackPosition.BOTTOM,
         );
         isCalculatingFare = false;
@@ -260,7 +227,7 @@ class PickUpLocationController extends GetxController {
       }
     } catch (e) {
       Get.snackbar(
-        'Error',
+        AppLocalization.tr.errorTitle,
         'Failed to calculate fare: $e',
         snackPosition: SnackPosition.BOTTOM,
       );
@@ -358,7 +325,7 @@ class PickUpLocationController extends GetxController {
 
   @override
   void onClose() {
-    mapController?.dispose();
+    disposeMapController();
     pickUpAddressController.dispose();
     pickUpLatitudeController.dispose();
     pickUpLongitudeController.dispose();

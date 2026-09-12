@@ -38,7 +38,7 @@ class EmailValidationScreen extends GetView<EmailValidationController> {
                 SizedBox(height: 52.h),
                 CustomTextField(
                   controller: controller.emailTEController,
-                  validator: (value) => controller.validateEmailField(value as String?),
+                  validator: (value) => controller.validateEmailField(value),
                   hintText: AppLocalization.tr.emailHintText,
                   hintextColor: const Color(0XFF02243E),
                   hintextSize: 14.sp,

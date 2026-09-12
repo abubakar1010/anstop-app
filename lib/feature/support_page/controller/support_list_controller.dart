@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../data/support_message_model.dart';
 import '../service/support_service.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
 
 class SupportListController extends GetxController {
   // ==================== State ====================
@@ -49,18 +50,19 @@ class SupportListController extends GetxController {
             ? response.errorMessage
             : 'Failed to load support messages';
         Get.snackbar(
-          'Error',
-          errorMessage.value,
+          AppLocalization.tr.errorTitle,
+          AppLocalization.tr.genericErrorMessage,
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.red,
           colorText: Colors.white,
         );
       }
     } catch (e) {
-      errorMessage.value = e.toString();
+      debugPrint('support_list_controller: $e');
+      errorMessage.value = AppLocalization.tr.genericErrorMessage;
       Get.snackbar(
-        'Error',
-        e.toString(),
+        AppLocalization.tr.errorTitle,
+        AppLocalization.tr.genericErrorMessage,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:ride_sharing/custom_assets/app_string.dart';
 import 'package:ride_sharing/feature/passenger/wallet/view/passenger_wallet_dialog_view.dart';
 import 'package:ride_sharing/feature/wallet/controller/wallet_controller.dart';
 import 'package:ride_sharing/routes/app_routes.dart';
@@ -9,6 +8,7 @@ import 'package:ride_sharing/utils/passenger/passenger_custom_drawer.dart';
 import 'package:ride_sharing/utils/transaction_items.dart';
 import 'package:ride_sharing/widgets/custom_app_bar_title.dart';
 import '../../../../app/utils/app_colors.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
 
 
 class PassengerWalletPage extends StatefulWidget {
@@ -62,7 +62,7 @@ class _PassengerWalletPageState extends State<PassengerWalletPage> {
       backgroundColor: AppColors.backgroundColor,
       appBar:  CustomAppBarTitle(
         scaffoldKey: _scaffoldKey,
-        title: AppString.walletTitle,
+        title: AppLocalization.tr.walletTitle,
         titleColor: AppColors.blackShade300,
       ),
       body: SingleChildScrollView(
@@ -85,8 +85,8 @@ class _PassengerWalletPageState extends State<PassengerWalletPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Transactions',
+                  Text(
+                    AppLocalization.tr.transactionsTitle,
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
@@ -102,11 +102,11 @@ class _PassengerWalletPageState extends State<PassengerWalletPage> {
                     }
 
                     if (_walletController.transactions.isEmpty) {
-                      return const Padding(
+                      return Padding(
                         padding: EdgeInsets.symmetric(vertical: 20),
                         child: Center(
                           child: Text(
-                            'No transactions found',
+                            AppLocalization.tr.noTransactionsMessage,
                             style: TextStyle(color: AppColors.secondaryText),
                           ),
                         ),

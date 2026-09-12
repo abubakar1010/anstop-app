@@ -2,14 +2,15 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:ride_sharing/services/locale_service.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter_android/google_maps_flutter_android.dart';
 import 'package:google_maps_flutter_platform_interface/google_maps_flutter_platform_interface.dart';
 import 'package:ride_sharing/app.dart';
 import 'package:ride_sharing/firebase_options.dart';
+import 'package:ride_sharing/services/location_service.dart';
 import 'package:ride_sharing/services/socket_services.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,9 +23,11 @@ void main() async {
   _initializeMapRenderer();
 
   // Load saved locale before runApp so GetMaterialApp builds with correct language
-  final prefs = await SharedPreferences.getInstance();
-  final savedLocale = prefs.getString('locale') ?? 'fr';
-  Get.updateLocale(Locale(savedLocale));
+  await LocaleService.restore();
+
+  // Restore the last known position before runApp so the first map frame opens
+  // where the user actually is instead of a hardcoded city.
+  await LocationService.warmUp();
 
   // Load environment variables
   await dotenv.load(fileName: ".env");

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../data/create_support_request_model.dart';
 import '../service/support_service.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
 
 class CreateSupportController extends GetxController {
   // ==================== Text Controllers ====================
@@ -27,14 +28,14 @@ class CreateSupportController extends GetxController {
   // ==================== Validation ====================
   String? validateSubject(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Subject is required';
+      return AppLocalization.tr.subjectRequiredError;
     }
     return null;
   }
 
   String? validateMessage(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Message is required';
+      return AppLocalization.tr.messageRequiredError;
     }
     return null;
   }
@@ -63,18 +64,19 @@ class CreateSupportController extends GetxController {
             ? response.errorMessage
             : 'Failed to submit support request';
         Get.snackbar(
-          'Error',
-          errorMessage.value,
+          AppLocalization.tr.errorTitle,
+          AppLocalization.tr.genericErrorMessage,
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.red,
           colorText: Colors.white,
         );
       }
     } catch (e) {
-      errorMessage.value = e.toString();
+      debugPrint('create_support_controller: $e');
+      errorMessage.value = AppLocalization.tr.genericErrorMessage;
       Get.snackbar(
-        'Error',
-        e.toString(),
+        AppLocalization.tr.errorTitle,
+        AppLocalization.tr.genericErrorMessage,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,
@@ -102,8 +104,8 @@ class CreateSupportController extends GetxController {
             children: [
               const Icon(Icons.check_circle, size: 70, color: Color(0xFF2FA65E)),
               const SizedBox(height: 14),
-              const Text(
-                'Submitted Successfully!',
+              Text(
+                AppLocalization.tr.submittedSuccessfullyTitle,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 20,
@@ -112,8 +114,8 @@ class CreateSupportController extends GetxController {
                 ),
               ),
               const SizedBox(height: 10),
-              const Text(
-                'Your complaint has been submitted. We will review and get back to you soon.',
+              Text(
+                AppLocalization.tr.complaintSubmittedMessage2,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 14,
@@ -134,8 +136,8 @@ class CreateSupportController extends GetxController {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   alignment: Alignment.center,
-                  child: const Text(
-                    'Back to Support',
+                  child: Text(
+                    AppLocalization.tr.backToSupportButton,
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 16,

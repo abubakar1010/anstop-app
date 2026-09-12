@@ -1,4 +1,3 @@
-import 'package:ride_sharing/custom_assets/app_string.dart';
 import 'package:ride_sharing/feature/auth/controller/car_information_controller.dart';
 import 'package:ride_sharing/feature/auth/controller/driving_license_controller.dart';
 import 'package:ride_sharing/feature/auth/controller/national_id_controller.dart';
@@ -42,7 +41,7 @@ class UploadYourDocuments extends GetView<UploadDocumentsController> {
                   : () => controller.submitDriverOnboard(),
               label: controller.isLoading.value
                   ? 'Submitting...'
-                  : AppString.submitButton,
+                  : AppLocalization.tr.submitButton,
             ),
           ),
         ),
@@ -55,14 +54,14 @@ class UploadYourDocuments extends GetView<UploadDocumentsController> {
             children: [
               SizedBox(height: 15.h),
               Text(
-                AppString.uploadDocumentsTitle,
+                AppLocalization.tr.uploadDocumentsTitle,
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w500),
               ),
               SizedBox(height: 8.h),
               Text(
-                '${AppString.uploadDocumentsMessage1} '
-                '${AppString.uploadDocumentsMessage2}',
+                '${AppLocalization.tr.uploadDocumentsMessage1} '
+                '${AppLocalization.tr.uploadDocumentsMessage2}',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 12.sp,
@@ -72,7 +71,7 @@ class UploadYourDocuments extends GetView<UploadDocumentsController> {
               SizedBox(height: 29.h),
               Obx(
                 () => CustomBoxItems(
-                  documentTitle: AppString.nationalIdLabel,
+                  documentTitle: AppLocalization.tr.nationalIdLabel,
                   icon: Icons.badge_outlined,
                   isUploaded: nationalIdController.isUploaded.value,
                   onTap: () => Get.to(() => const NationalIdScreen()),
@@ -80,7 +79,7 @@ class UploadYourDocuments extends GetView<UploadDocumentsController> {
               ),
               Obx(
                 () => CustomBoxItems(
-                  documentTitle: AppString.drivingLicenceLabel,
+                  documentTitle: AppLocalization.tr.drivingLicenceLabel,
                   icon: Icons.credit_card_outlined,
                   isUploaded: drivingLicenseController.isUploaded.value,
                   onTap: () => Get.to(() => const DrivingLicenseScreen()),
@@ -88,7 +87,7 @@ class UploadYourDocuments extends GetView<UploadDocumentsController> {
               ),
               Obx(
                 () => CustomBoxItems(
-                  documentTitle: AppString.carInformationLabel,
+                  documentTitle: AppLocalization.tr.carInformationLabel,
                   icon: Icons.directions_car_outlined,
                   isUploaded: carInformationController.isUploaded.value,
                   onTap: () => Get.to(() => const CarInformationScreen()),
@@ -96,7 +95,7 @@ class UploadYourDocuments extends GetView<UploadDocumentsController> {
               ),
               Obx(
                 () => CustomBoxItems(
-                  documentTitle: AppString.yourPictureLabel,
+                  documentTitle: AppLocalization.tr.yourPictureLabel,
                   icon: Icons.person_outline,
                   isUploaded: profilePictureController.isUploaded.value,
                   onTap: () => Get.to(() => const UploadProfilePictureScreen()),

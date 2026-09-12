@@ -1,4 +1,6 @@
 import 'package:get/get.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
+import 'package:flutter/foundation.dart';
 
 class MyTripController extends GetxController {
   // ==================== State ====================
@@ -29,7 +31,8 @@ class MyTripController extends GetxController {
       hasMore.value = false;
 
     } catch (e) {
-      errorMessage.value = e.toString();
+      debugPrint('my_trip_controller: $e');
+      errorMessage.value = AppLocalization.tr.genericErrorMessage;
     } finally {
       isLoading.value = false;
     }
@@ -55,7 +58,8 @@ class MyTripController extends GetxController {
       await Future.delayed(const Duration(seconds: 1));
 
     } catch (e) {
-      errorMessage.value = e.toString();
+      debugPrint('my_trip_controller: $e');
+      errorMessage.value = AppLocalization.tr.genericErrorMessage;
     } finally {
       isLoading.value = false;
     }

@@ -1,4 +1,6 @@
 import 'package:get/get.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
+import 'package:flutter/foundation.dart';
 
 class InvoiceController extends GetxController {
   // ==================== State ====================
@@ -29,7 +31,8 @@ class InvoiceController extends GetxController {
       }
 
     } catch (e) {
-      errorMessage.value = e.toString();
+      debugPrint('invoice_controller: $e');
+      errorMessage.value = AppLocalization.tr.genericErrorMessage;
     } finally {
       isLoading.value = false;
     }
@@ -46,13 +49,14 @@ class InvoiceController extends GetxController {
       isPdfGenerated.value = true;
 
       Get.snackbar(
-        'Success',
-        'PDF generated successfully',
+        AppLocalization.tr.successTitle,
+        AppLocalization.tr.pdfGeneratedMessage,
         snackPosition: SnackPosition.BOTTOM,
       );
 
     } catch (e) {
-      errorMessage.value = e.toString();
+      debugPrint('invoice_controller: $e');
+      errorMessage.value = AppLocalization.tr.genericErrorMessage;
     } finally {
       isLoading.value = false;
     }
@@ -70,13 +74,14 @@ class InvoiceController extends GetxController {
       await Future.delayed(const Duration(seconds: 1));
 
       Get.snackbar(
-        'Success',
-        'Invoice downloaded successfully',
+        AppLocalization.tr.successTitle,
+        AppLocalization.tr.invoiceDownloadedMessage,
         snackPosition: SnackPosition.BOTTOM,
       );
 
     } catch (e) {
-      errorMessage.value = e.toString();
+      debugPrint('invoice_controller: $e');
+      errorMessage.value = AppLocalization.tr.genericErrorMessage;
     } finally {
       isLoading.value = false;
     }
@@ -94,7 +99,8 @@ class InvoiceController extends GetxController {
       await Future.delayed(const Duration(seconds: 1));
 
     } catch (e) {
-      errorMessage.value = e.toString();
+      debugPrint('invoice_controller: $e');
+      errorMessage.value = AppLocalization.tr.genericErrorMessage;
     } finally {
       isLoading.value = false;
     }

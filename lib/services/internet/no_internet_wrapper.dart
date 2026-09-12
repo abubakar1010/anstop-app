@@ -8,6 +8,7 @@ import 'package:lottie/lottie.dart';
 
 
 import 'connectivity.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
 
 class NoInternetWrapper extends StatelessWidget {
   final Widget child;
@@ -44,7 +45,7 @@ class NoInternetWrapper extends StatelessWidget {
                       ),
                       SizedBox(height: 20.h),
                       Text(
-                        'No Internet Connection',
+                        AppLocalization.tr.noInternetConnectionLabel,
                         style: TextStyle(
                           color: Colors.black,
                           fontSize: 18.sp,
@@ -53,7 +54,7 @@ class NoInternetWrapper extends StatelessWidget {
                       ),
                       SizedBox(height: 8.h),
                       Text(
-                        'Please check your connection and try again.',
+                        AppLocalization.tr.networkErrorMessage,
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: Colors.grey.shade700,

@@ -51,7 +51,7 @@ class ChangePasswordScreen extends GetView<ChangePasswordController> {
                       isObscureText: true,
                       isPassword: true,
                       controller: controller.currentPasswordTEController,
-                      validator: (value) => controller.validateCurrentPassword(value as String?),
+                      validator: (value) => controller.validateCurrentPassword(value),
                       prefixIcon: Icon(
                         Icons.key,
                         color: Color(0XFF8A8A8A),
@@ -67,7 +67,7 @@ class ChangePasswordScreen extends GetView<ChangePasswordController> {
                       isObscureText: true,
                       isPassword: true,
                       controller: controller.newPasswordTEController,
-                      validator: (value) => controller.validateNewPassword(value as String?),
+                      validator: (value) => controller.validateNewPassword(value),
                       prefixIcon: Icon(
                         Icons.key,
                         color: Color(0XFF8A8A8A),
@@ -83,7 +83,7 @@ class ChangePasswordScreen extends GetView<ChangePasswordController> {
                       isObscureText: true,
                       isPassword: true,
                       controller: controller.confirmPasswordTEController,
-                      validator: (value) => controller.validateConfirmPassword(value as String?),
+                      validator: (value) => controller.validateConfirmPassword(value),
                       prefixIcon: Icon(
                         Icons.key,
                         color: Color(0XFF8A8A8A),

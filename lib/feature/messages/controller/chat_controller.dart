@@ -4,6 +4,7 @@ import 'package:logger/logger.dart';
 import '../../../services/socket_services.dart';
 import '../models/message_models.dart';
 import '../service/message_service.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
 
 class ChatController extends GetxController {
   // ==================== Text Controllers ====================
@@ -223,17 +224,17 @@ class ChatController extends GetxController {
 
         _scrollToBottom();
       } else {
-        errorMessage.value = response.errorMessage;
+        debugPrint('chat_controller: ${response.errorMessage}');
+        errorMessage.value = AppLocalization.tr.genericErrorMessage;
         Get.snackbar(
-          'Error',
-          response.errorMessage.isNotEmpty
-              ? response.errorMessage
-              : 'Failed to load messages',
+          AppLocalization.tr.errorTitle,
+          AppLocalization.tr.genericErrorMessage,
           snackPosition: SnackPosition.BOTTOM,
         );
       }
     } catch (e) {
-      errorMessage.value = e.toString();
+      debugPrint('chat_controller: $e');
+      errorMessage.value = AppLocalization.tr.genericErrorMessage;
       _logger.e('Error loading messages: $e');
     } finally {
       isLoading.value = false;
@@ -332,11 +333,12 @@ class ChatController extends GetxController {
       messageTEController.clear();
       _scrollToBottom();
     } catch (e) {
-      errorMessage.value = e.toString();
+      debugPrint('chat_controller: $e');
+      errorMessage.value = AppLocalization.tr.genericErrorMessage;
       _logger.e('Error sending message: $e');
       Get.snackbar(
-        'Error',
-        'Failed to send message',
+        AppLocalization.tr.errorTitle,
+        AppLocalization.tr.messageSendFailedMessage,
         snackPosition: SnackPosition.BOTTOM,
       );
     }

@@ -7,6 +7,8 @@ import 'package:ride_sharing/feature/auth/controller/upload_profile_picture_cont
 import 'package:ride_sharing/feature/auth/service/auth_service.dart';
 import 'package:ride_sharing/routes/app_routes.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
+import 'package:flutter/foundation.dart';
 
 class UploadDocumentsController extends GetxController {
   // ==================== Services ====================
@@ -64,8 +66,8 @@ class UploadDocumentsController extends GetxController {
       if (accessToken == null || accessToken.isEmpty) {
         errorMessage.value = 'Access token not found. Please login again.';
         AppSnackbar.error(
-          'Error',
-          'Access token not found. Please login again.',
+          AppLocalization.tr.errorTitle,
+          AppLocalization.tr.sessionExpiredMessage,
         );
         return;
       }
@@ -130,24 +132,24 @@ class UploadDocumentsController extends GetxController {
 
       if (response.isSuccess) {
         AppSnackbar.success(
-          'Success',
-          'Driver onboarding completed successfully!',
+          AppLocalization.tr.successTitle,
+          AppLocalization.tr.driverOnboardingSuccessMessage,
         );
 
         // Navigate to driver home screen
         Get.offAllNamed(AppRoutes.driverHomeScreen);
       } else {
-        errorMessage.value = response.errorMessage;
+        debugPrint('upload_documents_controller: ${response.errorMessage}');
+        errorMessage.value = AppLocalization.tr.genericErrorMessage;
         AppSnackbar.error(
-          'Onboarding Failed',
-          response.errorMessage.isNotEmpty
-              ? response.errorMessage
-              : 'Failed to complete onboarding. Please try again.',
+          AppLocalization.tr.onboardingFailedTitle,
+          AppLocalization.tr.genericErrorMessage,
         );
       }
     } catch (e) {
-      errorMessage.value = e.toString();
-      AppSnackbar.error('Error', e.toString());
+      debugPrint('upload_documents_controller: $e');
+      errorMessage.value = AppLocalization.tr.genericErrorMessage;
+      AppSnackbar.error(AppLocalization.tr.errorTitle, AppLocalization.tr.genericErrorMessage);
     } finally {
       isLoading.value = false;
     }
@@ -178,16 +180,16 @@ class UploadDocumentsController extends GetxController {
 
   String? _validateProfileData() {
     if (address == null || address!.trim().isEmpty) {
-      return 'Address is required';
+      return AppLocalization.tr.addressRequiredError;
     }
     if (dateOfBirth == null || dateOfBirth!.trim().isEmpty) {
-      return 'Date of birth is required';
+      return AppLocalization.tr.dateOfBirthRequiredError;
     }
     return null;
   }
 
   void _showErrorSnackbar(String message) {
-    AppSnackbar.error('Validation Error', message);
+    AppSnackbar.error(AppLocalization.tr.validationErrorTitle, message);
   }
 
   // ==================== Navigation ====================

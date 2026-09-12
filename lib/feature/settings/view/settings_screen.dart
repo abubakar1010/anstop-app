@@ -5,7 +5,6 @@ import 'package:ride_sharing/feature/settings/controller/change_password_control
 import 'package:ride_sharing/feature/settings/controller/legal_pages_controller.dart';
 import 'package:ride_sharing/feature/settings/controller/settings_controller.dart';
 import 'package:ride_sharing/feature/settings/data/legal_document_model.dart';
-import 'package:ride_sharing/l10n/l10n_helper.dart';
 import 'package:ride_sharing/feature/settings/utils/settings_menu_item.dart';
 import 'package:ride_sharing/feature/settings/view/change_password_screen.dart';
 import 'package:ride_sharing/feature/settings/view/legal_pages_screen.dart';

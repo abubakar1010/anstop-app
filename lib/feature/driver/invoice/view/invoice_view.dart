@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:ride_sharing/app/utils/app_colors.dart';
 import 'package:ride_sharing/widgets/auth_links/auth_link.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
 
 class InvoicePage extends StatelessWidget {
   const InvoicePage({Key? key}) : super(key: key);
@@ -100,8 +101,8 @@ class InvoicePage extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Details',
+                          Text(
+                            AppLocalization.tr.detailsLabel,
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
@@ -147,7 +148,7 @@ class InvoicePage extends StatelessWidget {
                                 Expanded(
                                   flex: 2,
                                   child: Text(
-                                    'Quantity',
+                                    AppLocalization.tr.quantityLabel,
                                     style: TextStyle(
                                       color: Colors.white,
                                       fontSize: 10.sp,

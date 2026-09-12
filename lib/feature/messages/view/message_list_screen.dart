@@ -56,8 +56,8 @@ class _MessagesListScreenState extends State<MessagesListScreen> {
           ),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          'Messages',
+        title: Text(
+          AppLocalization.tr.messagesTitle,
           style: TextStyle(
             color: MessagingColors.primaryText,
             fontSize: 18,

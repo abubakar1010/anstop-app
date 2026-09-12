@@ -5,6 +5,7 @@ import 'package:ride_sharing/widgets/custom_app_bar_title.dart';
 import 'package:ride_sharing/feature/driver/profile/controller/driver_profile_controller.dart';
 import 'package:ride_sharing/routes/app_routes.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
 
 class DriverProfileView extends StatelessWidget {
   const DriverProfileView({super.key});
@@ -42,7 +43,7 @@ class DriverProfileView extends StatelessWidget {
                       SizedBox(height: 16.h),
                       ElevatedButton(
                         onPressed: () => controller.loadProfile(),
-                        child: const Text('Retry'),
+                        child: Text(AppLocalization.tr.retryButton),
                       ),
                     ],
                   ),
@@ -133,7 +134,7 @@ class DriverProfileView extends StatelessWidget {
                                 controller.loadProfile();
                               }
                             },
-                            label: 'Edit Profile',
+                            label: AppLocalization.tr.editProfileButton,
                           ),
                           SizedBox(height: 16.h),
                         ],

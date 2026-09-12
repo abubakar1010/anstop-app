@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
 
 class DriverWalletController extends GetxController {
   // ==================== Text Controllers ====================
@@ -39,7 +40,8 @@ class DriverWalletController extends GetxController {
       transactions.value = [];
 
     } catch (e) {
-      errorMessage.value = e.toString();
+      debugPrint('driver_wallet_controller: $e');
+      errorMessage.value = AppLocalization.tr.genericErrorMessage;
     } finally {
       isLoading.value = false;
     }
@@ -55,7 +57,8 @@ class DriverWalletController extends GetxController {
       transactions.value = [];
 
     } catch (e) {
-      errorMessage.value = e.toString();
+      debugPrint('driver_wallet_controller: $e');
+      errorMessage.value = AppLocalization.tr.genericErrorMessage;
     } finally {
       isLoading.value = false;
     }
@@ -90,15 +93,16 @@ class DriverWalletController extends GetxController {
       amountTEController.clear();
 
       Get.snackbar(
-        'Success',
-        'Withdrawal successful',
+        AppLocalization.tr.successTitle,
+        AppLocalization.tr.withdrawalSuccessMessage,
         snackPosition: SnackPosition.BOTTOM,
       );
 
       loadTransactions();
 
     } catch (e) {
-      errorMessage.value = e.toString();
+      debugPrint('driver_wallet_controller: $e');
+      errorMessage.value = AppLocalization.tr.genericErrorMessage;
     } finally {
       isLoading.value = false;
     }

@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../../../app/utils/app_colors.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
 
 
 // Mock colors - replace with your actual AppColors
@@ -47,7 +48,7 @@ class PaymentConfirmationDialog extends StatelessWidget {
 
             // Question text
             Text(
-              'Did you receive the payment for this trip?',
+              AppLocalization.tr.didYouReceivePaymentQuestion,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 18.sp,
@@ -72,7 +73,7 @@ class PaymentConfirmationDialog extends StatelessWidget {
                       ),
                     ),
                     child: Text(
-                      'No, or received\ndifferent amount',
+                      AppLocalization.tr.paymentNotReceivedButton,
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: Colors.white,
@@ -96,7 +97,7 @@ class PaymentConfirmationDialog extends StatelessWidget {
                       ),
                     ),
                     child: Text(
-                      'Yes, payment received',
+                      AppLocalization.tr.paymentReceivedYesButton,
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: Colors.white,
@@ -212,7 +213,7 @@ class TripCompletionDialog extends StatelessWidget {
 
             // Congratulations text
             Text(
-              'Congratulations, you\'ve completed another trip.',
+              AppLocalization.tr.tripCompletedCongratsMessage,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 16.sp,
@@ -236,7 +237,7 @@ class TripCompletionDialog extends StatelessWidget {
                   ),
                 ),
                 child: Text(
-                  'Back to Home',
+                  AppLocalization.tr.backToHomeButton,
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 16.sp,
@@ -291,7 +292,7 @@ class StayOnlineDialog extends StatelessWidget {
 
             // Title
             Text(
-              'Keep online,',
+              AppLocalization.tr.keepOnlineLine1,
               style: TextStyle(
                 fontSize: 20.sp,
                 fontWeight: FontWeight.bold,
@@ -300,7 +301,7 @@ class StayOnlineDialog extends StatelessWidget {
             ),
 
             Text(
-              'watch your earnings climb!',
+              AppLocalization.tr.keepOnlineLine2,
               style: TextStyle(
                 fontSize: 20.sp,
                 fontWeight: FontWeight.bold,
@@ -312,7 +313,7 @@ class StayOnlineDialog extends StatelessWidget {
 
             // Subtitle
             Text(
-              'Don\'t miss out: stay connected, grab more\ntrips, and watch your earnings soar!',
+              AppLocalization.tr.stayConnectedMessage,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14.sp,
@@ -337,7 +338,7 @@ class StayOnlineDialog extends StatelessWidget {
                       ),
                     ),
                     child: Text(
-                      'Go offline',
+                      AppLocalization.tr.driverGoOfflineButton,
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 14.sp,
@@ -360,7 +361,7 @@ class StayOnlineDialog extends StatelessWidget {
                       ),
                     ),
                     child: Text(
-                      'Stay online',
+                      AppLocalization.tr.stayOnlineButton,
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 14.sp,

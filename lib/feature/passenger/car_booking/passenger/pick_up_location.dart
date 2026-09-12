@@ -5,17 +5,16 @@ import 'package:get/get.dart';
 import 'package:google_places_flutter/google_places_flutter.dart';
 import 'package:google_places_flutter/model/prediction.dart';
 import 'package:ride_sharing/custom_assets/app_image.dart';
-import 'package:ride_sharing/custom_assets/app_string.dart';
 import 'package:ride_sharing/l10n/l10n_helper.dart';
 import 'package:ride_sharing/feature/passenger/car_booking/passenger/controller/pick_up_location_controller.dart';
 import 'package:ride_sharing/feature/passenger/car_booking/passenger/passenger_map_screen.dart';
 import 'package:ride_sharing/feature/passenger/car_booking/passenger/set_on_map_screen.dart';
 import 'package:ride_sharing/feature/passenger/set_location/view/set_location_option_page.dart';
 import 'package:ride_sharing/widgets/custom_app_bar_title.dart';
-import 'package:ride_sharing/feature/passenger/passenger_common_utils/custom_google_map.dart';
+import 'package:ride_sharing/widgets/app_google_map.dart';
 import 'package:ride_sharing/widgets/home_links/home_links.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:ride_sharing/app/utils/app_colors.dart';
+import 'package:ride_sharing/services/app_config.dart';
 
 class PickUpLocationScreen extends StatelessWidget {
   PickUpLocationScreen({Key? key}) : super(key: key);
@@ -26,7 +25,10 @@ class PickUpLocationScreen extends StatelessWidget {
         builder: (controller) {
           return Stack(
             children: [
-              PassengerGoogleMapWidget(),
+              AppGoogleMap(
+                camera: controller,
+                markers: controller.markers,
+              ),
               if (controller.isLoading)
                 Container(
                   color: Colors.black54,
@@ -98,7 +100,7 @@ class PickUpLocationScreen extends StatelessWidget {
                                   Expanded(
                                     child: GooglePlaceAutoCompleteTextField(
                                       textEditingController: controller.pickUpAddressController,
-                                      googleAPIKey: AppString.googleMapsKey,
+                                      googleAPIKey: AppConfig.googleMapsApiKey,
                                     //   googleAPIKey: "AIzaSyBUHqcmvmiPPwuwl33JkMP3lAzKMxREenI",
                                       inputDecoration: InputDecoration(
                                         border: InputBorder.none,
@@ -183,7 +185,7 @@ class PickUpLocationScreen extends StatelessWidget {
                                   Expanded(
                                     child: GooglePlaceAutoCompleteTextField(
                                       textEditingController: controller.destinationAddressController,
-                                      googleAPIKey: AppString.googleMapsKey,
+                                      googleAPIKey: AppConfig.googleMapsApiKey,
                                    //   googleAPIKey: "AIzaSyBUHqcmvmiPPwuwl33JkMP3lAzKMxREenI",
                                       inputDecoration: InputDecoration(
                                         border: InputBorder.none,
@@ -307,7 +309,7 @@ class PickUpLocationScreen extends StatelessWidget {
                             Padding(
                               padding: EdgeInsets.symmetric(horizontal: 8.sp),
                               child: Text(
-                                'Select the car book for..',
+                                AppLocalization.tr.selectCarBookForLabel,
                                 style: TextStyle(
                                   fontSize: 16.sp,
                                   fontWeight: FontWeight.w500,
@@ -364,7 +366,7 @@ class PickUpLocationScreen extends StatelessWidget {
                               Padding(
                                 padding: EdgeInsets.symmetric(horizontal: 8.sp),
                                 child: Text(
-                                  'Friend phone no.',
+                                  AppLocalization.tr.friendPhoneNumberHint,
                                   style: TextStyle(
                                     fontSize: 16.sp,
                                     fontWeight: FontWeight.w500,
@@ -468,7 +470,7 @@ class PickUpLocationScreen extends StatelessWidget {
                         ),
                       )
                     : Text(
-                        "Next",
+                        AppLocalization.tr.nextButton,
                         style: TextStyle(color: AppColors.white),
                       ),
               ),

@@ -2,6 +2,8 @@ import 'package:get/get.dart';
 import 'package:ride_sharing/feature/passenger/my_ride/data/get_my_ride_response.dart';
 import 'package:ride_sharing/feature/passenger/my_ride/service/my_ride_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
+import 'package:flutter/foundation.dart';
 
 class MyRideController extends GetxController {
   // ==================== State ====================
@@ -41,10 +43,12 @@ class MyRideController extends GetxController {
         rides.assignAll(list.map((e) => MyRideModel.fromJson(e)).toList());
       }
       else {
-        errorMessage.value = response.errorMessage;
+        debugPrint('my_ride_controller: ${response.errorMessage}');
+        errorMessage.value = AppLocalization.tr.genericErrorMessage;
       }
     } catch (e) {
-      errorMessage.value = e.toString();
+      debugPrint('my_ride_controller: $e');
+      errorMessage.value = AppLocalization.tr.genericErrorMessage;
     } finally {
       isLoading.value = false;
     }
@@ -76,7 +80,8 @@ class MyRideController extends GetxController {
       await Future.delayed(const Duration(seconds: 1));
 
     } catch (e) {
-      errorMessage.value = e.toString();
+      debugPrint('my_ride_controller: $e');
+      errorMessage.value = AppLocalization.tr.genericErrorMessage;
     } finally {
       isLoading.value = false;
     }

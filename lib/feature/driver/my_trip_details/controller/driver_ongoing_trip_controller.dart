@@ -1,5 +1,7 @@
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
+import 'package:flutter/foundation.dart';
 
 class DriverOngoingTripController extends GetxController {
   // ==================== State ====================
@@ -39,7 +41,8 @@ class DriverOngoingTripController extends GetxController {
       }
 
     } catch (e) {
-      errorMessage.value = e.toString();
+      debugPrint('driver_ongoing_trip_controller: $e');
+      errorMessage.value = AppLocalization.tr.genericErrorMessage;
     } finally {
       isLoading.value = false;
     }
@@ -62,7 +65,8 @@ class DriverOngoingTripController extends GetxController {
       // Get.back();
 
     } catch (e) {
-      errorMessage.value = e.toString();
+      debugPrint('driver_ongoing_trip_controller: $e');
+      errorMessage.value = AppLocalization.tr.genericErrorMessage;
     } finally {
       isLoading.value = false;
     }

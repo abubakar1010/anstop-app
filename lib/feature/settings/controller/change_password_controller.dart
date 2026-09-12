@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../data/change_password_request_model.dart';
 import '../data/change_password_response_model.dart';
 import '../service/settings_service.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
 
 class ChangePasswordController extends GetxController {
   // ==================== Text Controllers ====================
@@ -75,8 +76,8 @@ class ChangePasswordController extends GetxController {
             ? response.errorMessage
             : 'Failed to change password';
         Get.snackbar(
-          'Error',
-          errorMessage.value,
+          AppLocalization.tr.errorTitle,
+          AppLocalization.tr.genericErrorMessage,
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.red,
           colorText: Colors.white,
@@ -84,10 +85,11 @@ class ChangePasswordController extends GetxController {
         return false;
       }
     } catch (e) {
-      errorMessage.value = e.toString();
+      debugPrint('change_password_controller: $e');
+      errorMessage.value = AppLocalization.tr.genericErrorMessage;
       Get.snackbar(
-        'Error',
-        errorMessage.value,
+        AppLocalization.tr.errorTitle,
+        AppLocalization.tr.genericErrorMessage,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,
@@ -105,30 +107,30 @@ class ChangePasswordController extends GetxController {
 
   String? validateCurrentPassword(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Current password is required';
+      return AppLocalization.tr.currentPasswordRequiredError;
     }
     return null;
   }
 
   String? validateNewPassword(String? value) {
     if (value == null || value.isEmpty) {
-      return 'New password is required';
+      return AppLocalization.tr.newPasswordRequiredError;
     }
     if (value.length < 6) {
-      return 'Password must be at least 6 characters';
+      return AppLocalization.tr.passwordTooShortError;
     }
     if (value == currentPasswordTEController.text) {
-      return 'New password must be different from current password';
+      return AppLocalization.tr.newPasswordMustDifferError;
     }
     return null;
   }
 
   String? validateConfirmPassword(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Confirm password is required';
+      return AppLocalization.tr.confirmPasswordRequiredError;
     }
     if (value != newPasswordTEController.text) {
-      return 'Passwords do not match';
+      return AppLocalization.tr.passwordsDoNotMatchError;
     }
     return null;
   }

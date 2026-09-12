@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:ride_sharing/services/stripe/payment_result.dart';
 import 'package:ride_sharing/services/stripe/stripe_config.dart';
 import 'package:ride_sharing/services/stripe/stripe_exeption.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
 
 /// Robust Stripe Payment Helper Class
 class StripePaymentHelper {
@@ -203,7 +204,7 @@ class StripePaymentHelper {
       _log('General error during payment: $e');
 
       final result = PaymentResult.failure(
-        message: 'An unexpected error occurred during payment',
+        message: AppLocalization.tr.paymentUnexpectedErrorMessage,
       );
 
       // Show error dialog
@@ -224,12 +225,12 @@ class StripePaymentHelper {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: const Text('Payment Error'),
+            title: Text(AppLocalization.tr.paymentErrorTitle),
             content: Text(message),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Close'),
+                child: Text(AppLocalization.tr.closeButton),
               ),
             ],
           ),
@@ -242,12 +243,12 @@ class StripePaymentHelper {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: const Text('Payment Successful'),
+            title: Text(AppLocalization.tr.paymentSuccessfulTitle),
             content: Text(message),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Close'),
+                child: Text(AppLocalization.tr.closeButton),
               ),
             ],
           ),

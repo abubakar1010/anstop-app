@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:ride_sharing/custom_assets/app_image.dart';
 import 'package:ride_sharing/feature/passenger/car_booking/passenger/controller/pick_up_location_controller.dart';
-import 'package:ride_sharing/l10n/l10n_helper.dart';
 import 'package:ride_sharing/feature/auth/view/email_validation_screen.dart';
 import 'package:ride_sharing/feature/passenger/set_location/view/set_location_option_page.dart';
 import 'package:ride_sharing/widgets/auth_links/auth_link.dart';

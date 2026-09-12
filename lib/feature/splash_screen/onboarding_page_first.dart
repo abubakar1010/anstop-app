@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:ride_sharing/app/utils/app_colors.dart';
 import 'package:ride_sharing/custom_assets/app_image.dart';
-import 'package:ride_sharing/custom_assets/app_string.dart';
 import 'package:ride_sharing/feature/splash_screen/onboarding_page_second.dart';
 import 'package:ride_sharing/widgets/auth_links/auth_link.dart';
 import 'package:ride_sharing/widgets/custom_sliding_container.dart';

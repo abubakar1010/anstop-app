@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'custom_text.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
 
 class NoInterNetScreen extends StatelessWidget {
   final bool? isToast;
@@ -40,7 +41,7 @@ class NoInterNetScreen extends StatelessWidget {
                   SizedBox(height: 30.h),
 
                   CustomText(
-                      text: "Oops!",
+                      text: AppLocalization.tr.oopsErrorTitle,
                       fontsize: 30.h,
                       color: Colors.red,
                       top: 10.h,
@@ -48,7 +49,7 @@ class NoInterNetScreen extends StatelessWidget {
                       bottom: 10.h),
                   CustomText(
                     text:
-                    "There was some problem, Check your connection and try again",
+                    AppLocalization.tr.noInternetMessage,
                     maxline: 3,
                     left: 30.w,
                     right: 30.w,
@@ -74,8 +75,8 @@ class NoInterNetScreen extends StatelessWidget {
                     children: [
                       const Icon(Icons.wifi_off, color: Colors.white),
                       SizedBox(width: 8.w),
-                      const Text(
-                        'No Internet Connection',
+                      Text(
+                        AppLocalization.tr.noInternetConnectionLabel,
                         style: TextStyle(color: Colors.white),
                       ),
                     ],

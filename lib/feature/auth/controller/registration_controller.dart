@@ -4,6 +4,7 @@ import 'package:ride_sharing/feature/auth/data/signup_request_model.dart';
 import 'package:ride_sharing/feature/auth/service/auth_service.dart';
 import 'package:ride_sharing/feature/auth/view/email_validation_screen.dart';
 import 'package:ride_sharing/routes/app_routes.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
 
 class RegistrationController extends GetxController {
   // ==================== Text Controllers ====================
@@ -69,8 +70,8 @@ class RegistrationController extends GetxController {
     if (!isAgreedToTerms.value) {
       errorMessage.value = 'Please agree to terms and conditions';
       Get.snackbar(
-        'Error',
-        'Please agree to terms and conditions',
+        AppLocalization.tr.errorTitle,
+        AppLocalization.tr.pleaseAgreeToTermsMessage,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,
@@ -114,22 +115,22 @@ class RegistrationController extends GetxController {
         );
       } else {
         // Show error message
-        errorMessage.value = response.errorMessage;
+        debugPrint('registration_controller: ${response.errorMessage}');
+        errorMessage.value = AppLocalization.tr.genericErrorMessage;
         Get.snackbar(
-          'Registration Failed',
-          response.errorMessage.isNotEmpty
-              ? response.errorMessage
-              : 'Something went wrong',
+          AppLocalization.tr.registrationFailedTitle,
+          AppLocalization.tr.genericErrorMessage,
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.red,
           colorText: Colors.white,
         );
       }
     } catch (e) {
-      errorMessage.value = e.toString();
+      debugPrint('registration_controller: $e');
+      errorMessage.value = AppLocalization.tr.genericErrorMessage;
       Get.snackbar(
-        'Error',
-        e.toString(),
+        AppLocalization.tr.errorTitle,
+        AppLocalization.tr.genericErrorMessage,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,
@@ -146,47 +147,47 @@ class RegistrationController extends GetxController {
 
   String? validateName(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Name is required';
+      return AppLocalization.tr.nameRequiredError;
     }
     return null;
   }
 
   String? validateEmail(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Email is required';
+      return AppLocalization.tr.emailRequiredError;
     }
     if (!GetUtils.isEmail(value)) {
-      return 'Enter a valid email';
+      return AppLocalization.tr.invalidEmailError;
     }
     return null;
   }
 
   String? validatePhone(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Phone number is required';
+      return AppLocalization.tr.phoneRequiredError;
     }
     if (value.length < 10) {
-      return 'Enter a valid phone number';
+      return AppLocalization.tr.invalidPhoneError;
     }
     return null;
   }
 
   String? validatePassword(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Password is required';
+      return AppLocalization.tr.passwordRequiredError;
     }
     if (value.length < 6) {
-      return 'Password must be at least 6 characters';
+      return AppLocalization.tr.passwordTooShortError;
     }
     return null;
   }
 
   String? validateConfirmPassword(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Confirm password is required';
+      return AppLocalization.tr.confirmPasswordRequiredError;
     }
     if (value != passwordTEController.text) {
-      return 'Passwords do not match';
+      return AppLocalization.tr.passwordsDoNotMatchError;
     }
     return null;
   }

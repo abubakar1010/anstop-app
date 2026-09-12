@@ -10,6 +10,7 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as p;
 import 'package:mime/mime.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
 class ApiResponse {
   final bool isSuccess;
   final int statusCode;
@@ -40,8 +41,8 @@ class ApiClient {
 
     Get.dialog(
       AlertDialog(
-        title: const Text('Server Error'),
-        content: const Text('The server is not working. Please try again later.'),
+        title: Text(AppLocalization.tr.serverErrorTitle),
+        content: Text(AppLocalization.tr.serverUnavailableMessage),
         actions: [
           TextButton(
             onPressed: () => Get.back(),

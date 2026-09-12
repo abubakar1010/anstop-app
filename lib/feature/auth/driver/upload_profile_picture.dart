@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ride_sharing/app/utils/app_snackbar.dart';
 import 'package:ride_sharing/app/helpers/image_picker_helper.dart';
-import 'package:ride_sharing/custom_assets/app_string.dart';
 import 'package:ride_sharing/feature/auth/controller/upload_profile_picture_controller.dart';
 import 'package:ride_sharing/feature/auth/passenger/terms_of_services.dart';
 import 'package:ride_sharing/widgets/auth_links/auth_link.dart';
@@ -45,7 +44,7 @@ class UploadProfilePictureScreen
                   : () => _onSubmit(context),
               label: controller.isImageUploading.value
                   ? 'Uploading...'
-                  : AppString.submitButton,
+                  : AppLocalization.tr.submitButton,
             ),
           ),
         ),
@@ -59,7 +58,7 @@ class UploadProfilePictureScreen
               children: [
                 SizedBox(height: 20.h),
                 Text(
-                  AppString.uploadPictureTitle,
+                  AppLocalization.tr.uploadPictureTitle,
                   style: TextStyle(
                     fontSize: 20.sp,
                     fontWeight: FontWeight.bold,
@@ -71,7 +70,7 @@ class UploadProfilePictureScreen
                   child: Padding(
                     padding: EdgeInsets.only(left: 4.sp),
                     child: Text(
-                      AppString.uploadProfilePictureLabel,
+                      AppLocalization.tr.uploadProfilePictureLabel,
                       textAlign: TextAlign.start,
                       style: TextStyle(
                         fontSize: 15.sp,

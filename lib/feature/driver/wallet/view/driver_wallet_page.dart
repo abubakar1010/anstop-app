@@ -127,8 +127,8 @@ class _DriverWalletPageState extends State<DriverWalletPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Transactions',
+                  Text(
+                    AppLocalization.tr.transactionsTitle,
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
@@ -144,11 +144,11 @@ class _DriverWalletPageState extends State<DriverWalletPage> {
                     }
 
                     if (_walletController.transactions.isEmpty) {
-                      return const Padding(
+                      return Padding(
                         padding: EdgeInsets.symmetric(vertical: 20),
                         child: Center(
                           child: Text(
-                            'No transactions found',
+                            AppLocalization.tr.noTransactionsMessage,
                             style: TextStyle(color: AppColors.secondaryText),
                           ),
                         ),

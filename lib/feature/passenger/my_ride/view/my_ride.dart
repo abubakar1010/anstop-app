@@ -12,6 +12,7 @@ import '../../../../custom_assets/app_image.dart';
 import '../../../../widgets/custom_horizontal_line.dart';
 import '../../../../widgets/custom_toggle_button.dart';
 import '../utils/ride_card.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
 
 class MyRidePage extends StatefulWidget {
   MyRidePage({Key? key}) : super(key: key);
@@ -63,7 +64,7 @@ class _MyRidePageState extends State<MyRidePage> {
                 }
 
                 if (controller.rides.isEmpty) {
-                  return const Center(child: Text('No rides found'));
+                  return Center(child: Text(AppLocalization.tr.noRidesFoundMessage));
                 }
 
                 return ListView.builder(

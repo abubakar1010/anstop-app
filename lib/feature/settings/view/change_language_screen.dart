@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:get/get.dart';
 import 'package:ride_sharing/l10n/l10n_helper.dart';
+import 'package:ride_sharing/services/locale_service.dart';
 import '../../../app/utils/app_colors.dart';
 
 
@@ -20,21 +20,20 @@ class _ChangeLanguageScreenState extends State<ChangeLanguageScreen> {
   void initState() {
     super.initState();
     // Initialize selected language based on current locale
-    final currentLocale = Get.locale?.languageCode ?? 'en';
-    selectedLanguage = currentLocale == 'fr' ? 'French' : 'English';
+    selectedLanguage = LocaleService.isFrench ? 'French' : 'English';
   }
 
-  void _changeLanguage(String language) {
+  Future<void> _changeLanguage(String language) async {
     setState(() {
       selectedLanguage = language;
     });
 
-    // Update the app locale based on selection
-    if (language == AppLocalization.tr.frenchLanguage || language == 'French') {
-      Get.updateLocale(const Locale('fr'));
-    } else {
-      Get.updateLocale(const Locale('en'));
-    }
+    // Update the app locale and remember it, so the choice survives a restart.
+    final isFrench =
+        language == AppLocalization.tr.frenchLanguage || language == 'French';
+    await LocaleService.setLocale(
+      isFrench ? const Locale('fr') : const Locale('en'),
+    );
   }
 
   @override

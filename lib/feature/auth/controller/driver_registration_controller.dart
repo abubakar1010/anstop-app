@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
 
 class DriverRegistrationController extends GetxController {
   // ==================== Text Controllers ====================
@@ -82,7 +83,8 @@ class DriverRegistrationController extends GetxController {
       // Get.toNamed(AppRoutes.uploadDocumentsScreen);
 
     } catch (e) {
-      errorMessage.value = e.toString();
+      debugPrint('driver_registration_controller: $e');
+      errorMessage.value = AppLocalization.tr.genericErrorMessage;
     } finally {
       isLoading.value = false;
     }
@@ -99,54 +101,54 @@ class DriverRegistrationController extends GetxController {
 
   String? validateFirstName(String? value) {
     if (value == null || value.isEmpty) {
-      return 'First name is required';
+      return AppLocalization.tr.firstNameRequiredError;
     }
     return null;
   }
 
   String? validateLastName(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Last name is required';
+      return AppLocalization.tr.lastNameRequiredError;
     }
     return null;
   }
 
   String? validateEmail(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Email is required';
+      return AppLocalization.tr.emailRequiredError;
     }
     if (!GetUtils.isEmail(value)) {
-      return 'Enter a valid email';
+      return AppLocalization.tr.invalidEmailError;
     }
     return null;
   }
 
   String? validatePhone(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Phone number is required';
+      return AppLocalization.tr.phoneRequiredError;
     }
     if (value.length < 10) {
-      return 'Enter a valid phone number';
+      return AppLocalization.tr.invalidPhoneError;
     }
     return null;
   }
 
   String? validatePassword(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Password is required';
+      return AppLocalization.tr.passwordRequiredError;
     }
     if (value.length < 6) {
-      return 'Password must be at least 6 characters';
+      return AppLocalization.tr.passwordTooShortError;
     }
     return null;
   }
 
   String? validateConfirmPassword(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Confirm password is required';
+      return AppLocalization.tr.confirmPasswordRequiredError;
     }
     if (value != passwordTEController.text) {
-      return 'Passwords do not match';
+      return AppLocalization.tr.passwordsDoNotMatchError;
     }
     return null;
   }

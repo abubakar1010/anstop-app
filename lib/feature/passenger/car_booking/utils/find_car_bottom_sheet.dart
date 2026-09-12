@@ -298,7 +298,7 @@ class _FindCarBottomSheetState extends State<FindCarBottomSheet> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Duration',
+                            AppLocalization.tr.durationLabel,
                             style: TextStyle(
                               fontSize: 16.sp,
                               color: Colors.black,
@@ -319,7 +319,7 @@ class _FindCarBottomSheetState extends State<FindCarBottomSheet> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Fare',
+                            AppLocalization.tr.fareLabel,
                             style: TextStyle(
                               fontSize: 16.sp,
                               color: Colors.black,
@@ -342,7 +342,7 @@ class _FindCarBottomSheetState extends State<FindCarBottomSheet> {
             ),
             SizedBox(height: 16.sp),
             Text(
-              'Payment Method',
+              AppLocalization.tr.paymentMethodLabel,
               style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 8.sp),
@@ -392,7 +392,7 @@ class _FindCarBottomSheetState extends State<FindCarBottomSheet> {
             SizedBox(height: 10.sp),
             // Ride Needs Dropdown
             Text(
-              'Added Important Things',
+              AppLocalization.tr.addedImportantThingsLabel,
               style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 8.sp),
@@ -414,7 +414,7 @@ class _FindCarBottomSheetState extends State<FindCarBottomSheet> {
                 child: Row(
                   children: [
                     Text(
-                      'Children',
+                      AppLocalization.tr.childrenLabel,
                       style: TextStyle(
                         fontSize: 18.sp,
                         color: AppColors.primaryColor,
@@ -493,7 +493,7 @@ class _FindCarBottomSheetState extends State<FindCarBottomSheet> {
                       ),
                     )
                   : Text(
-                      'Find Car',
+                      AppLocalization.tr.findCarButton,
                       style: TextStyle(color: AppColors.white),
                     ),
             ),

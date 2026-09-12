@@ -1,11 +1,11 @@
 import 'package:ride_sharing/feature/auth/view/log_in_screen.dart';
 import 'package:ride_sharing/feature/settings/data/legal_document_model.dart';
-import 'package:ride_sharing/l10n/l10n_helper.dart';
 import 'package:ride_sharing/routes/app_routes.dart';
 import 'package:ride_sharing/widgets/auth_links/auth_link.dart';
 import 'package:ride_sharing/feature/auth/controller/registration_controller.dart';
 
 import '../../../custom_assets/app_image.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
 
 class RegistrationScreen extends StatefulWidget {
   final String? role;
@@ -66,7 +66,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                 color: Color(0XFF8A8A8A),
                                 size: 24.sp,
                               ),
-                              hintText: 'First Name',
+                              hintText: AppLocalization.tr.firstNameLabel,
                               hintextSize: 14.sp,
                               hintextColor: Color(0XFF8A8A8A),
                             ),
@@ -80,7 +80,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                 color: Color(0XFF8A8A8A),
                                 size: 24.sp,
                               ),
-                              hintText: 'Last Name',
+                              hintText: AppLocalization.tr.lastNameLabel,
                               hintextSize: 14.sp,
                               hintextColor: Color(0XFF8A8A8A),
                             ),
@@ -108,7 +108,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           color: Color(0XFF8A8A8A),
                           size: 24.sp,
                         ),
-                        hintText: 'Phone Number',
+                        hintText: AppLocalization.tr.phoneNumberLabel,
                         hintextSize: 14.sp,
                         hintextColor: Color(0XFF8A8A8A),
                       ),

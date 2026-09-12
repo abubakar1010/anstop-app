@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../widgets/custom_text.dart';
 import '../utils/app_colors.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
 
 class PhotoPickerHelper {
   static final ImagePicker _picker = ImagePicker();
@@ -25,7 +26,7 @@ class PhotoPickerHelper {
             mainAxisSize: MainAxisSize.min,
             children: [
               CustomText(text:
-                'Select Photo',
+                AppLocalization.tr.selectPhotoTitle,
                   fontSize: 16.sp,
                   fontWeight: FontWeight.bold,
                 ),
@@ -36,14 +37,14 @@ class PhotoPickerHelper {
                   _buildOption(
                     context,
                     icon: Icons.camera_alt,
-                    label: 'Camera',
+                    label: AppLocalization.tr.cameraOption,
                     source: ImageSource.camera,
                     onImagePicked: onImagePicked,
                   ),
                   _buildOption(
                     context,
                     icon: Icons.photo_library,
-                    label: 'Gallery',
+                    label: AppLocalization.tr.galleryOption,
                     source: ImageSource.gallery,
                     onImagePicked: onImagePicked,
                   ),

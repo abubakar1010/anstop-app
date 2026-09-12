@@ -1,45 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:get/get.dart';
 import 'package:ride_sharing/feature/passenger/homepage/controller/home_page_controller.dart';
+import 'package:ride_sharing/widgets/app_google_map.dart';
 
-class PassengerGoogleMapWidget extends StatefulWidget {
+/// The home/ride map, driven by [HomePageController]. Screens with their own
+/// map state build [AppGoogleMap] with their own controller instead.
+class PassengerGoogleMapWidget extends StatelessWidget {
   const PassengerGoogleMapWidget({Key? key}) : super(key: key);
 
-  @override
-  State<PassengerGoogleMapWidget> createState() => _PassengerGoogleMapWidgetState();
-}
-
-class _PassengerGoogleMapWidgetState extends State<PassengerGoogleMapWidget> {
   @override
   Widget build(BuildContext context) {
     return GetBuilder<HomePageController>(
       builder: (controller) {
-        return GoogleMap(
-          initialCameraPosition: HomePageController.defaultLocation,
-          myLocationEnabled: true,
-          myLocationButtonEnabled: false,
-          mapType: MapType.normal,
-          zoomControlsEnabled: false,
+        return AppGoogleMap(
+          camera: controller,
           markers: controller.markers,
           polylines: controller.polylines,
           circles: controller.circles,
-          onMapCreated: (GoogleMapController googleMapController) {
-            controller.mapController = googleMapController;
-            if (controller.currentPosition != null) {
-              googleMapController.animateCamera(
-                CameraUpdate.newCameraPosition(
-                  CameraPosition(
-                    target: LatLng(
-                      controller.currentPosition!.latitude,
-                      controller.currentPosition!.longitude,
-                    ),
-                    zoom: 15.0,
-                  ),
-                ),
-              );
-            }
-          },
         );
       },
     );

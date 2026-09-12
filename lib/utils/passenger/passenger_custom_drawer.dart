@@ -4,7 +4,6 @@ import 'package:get/get.dart';
 import 'package:ride_sharing/app/utils/app_colors.dart';
 import 'package:ride_sharing/custom_assets/app_image.dart';
 import 'package:ride_sharing/feature/driver/profile/controller/driver_profile_controller.dart';
-import 'package:ride_sharing/l10n/l10n_helper.dart';
 import 'package:ride_sharing/feature/settings/view/settings_screen.dart';
 import 'package:ride_sharing/routes/app_routes.dart';
 import 'package:ride_sharing/widgets/auth_links/auth_link.dart';
@@ -13,6 +12,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../feature/auth/view/log_out_dialog.dart';
 import '../custom_user_rating.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
 
 class PassengerCustomDrawer extends StatelessWidget {
   PassengerCustomDrawer({Key? key}) : super(key: key);
@@ -157,19 +157,19 @@ class PassengerCustomDrawer extends StatelessWidget {
         // Show dialog asking user to re-login
         await Get.dialog(
           AlertDialog(
-            title: Text('Login Required'),
-            content: Text('Please log out and log in again to switch to driver mode.'),
+            title: Text(AppLocalization.tr.loginRequiredTitle),
+            content: Text(AppLocalization.tr.switchToDriverModeMessage),
             actions: [
               TextButton(
                 onPressed: () {
                   Get.back(); // Close dialog
                   Get.toNamed(AppRoutes.loginScreen); // Navigate to login
                 },
-                child: Text('Go to Login'),
+                child: Text(AppLocalization.tr.goToLoginButton),
               ),
               TextButton(
                 onPressed: () => Get.back(), // Close dialog
-                child: Text('Cancel'),
+                child: Text(AppLocalization.tr.cancelButton),
               ),
             ],
           ),
@@ -203,7 +203,7 @@ class PassengerCustomDrawer extends StatelessWidget {
       Get.back(); // Close loading if open
       debugPrint('Error switching to driver: $e');
       Get.snackbar(
-        'Error',
+        AppLocalization.tr.errorTitle,
         'Failed to switch to driver mode. Please try again.',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,

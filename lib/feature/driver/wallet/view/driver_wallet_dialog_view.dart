@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ride_sharing/app/utils/app_colors.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
 
 
 class WithdrawDialog extends StatelessWidget {
@@ -26,8 +27,8 @@ class WithdrawDialog extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
-              'Withdraw',
+            Text(
+              AppLocalization.tr.withdrawButton,
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.w600,
@@ -35,8 +36,8 @@ class WithdrawDialog extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 20),
-            const Text(
-              'Are you sure you want to withdraw\nnow?',
+            Text(
+              AppLocalization.tr.withdrawConfirmQuestion,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 15,
@@ -61,8 +62,8 @@ class WithdrawDialog extends StatelessWidget {
                         borderRadius: BorderRadius.circular(25),
                       ),
                     ),
-                    child: const Text(
-                      'No',
+                    child: Text(
+                      AppLocalization.tr.noButton,
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -83,8 +84,8 @@ class WithdrawDialog extends StatelessWidget {
                         borderRadius: BorderRadius.circular(25),
                       ),
                     ),
-                    child: const Text(
-                      'Yes',
+                    child: Text(
+                      AppLocalization.tr.yesButton,
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -163,8 +164,8 @@ class WithdrawSuccessDialog extends StatelessWidget {
 
             const SizedBox(height: 24),
 
-            const Text(
-              'Withdraw Req. Successful',
+            Text(
+              AppLocalization.tr.withdrawRequestSuccessTitle,
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w600,
@@ -174,8 +175,8 @@ class WithdrawSuccessDialog extends StatelessWidget {
 
             const SizedBox(height: 12),
 
-            const Text(
-              'Your Withdraw request has been sent successfully.\nYou will get the money within 24 hours.',
+            Text(
+              AppLocalization.tr.withdrawRequestSuccessMessage,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14,
@@ -199,8 +200,8 @@ class WithdrawSuccessDialog extends StatelessWidget {
                     borderRadius: BorderRadius.circular(25),
                   ),
                 ),
-                child: const Text(
-                  'Go To My Wallet',
+                child: Text(
+                  AppLocalization.tr.goToMyWalletButton,
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,

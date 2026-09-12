@@ -1,4 +1,6 @@
 import 'package:get/get.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
+import 'package:flutter/foundation.dart';
 
 class PassengerPaymentController extends GetxController {
   // ==================== State ====================
@@ -51,8 +53,8 @@ class PassengerPaymentController extends GetxController {
 
       // Show success and navigate back
       Get.snackbar(
-        'Success',
-        'Payment completed successfully',
+        AppLocalization.tr.successTitle,
+        AppLocalization.tr.paymentCompletedMessage,
         snackPosition: SnackPosition.BOTTOM,
       );
 
@@ -60,7 +62,8 @@ class PassengerPaymentController extends GetxController {
       // Get.back(result: true);
 
     } catch (e) {
-      errorMessage.value = e.toString();
+      debugPrint('passenger_payment_controller: $e');
+      errorMessage.value = AppLocalization.tr.genericErrorMessage;
       paymentStatus.value = 'failed';
     } finally {
       isProcessing.value = false;

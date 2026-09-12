@@ -14,6 +14,7 @@ import 'package:ride_sharing/widgets/custom_vertical_line.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
 
 class PassengerPaymentScreen extends StatefulWidget {
   final String driverName;
@@ -91,8 +92,8 @@ class _PassengerPaymentScreenState extends State<PassengerPaymentScreen> {
         _showThankYouDialog(dialogContext);
       } else {
         Get.snackbar(
-          'Error',
-          response.errorMessage,
+          AppLocalization.tr.errorTitle,
+          AppLocalization.tr.genericErrorMessage,
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.red,
           colorText: Colors.white,
@@ -101,7 +102,7 @@ class _PassengerPaymentScreenState extends State<PassengerPaymentScreen> {
     } catch (e) {
       if (mounted) {
         Get.snackbar(
-          'Error',
+          AppLocalization.tr.errorTitle,
           'Failed to submit rating. Please try again.',
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.red,
@@ -117,7 +118,7 @@ class _PassengerPaymentScreenState extends State<PassengerPaymentScreen> {
     SocketIoService.to.onPaymentConfirmed((data) {
       if (mounted) {
         Get.snackbar(
-          'Payment Confirmed',
+          AppLocalization.tr.paymentConfirmedTitle,
           'Your payment was confirmed successfully',
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.green,
@@ -188,20 +189,39 @@ class _PassengerPaymentScreenState extends State<PassengerPaymentScreen> {
       if (_requiresOnlinePayment()) {
         // CARD / WALLET: call API → get Stripe Checkout URL → open in browser
         final checkoutUrl = await _callPayRideFareApi(context);
-        if (checkoutUrl != null && checkoutUrl.isNotEmpty) {
-          final uri = Uri.parse(checkoutUrl);
-          if (await canLaunchUrl(uri)) {
-            await launchUrl(uri, mode: LaunchMode.externalApplication);
-          } else {
-            if (mounted) {
-              Get.snackbar(
-                'Error',
-                'Could not open payment link',
-                snackPosition: SnackPosition.BOTTOM,
-                backgroundColor: Colors.red,
-                colorText: Colors.white,
-              );
-            }
+        if (checkoutUrl == null || checkoutUrl.isEmpty) {
+          // The request succeeded but carried no checkout URL. Staying silent
+          // here is what made this look like "the button does nothing" — say
+          // so instead, and log the payload for whoever is debugging.
+          _logger.e(
+            'pay-ride-fare returned no checkout URL for rideId=${widget.rideId}, '
+            'method=${widget.paymentMethod}',
+          );
+          if (mounted) {
+            Get.snackbar(
+              AppLocalization.tr.errorTitle,
+              'Payment could not be started — the server did not return a payment link.',
+              snackPosition: SnackPosition.BOTTOM,
+              backgroundColor: Colors.red,
+              colorText: Colors.white,
+              duration: const Duration(seconds: 4),
+            );
+          }
+          return;
+        }
+
+        final uri = Uri.parse(checkoutUrl);
+        if (await canLaunchUrl(uri)) {
+          await launchUrl(uri, mode: LaunchMode.externalApplication);
+        } else {
+          if (mounted) {
+            Get.snackbar(
+              AppLocalization.tr.errorTitle,
+              'Could not open payment link',
+              snackPosition: SnackPosition.BOTTOM,
+              backgroundColor: Colors.red,
+              colorText: Colors.white,
+            );
           }
         }
       } else {
@@ -408,7 +428,7 @@ class _PassengerPaymentScreenState extends State<PassengerPaymentScreen> {
                       child: Padding(
                         padding: const EdgeInsets.only(top: 8),
                         child: Text(
-                          'Give your ratings',
+                          AppLocalization.tr.giveYourRatingsLabel,
                           textAlign: TextAlign.center,
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
@@ -464,8 +484,8 @@ class _PassengerPaymentScreenState extends State<PassengerPaymentScreen> {
                                 strokeWidth: 2,
                               ),
                             )
-                          : const Text(
-                              'Submit',
+                          : Text(
+                              AppLocalization.tr.submitButton,
                               style: TextStyle(fontSize: 20, color: AppColors.white),
                             ),
                     ),
@@ -505,10 +525,10 @@ class _PassengerPaymentScreenState extends State<PassengerPaymentScreen> {
                     width: 100,
                   ),
                 ),
-                const Padding(
+                Padding(
                   padding: EdgeInsets.all(10),
                   child: Text(
-                    'Thank you for your valuable feedback and tip!',
+                    AppLocalization.tr.thankYouFeedbackAndTipMessage,
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 10),
                   ),

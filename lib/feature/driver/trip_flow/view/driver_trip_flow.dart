@@ -12,6 +12,7 @@ import 'package:ride_sharing/widgets/custom_horizontal_line.dart';
 import 'package:ride_sharing/widgets/custom_vertical_line.dart';
 import 'package:ride_sharing/l10n/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
 
 // import your app colors here
 // import '../../../../app/message_utils/app_colors.dart';
@@ -1659,7 +1660,7 @@ class TripTakenBottomSheet extends StatelessWidget {
           SizedBox(height: 16.h),
 
           Text(
-            'Ride Accepted!',
+            AppLocalization.tr.rideAcceptedTitle,
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 20.sp,
@@ -1671,7 +1672,7 @@ class TripTakenBottomSheet extends StatelessWidget {
           SizedBox(height: 8.h),
 
           Text(
-            'Navigate to pickup location',
+            AppLocalization.tr.navigateToPickupMessage,
             style: TextStyle(
               fontSize: 14.sp,
               color: Colors.grey[600],
@@ -1782,7 +1783,7 @@ class TripAcceptedBottomSheet extends StatelessWidget {
                     children: [
                       Icon(Icons.location_on,color: AppColors.togglebuttonColor,) ,
                       Text(
-                        "I will pick you up ",
+                        "${AppLocalization.tr.iWillPickYouUpLabel} ",
                      //   trip.pickupLocation,
                         style: TextStyle(
                           fontSize: 14.sp,
@@ -1911,7 +1912,7 @@ class ActiveTripBottomSheet extends StatelessWidget {
                     ),
                   ),
                   child: Text(
-                    'You are on a trip',
+                    AppLocalization.tr.onATripLabel,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 16.sp,

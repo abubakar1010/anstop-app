@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:ride_sharing/app/utils/app_snackbar.dart';
 import 'package:ride_sharing/feature/auth/service/auth_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
 
 class DrivingLicenseController extends GetxController {
   // ==================== Services ====================
@@ -49,8 +50,8 @@ class DrivingLicenseController extends GetxController {
       if (accessToken == null || accessToken.isEmpty) {
         errorMessage.value = 'Access token not found. Please login again.';
         AppSnackbar.error(
-          'Error',
-          'Access token not found. Please login again.',
+          AppLocalization.tr.errorTitle,
+          AppLocalization.tr.sessionExpiredMessage,
         );
         return;
       }
@@ -67,22 +68,22 @@ class DrivingLicenseController extends GetxController {
         } else {
           errorMessage.value = 'Failed to get image URL from response';
           AppSnackbar.error(
-            'Upload Failed',
-            'Failed to get image URL from response',
+            AppLocalization.tr.uploadFailedTitle,
+            AppLocalization.tr.imageUrlMissingMessage,
           );
         }
       } else {
-        errorMessage.value = response.errorMessage;
+        debugPrint('driving_license_controller: ${response.errorMessage}');
+        errorMessage.value = AppLocalization.tr.genericErrorMessage;
         AppSnackbar.error(
-          'Upload Failed',
-          response.errorMessage.isNotEmpty
-              ? response.errorMessage
-              : 'Failed to upload image. Please try again.',
+          AppLocalization.tr.uploadFailedTitle,
+          AppLocalization.tr.genericErrorMessage,
         );
       }
     } catch (e) {
-      errorMessage.value = e.toString();
-      AppSnackbar.error('Error', e.toString());
+      debugPrint('driving_license_controller: $e');
+      errorMessage.value = AppLocalization.tr.genericErrorMessage;
+      AppSnackbar.error(AppLocalization.tr.errorTitle, AppLocalization.tr.genericErrorMessage);
     } finally {
       isFrontImageUploading.value = false;
     }
@@ -100,8 +101,8 @@ class DrivingLicenseController extends GetxController {
       if (accessToken == null || accessToken.isEmpty) {
         errorMessage.value = 'Access token not found. Please login again.';
         AppSnackbar.error(
-          'Error',
-          'Access token not found. Please login again.',
+          AppLocalization.tr.errorTitle,
+          AppLocalization.tr.sessionExpiredMessage,
         );
         return;
       }
@@ -118,22 +119,22 @@ class DrivingLicenseController extends GetxController {
         } else {
           errorMessage.value = 'Failed to get image URL from response';
           AppSnackbar.error(
-            'Upload Failed',
-            'Failed to get image URL from response',
+            AppLocalization.tr.uploadFailedTitle,
+            AppLocalization.tr.imageUrlMissingMessage,
           );
         }
       } else {
-        errorMessage.value = response.errorMessage;
+        debugPrint('driving_license_controller: ${response.errorMessage}');
+        errorMessage.value = AppLocalization.tr.genericErrorMessage;
         AppSnackbar.error(
-          'Upload Failed',
-          response.errorMessage.isNotEmpty
-              ? response.errorMessage
-              : 'Failed to upload image. Please try again.',
+          AppLocalization.tr.uploadFailedTitle,
+          AppLocalization.tr.genericErrorMessage,
         );
       }
     } catch (e) {
-      errorMessage.value = e.toString();
-      AppSnackbar.error('Error', e.toString());
+      debugPrint('driving_license_controller: $e');
+      errorMessage.value = AppLocalization.tr.genericErrorMessage;
+      AppSnackbar.error(AppLocalization.tr.errorTitle, AppLocalization.tr.genericErrorMessage);
     } finally {
       isBackImageUploading.value = false;
     }
@@ -157,13 +158,13 @@ class DrivingLicenseController extends GetxController {
   /// Returns `null` when this section is complete, otherwise the reason why not.
   String? validateSection() {
     if (licenseNumberTEController.text.trim().isEmpty) {
-      return 'Driving license number is required';
+      return AppLocalization.tr.drivingLicenseNumberRequiredError;
     }
     if (isFrontImageUploading.value || isBackImageUploading.value) {
-      return 'Please wait until the Driving License images finish uploading';
+      return AppLocalization.tr.drivingLicenseImagesUploadingMessage;
     }
     if (frontImageUrl.value.isEmpty || backImageUrl.value.isEmpty) {
-      return 'Please upload both front and back of Driving License';
+      return AppLocalization.tr.uploadDrivingLicenseBothSidesMessage;
     }
     return null;
   }
@@ -174,7 +175,7 @@ class DrivingLicenseController extends GetxController {
     final error = validateSection();
     isUploaded.value = error == null;
     if (error != null) {
-      AppSnackbar.error('Validation Error', error);
+      AppSnackbar.error(AppLocalization.tr.validationErrorTitle, error);
       return false;
     }
     return true;
