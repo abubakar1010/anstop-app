@@ -20,10 +20,14 @@ class MyRidePage extends StatefulWidget {
   @override
   State<MyRidePage> createState() => _MyRidePageState();
 }
-final MyRideController controller = Get.put(MyRideController());
-final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-
 class _MyRidePageState extends State<MyRidePage> {
+  // Instance fields, not file-level globals: a single shared GlobalKey is
+  // claimed by whichever Scaffold mounted last, so during a push/pop
+  // transition (two instances alive at once) the key detaches from this page
+  // and the drawer button stops responding.
+  final MyRideController controller = Get.put(MyRideController());
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
