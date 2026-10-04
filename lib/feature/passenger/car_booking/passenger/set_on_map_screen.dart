@@ -2,11 +2,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:ride_sharing/custom_assets/app_image.dart';
 import 'package:ride_sharing/feature/passenger/car_booking/passenger/controller/pick_up_location_controller.dart';
 import 'package:ride_sharing/feature/auth/view/email_validation_screen.dart';
-import 'package:ride_sharing/feature/passenger/set_location/view/set_location_option_page.dart';
 import 'package:ride_sharing/widgets/auth_links/auth_link.dart';
 import 'package:ride_sharing/widgets/custom_location_button.dart';
 
 import '../../../../routes/app_routes.dart';
+import '../../set_location/view/set_location_option_page.dart';
 class SetOnMapScreen extends StatelessWidget {
   SetOnMapScreen({super.key});
   final TextEditingController locationTEController = TextEditingController();
@@ -48,8 +48,10 @@ class SetOnMapScreen extends StatelessWidget {
                   icon: Icons.pin_drop_rounded,
                   title: AppLocalization.tr.setOnMapOption,
                   onTap: () {
-                    Get.toNamed(AppRoutes.setLocationScreen);
-                    print('Home tapped');
+                    Get.toNamed(
+                      AppRoutes.setLocationScreen,
+                      arguments: {'addressType': 'SET_ON_MAP'},
+                    );
                   },
                 ),
                 Padding(
@@ -71,8 +73,10 @@ class SetOnMapScreen extends StatelessWidget {
                             mainText: AppLocalization.tr.homeOption,
                             subText: AppLocalization.tr.setAddressSubtitle,
                             onTap: () {
-                              print('Location button tapped');
-                              Get.to(SetLocationOptionPage());
+                              Get.toNamed(
+                                AppRoutes.setLocationScreen,
+                                arguments: {'addressType': 'HOME'},
+                              );
                             },
                           ),
                           VerticalDivider(color: AppColors.white, width: 2),
@@ -81,7 +85,10 @@ class SetOnMapScreen extends StatelessWidget {
                             mainText: AppLocalization.tr.workOption,
                             subText: AppLocalization.tr.setAddressSubtitle,
                             onTap: () {
-                              print('Location button tapped');
+                              Get.toNamed(
+                                AppRoutes.setLocationScreen,
+                                arguments: {'addressType': 'WORK'},
+                              );
                             },
                           ),
                         ],

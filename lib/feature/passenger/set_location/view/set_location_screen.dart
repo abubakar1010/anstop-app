@@ -24,6 +24,7 @@ class SetLocationScreen extends StatelessWidget {
               AppGoogleMap(
                 camera: controller,
                 markers: controller.markers,
+                onTap: controller.onMapTapped,
               ),
               if (controller.isLoading)
                 Container(

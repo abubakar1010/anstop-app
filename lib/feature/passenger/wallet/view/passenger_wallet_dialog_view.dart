@@ -88,11 +88,11 @@ class _WithdrawalFormDialogState extends State<WithdrawalFormDialog> {
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter amount';
+                    return AppLocalization.tr.amountRequiredError;
                   }
                   final amount = int.tryParse(value);
                   if (amount == null || amount <= 0) {
-                    return 'Please enter a valid amount';
+                    return AppLocalization.tr.invalidAmountError;
                   }
                   return null;
                 },
@@ -125,7 +125,7 @@ class _WithdrawalFormDialogState extends State<WithdrawalFormDialog> {
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter bank name';
+                    return 'Veuillez saisir le nom de la banque';
                   }
                   return null;
                 },
@@ -159,7 +159,7 @@ class _WithdrawalFormDialogState extends State<WithdrawalFormDialog> {
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter account number';
+                    return 'Veuillez saisir le numéro de compte';
                   }
                   return null;
                 },

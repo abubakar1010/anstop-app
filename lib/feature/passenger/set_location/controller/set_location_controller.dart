@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:ride_sharing/l10n/app_localizations.dart';
 import 'package:ride_sharing/services/api_client.dart';
 import 'package:ride_sharing/services/location_service.dart';
@@ -356,6 +357,63 @@ class SetLocationController extends GetxController with MapCameraMixin {
       );
     } finally {
       isSubmitting = false;
+      update();
+    }
+  }
+
+  // Called when user taps directly on the map — sets marker + reverse geocodes
+  Future<void> onMapTapped(LatLng tappedPoint) async {
+    final lat = tappedPoint.latitude;
+    final lng = tappedPoint.longitude;
+
+    // Update lat/lng controllers
+    latitudeController.text = lat.toString();
+    longitudeController.text = lng.toString();
+
+    // Move marker to tapped position immediately
+    markers.clear();
+    markers.add(
+      Marker(
+        markerId: const MarkerId('tapped_location'),
+        position: tappedPoint,
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+      ),
+    );
+    moveCameraTo(tappedPoint);
+    update();
+
+    // Reverse geocode to get human-readable address
+    try {
+      final List<Placemark> placemarks = await placemarkFromCoordinates(lat, lng);
+      if (placemarks.isNotEmpty) {
+        final Placemark place = placemarks.first;
+        final parts = [
+          place.street,
+          place.subLocality,
+          place.locality,
+          place.administrativeArea,
+        ].where((p) => p != null && p.isNotEmpty).toList();
+
+        final address = parts.isNotEmpty ? parts.join(', ') : '$lat, $lng';
+
+        addressController.text = address;
+
+        // Update marker info window with address
+        markers.clear();
+        markers.add(
+          Marker(
+            markerId: const MarkerId('tapped_location'),
+            position: tappedPoint,
+            infoWindow: InfoWindow(title: address),
+            icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+          ),
+        );
+        update();
+      }
+    } catch (e) {
+      // Fallback: use coordinates as address text if geocoding fails
+      addressController.text = '${lat.toStringAsFixed(6)}, ${lng.toStringAsFixed(6)}';
+      debugPrint('Reverse geocoding failed: $e');
       update();
     }
   }

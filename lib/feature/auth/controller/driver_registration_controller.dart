@@ -68,7 +68,7 @@ class DriverRegistrationController extends GetxController {
     }
 
     if (!isAgreedToTerms.value) {
-      errorMessage.value = 'Please agree to terms and conditions';
+      errorMessage.value = AppLocalization.tr.pleaseAgreeToTermsMessage;
       return;
     }
 

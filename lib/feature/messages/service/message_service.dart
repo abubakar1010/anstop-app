@@ -1,4 +1,5 @@
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../l10n/l10n_helper.dart';
 import '../../../services/api_client.dart';
 import '../../../services/api_urls.dart';
 
@@ -19,7 +20,7 @@ class MessageService {
         return ApiResponse(
           isSuccess: false,
           statusCode: 401,
-          errorMessage: 'Access token not found. Please login again.',
+          errorMessage: AppLocalization.tr.sessionExpiredMessage,
         );
       }
 

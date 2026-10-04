@@ -30,40 +30,19 @@ class SplashScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Obx(() => Row(
+                  Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      GestureDetector(
-                        onTap: () => controller.toggleLanguage(false),
-                        child: Text(
-                          AppLocalization.tr.splashEnglishLabel,
-                          style: TextStyle(
-                            color: controller.isFrench.value ?  Colors.grey[300] : AppColors.primaryColor,
-                            fontWeight: controller.isFrench.value ? FontWeight.normal : FontWeight.bold,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                        child: Text(
-                          '|',
-                          style: const TextStyle(color: Colors.white, fontSize: 14),
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () => controller.toggleLanguage(true),
-                        child: Text(
-                          AppLocalization.tr.splashFrenchLabel,
-                          style: TextStyle(
-                            color: controller.isFrench.value ? AppColors.primaryColor : Colors.white,
-                            fontWeight: controller.isFrench.value ? FontWeight.bold : FontWeight.normal,
-                            fontSize: 14,
-                          ),
+                      Text(
+                        AppLocalization.tr.splashFrenchLabel,
+                        style: TextStyle(
+                          color: AppColors.primaryColor,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
                         ),
                       ),
                     ],
-                  )),
+                  ),
                   const Spacer(),
                   Image.asset(AppImage.logoAnstop),
                   const SizedBox(height: 20),

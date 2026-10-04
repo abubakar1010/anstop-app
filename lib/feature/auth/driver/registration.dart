@@ -186,7 +186,7 @@ class _DriverRegistrationState extends State<DriverRegistration> {
                           if (_birthdayController.text.isEmpty) {
                             Get.snackbar(
                               AppLocalization.tr.validationErrorTitle,
-                              'Please select your birthday',
+                              AppLocalization.tr.dateOfBirthRequiredError,
                               snackPosition: SnackPosition.BOTTOM,
                               backgroundColor: Colors.red,
                               colorText: Colors.white,
@@ -196,7 +196,7 @@ class _DriverRegistrationState extends State<DriverRegistration> {
                           if (_addressTEController.text.trim().isEmpty) {
                             Get.snackbar(
                               AppLocalization.tr.validationErrorTitle,
-                              'Please enter your address',
+                              AppLocalization.tr.addressRequiredError,
                               snackPosition: SnackPosition.BOTTOM,
                               backgroundColor: Colors.red,
                               colorText: Colors.white,

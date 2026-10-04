@@ -58,13 +58,13 @@ class LegalPagesController extends GetxController {
         } else {
           errorMessage.value = legalResponse.message.isNotEmpty
               ? legalResponse.message
-              : 'Failed to load document';
+              : AppLocalization.tr.genericErrorMessage;
           _logger.w('Document load failed — message: ${errorMessage.value}');
         }
       } else {
         errorMessage.value = response.errorMessage.isNotEmpty
             ? response.errorMessage
-            : 'Failed to load document';
+            : AppLocalization.tr.genericErrorMessage;
         _logger.e('API error — statusCode: ${response.statusCode}, error: ${errorMessage.value}');
         Get.snackbar(
           AppLocalization.tr.errorTitle,

@@ -77,7 +77,7 @@ class ResetPasswordController extends GetxController {
       } else {
         errorMessage.value = response.errorMessage.isNotEmpty
             ? response.errorMessage
-            : 'Failed to reset password. Please try again.';
+            : AppLocalization.tr.genericErrorMessage;
         Get.snackbar(
           AppLocalization.tr.resetFailedTitle,
           AppLocalization.tr.genericErrorMessage,

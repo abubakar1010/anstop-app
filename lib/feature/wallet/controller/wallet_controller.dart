@@ -76,7 +76,7 @@ class WalletController extends GetxController {
 
       final amount = double.tryParse(amountTEController.text.trim()) ?? 0;
       if (amount <= 0) {
-        errorMessage.value = 'Please enter a valid amount';
+        errorMessage.value = AppLocalization.tr.invalidAmountError;
         return;
       }
 
@@ -126,7 +126,7 @@ class WalletController extends GetxController {
       final accessToken = prefs.getString('accessToken') ?? '';
 
       if (accessToken.isEmpty) {
-        errorMessage.value = 'Not authenticated';
+        errorMessage.value = AppLocalization.tr.sessionExpiredMessage;
         return;
       }
 
@@ -277,7 +277,7 @@ class WalletController extends GetxController {
       final accessToken = prefs.getString('accessToken') ?? '';
 
       if (accessToken.isEmpty) {
-        errorMessage.value = 'Not authenticated';
+        errorMessage.value = AppLocalization.tr.sessionExpiredMessage;
         return false;
       }
 

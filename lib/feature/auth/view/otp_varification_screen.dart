@@ -20,60 +20,67 @@ class OtpVarificationScreen extends StatelessWidget {
         forceMaterialTransparency: true,
       ),
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: EdgeInsets.symmetric(horizontal: 20.w),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              SizedBox(height: 66.h),
-              Image.asset(
-                  AppImage.logoAnstop
-              ),
-              SizedBox(height: 52.h),
-              CustomPinCodeTextField(
-                textEditingController: _controller.otpController,
-              ),
-              SizedBox(height: 12.h),
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20.w),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      AppLocalization.tr.otpDidNotGetText,
-                      style: TextStyle(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w400,
-                        color: Color(0XFF8A8A8A),
-                      ),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: MediaQuery.of(context).size.height -
+                  MediaQuery.of(context).padding.top -
+                  kToolbarHeight,
+            ),
+            child: IntrinsicHeight(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  SizedBox(height: 66.h),
+                  Image.asset(
+                      AppImage.logoAnstop
+                  ),
+                  SizedBox(height: 52.h),
+                  CustomPinCodeTextField(
+                    textEditingController: _controller.otpController,
+                  ),
+                  SizedBox(height: 12.h),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 20.w),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          AppLocalization.tr.otpDidNotGetText,
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w400,
+                            color: Color(0XFF8A8A8A),
+                          ),
+                        ),
+                        Text(
+                          AppLocalization.tr.resendButtonText,
+                          style: TextStyle(
+                            color: Colors.red,
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w400,
+                            decoration: TextDecoration.underline,
+                            decorationColor: Colors.red,
+                            decorationThickness: 2.r,
+                          ),
+                        ),
+                      ],
                     ),
-                    Text(
-                      AppLocalization.tr.resendButtonText,
-                      style: TextStyle(
-                        color: Colors.red,
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w400,
-                        decoration: TextDecoration.underline,
-                        decorationColor: Colors.red,
-                        decorationThickness: 2.r,
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                  SizedBox(height: 40.h),
+                  Obx(() => CustomButton(
+                    onPressed: _controller.isLoading.value ? null : () {
+                      _controller.verifyOTP();
+                    },
+                    label: _controller.isLoading.value
+                        ? AppLocalization.tr.submittingButton
+                        : AppLocalization.tr.otpVarificationButtonText,
+                  )),
+                  SizedBox(height: 24.h),
+                ],
               ),
-              SizedBox(height: 67.h),
-
-              Obx(() => CustomButton(
-                onPressed: _controller.isLoading.value ? null : () {
-                  _controller.verifyOTP();
-                },
-                label: _controller.isLoading.value
-                    ? 'Verifying...'
-                    : AppLocalization.tr.otpVarificationButtonText,
-              )),
-              Spacer(),
-              Spacer(),
-            ],
+            ),
           ),
         ),
       ),

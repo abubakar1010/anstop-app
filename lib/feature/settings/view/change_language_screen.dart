@@ -19,27 +19,19 @@ class _ChangeLanguageScreenState extends State<ChangeLanguageScreen> {
   @override
   void initState() {
     super.initState();
-    // Initialize selected language based on current locale
-    selectedLanguage = LocaleService.isFrench ? 'French' : 'English';
+    selectedLanguage = 'French';
   }
 
   Future<void> _changeLanguage(String language) async {
     setState(() {
       selectedLanguage = language;
     });
-
-    // Update the app locale and remember it, so the choice survives a restart.
-    final isFrench =
-        language == AppLocalization.tr.frenchLanguage || language == 'French';
-    await LocaleService.setLocale(
-      isFrench ? const Locale('fr') : const Locale('en'),
-    );
+    await LocaleService.setLocale(const Locale('fr'));
   }
 
   @override
   Widget build(BuildContext context) {
     final List<String> languages = [
-      AppLocalization.tr.englishLanguage,
       AppLocalization.tr.frenchLanguage,
     ];
 
@@ -80,7 +72,6 @@ class _ChangeLanguageScreenState extends State<ChangeLanguageScreen> {
 
   Widget _buildLanguageOption(String language) {
     final isSelected = selectedLanguage == language ||
-        (language == AppLocalization.tr.englishLanguage && selectedLanguage == 'English') ||
         (language == AppLocalization.tr.frenchLanguage && selectedLanguage == 'French');
 
     return InkWell(

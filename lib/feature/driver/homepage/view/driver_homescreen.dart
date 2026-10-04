@@ -220,72 +220,69 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
                       child: BackdropFilter(
                         filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                         child: GlassCard(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 12.w,
+                            vertical: 14.h,
+                          ),
                           child: Row(
-                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              SizedBox(width: 16.w),
+                              SizedBox(width: 4.w),
                               Expanded(
                                 child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  mainAxisSize: MainAxisSize.min,
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Center(
-                                      child: Text(
-                                        l10n.driverYouAreOffline,
-                                        style: TextStyle(
-                                          fontSize: 18.sp,
-                                          fontWeight: FontWeight.bold,
-                                          color: AppColors.tesxtColor,
-                                        ),
+                                    Text(
+                                      l10n.driverYouAreOffline,
+                                      style: TextStyle(
+                                        fontSize: 16.sp,
+                                        fontWeight: FontWeight.bold,
+                                        color: AppColors.tesxtColor,
                                       ),
                                     ),
-                                    // SizedBox(height: 8.h),
+                                    SizedBox(height: 4.h),
                                     Text(
                                       l10n.driverGoOnlineMessage,
-                                      textAlign: TextAlign.center,
                                       style: TextStyle(
-                                        fontSize: 12.sp,
+                                        fontSize: 11.sp,
                                         color: AppColors.tesxtColor,
                                       ),
                                     ),
                                   ],
                                 ),
                               ),
-                              SizedBox(width: 16.w),
-                              SizedBox(
-                                width: 80.w,
-                                height: 60.h,
-                                child: ElevatedButton(
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: AppColors.primaryColor,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8.r),
-                                    ),
-                                    padding: EdgeInsets.symmetric(
-                                      horizontal: 8.w,
-                                      vertical: 8.h,
-                                    ),
+                              SizedBox(width: 12.w),
+                              ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColors.primaryColor,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8.r),
                                   ),
-                                  onPressed: () {
-                                    setState(() {
-                                      _isOnline = true;
-                                      _animationController.forward();
-                                    });
-                                    _homeController.startLocationUpdates();
-                                  },
-                                  child: Text(
-                                    l10n.driverGoOnlineButton,
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 12.sp,
-                                      fontWeight: FontWeight.w600,
-                                      height: 1.2,
-                                    ),
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 12.w,
+                                    vertical: 10.h,
+                                  ),
+                                ),
+                                onPressed: () {
+                                  setState(() {
+                                    _isOnline = true;
+                                    _animationController.forward();
+                                  });
+                                  _homeController.startLocationUpdates();
+                                },
+                                child: Text(
+                                  l10n.driverGoOnlineButton,
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 12.sp,
+                                    fontWeight: FontWeight.w600,
+                                    height: 1.3,
                                   ),
                                 ),
                               ),
-                              SizedBox(width: 16.w),
+                              SizedBox(width: 4.w),
                             ],
                           ),
                         ),
@@ -376,8 +373,8 @@ class GlassCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: 345.w,
-      height: 98.h,
-      //  color: Colors.black.withOpacity(0.3),
+      // No fixed height — let content determine height so French text never overflows
+      constraints: BoxConstraints(minHeight: 90.h),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(borderRadius.r),
         border: Border.all(

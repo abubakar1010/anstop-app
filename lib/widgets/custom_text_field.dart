@@ -91,15 +91,13 @@ class _CustomTextFieldState extends State<CustomTextField> {
     });
   }
 
-  /// Message shown when the field is left empty. Falls back through
-  /// hintText -> labelText -> a generic message, so a field declared without
-  /// either one never crashes on validation.
+  /// Message shown when the field is left empty.
   String get _emptyMessage {
     final label = widget.hintText ?? widget.labelText;
     if (label == null || label.trim().isEmpty) {
-      return 'This field is required';
+      return 'Ce champ est obligatoire';
     }
-    return 'Please ${label.trim().toLowerCase()}';
+    return 'Veuillez ${label.trim().toLowerCase()}';
   }
 
   String? _defaultValidator(dynamic value) {
@@ -111,10 +109,10 @@ class _CustomTextFieldState extends State<CustomTextField> {
     if (widget.isEmail == true) {
       return AppConstants.emailValidate.hasMatch(text)
           ? null
-          : 'Please check your email!';
+          : 'Veuillez vérifier votre e-mail !';
     }
     if (widget.isPassword && text.length < 8) {
-      return 'Password: 8 characters min!';
+      return 'Mot de passe : 8 caractères minimum !';
     }
     return null;
   }

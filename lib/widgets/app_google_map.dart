@@ -16,12 +16,17 @@ class AppGoogleMap extends StatelessWidget {
     this.markers = const <Marker>{},
     this.polylines = const <Polyline>{},
     this.circles = const <Circle>{},
+    this.onTap,
   });
 
   final MapCameraMixin camera;
   final Set<Marker> markers;
   final Set<Polyline> polylines;
   final Set<Circle> circles;
+
+  /// Optional callback fired when the user taps an empty spot on the map.
+  /// Receives the [LatLng] of the tapped position.
+  final void Function(LatLng)? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -37,6 +42,7 @@ class AppGoogleMap extends StatelessWidget {
       polylines: polylines,
       circles: circles,
       onMapCreated: camera.attachMapController,
+      onTap: onTap,
     );
   }
 }

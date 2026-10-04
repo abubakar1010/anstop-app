@@ -70,12 +70,12 @@ class CancelTaxiController extends GetxController {
 
   bool validateCancellation() {
     if (selectedReasons.isEmpty) {
-      errorMessage.value = 'Please select at least one reason';
+      errorMessage.value = AppLocalization.tr.genericErrorMessage;
       return false;
     }
 
     if (selectedReasons.contains('Other') && otherReasonTEController.text.isEmpty) {
-      errorMessage.value = 'Please specify other reason';
+      errorMessage.value = AppLocalization.tr.genericErrorMessage;
       return false;
     }
 

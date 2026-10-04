@@ -170,7 +170,7 @@ class _DriverWalletPageState extends State<DriverWalletPage> {
                         final tx = _walletController.transactions[index];
 
                         return TransactionItem(
-                          title: tx.type == 'DEPOSIT' ? 'Wallet Deposit' : 'Wallet Withdrawal',
+                          title: tx.type == 'DEPOSIT' ? 'Dépôt portefeuille' : 'Retrait portefeuille',
                           time: _formatTransactionTime(tx.createdAt),
                           amount: tx.amount.toStringAsFixed(2),
                           isPositive: tx.type == 'DEPOSIT',

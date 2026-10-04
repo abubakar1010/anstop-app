@@ -189,7 +189,7 @@ class ChatController extends GetxController {
   // ==================== Business Logic ====================
   Future<void> loadMessages() async {
     if (conversationId.isEmpty) {
-      errorMessage.value = 'Conversation ID is missing';
+      errorMessage.value = AppLocalization.tr.genericErrorMessage;
       return;
     }
 

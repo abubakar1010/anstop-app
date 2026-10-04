@@ -68,7 +68,7 @@ class RegistrationController extends GetxController {
     }
 
     if (!isAgreedToTerms.value) {
-      errorMessage.value = 'Please agree to terms and conditions';
+      errorMessage.value = AppLocalization.tr.pleaseAgreeToTermsMessage;
       Get.snackbar(
         AppLocalization.tr.errorTitle,
         AppLocalization.tr.pleaseAgreeToTermsMessage,

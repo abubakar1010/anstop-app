@@ -38,7 +38,7 @@ class PassengerPaymentController extends GetxController {
 
   Future<void> processPayment() async {
     if (selectedMethod.value.isEmpty) {
-      errorMessage.value = 'Please select a payment method';
+      errorMessage.value = AppLocalization.tr.genericErrorMessage;
       return;
     }
 

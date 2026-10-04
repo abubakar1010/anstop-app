@@ -46,7 +46,7 @@ class ApiClient {
         actions: [
           TextButton(
             onPressed: () => Get.back(),
-            child: const Text('OK'),
+            child: Text(AppLocalization.tr.okButton),
           ),
         ],
       ),

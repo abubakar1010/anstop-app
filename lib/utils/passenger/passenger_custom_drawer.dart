@@ -222,7 +222,7 @@ class PassengerCustomDrawer extends StatelessWidget {
       debugPrint('Error switching to driver: $e');
       Get.snackbar(
         AppLocalization.tr.errorTitle,
-        'Failed to switch to driver mode. Please try again.',
+        AppLocalization.tr.genericErrorMessage,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,

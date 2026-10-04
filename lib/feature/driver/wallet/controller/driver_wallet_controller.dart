@@ -73,12 +73,12 @@ class DriverWalletController extends GetxController {
     final amount = double.tryParse(amountTEController.text);
 
     if (amount == null || amount <= 0) {
-      errorMessage.value = 'Please enter a valid amount';
+      errorMessage.value = AppLocalization.tr.invalidAmountError;
       return;
     }
 
     if (amount > balance.value) {
-      errorMessage.value = 'Insufficient balance';
+      errorMessage.value = AppLocalization.tr.genericErrorMessage;
       return;
     }
 

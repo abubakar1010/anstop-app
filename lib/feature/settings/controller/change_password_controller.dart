@@ -74,7 +74,7 @@ class ChangePasswordController extends GetxController {
       } else {
         errorMessage.value = response.errorMessage.isNotEmpty
             ? response.errorMessage
-            : 'Failed to change password';
+            : AppLocalization.tr.genericErrorMessage;
         Get.snackbar(
           AppLocalization.tr.errorTitle,
           AppLocalization.tr.genericErrorMessage,

@@ -48,7 +48,7 @@ class NationalIdController extends GetxController {
       final accessToken = prefs.getString('accessToken');
 
       if (accessToken == null || accessToken.isEmpty) {
-        errorMessage.value = 'Access token not found. Please login again.';
+        errorMessage.value = AppLocalization.tr.sessionExpiredMessage;
         AppSnackbar.error(
           AppLocalization.tr.errorTitle,
           AppLocalization.tr.sessionExpiredMessage,
@@ -67,7 +67,7 @@ class NationalIdController extends GetxController {
         if (data != null && data is List && data.isNotEmpty) {
           frontImageUrl.value = data[0];
         } else {
-          errorMessage.value = 'Failed to get image URL from response';
+          errorMessage.value = AppLocalization.tr.imageUrlMissingMessage;
           AppSnackbar.error(
             AppLocalization.tr.uploadFailedTitle,
             AppLocalization.tr.imageUrlMissingMessage,
@@ -101,7 +101,7 @@ class NationalIdController extends GetxController {
       final accessToken = prefs.getString('accessToken');
 
       if (accessToken == null || accessToken.isEmpty) {
-        errorMessage.value = 'Access token not found. Please login again.';
+        errorMessage.value = AppLocalization.tr.sessionExpiredMessage;
         AppSnackbar.error(
           AppLocalization.tr.errorTitle,
           AppLocalization.tr.sessionExpiredMessage,
@@ -120,7 +120,7 @@ class NationalIdController extends GetxController {
         if (data != null && data is List && data.isNotEmpty) {
           backImageUrl.value = data[0];
         } else {
-          errorMessage.value = 'Failed to get image URL from response';
+          errorMessage.value = AppLocalization.tr.imageUrlMissingMessage;
           AppSnackbar.error(
             AppLocalization.tr.uploadFailedTitle,
             AppLocalization.tr.imageUrlMissingMessage,

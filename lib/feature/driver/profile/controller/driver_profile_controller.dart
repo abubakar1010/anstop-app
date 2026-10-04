@@ -32,7 +32,7 @@ class DriverProfileController extends GetxController {
       final accessToken = prefs.getString('accessToken') ?? '';
 
       if (accessToken.isEmpty) {
-        errorMessage.value = 'Not authenticated';
+        errorMessage.value = AppLocalization.tr.sessionExpiredMessage;
         return;
       }
 

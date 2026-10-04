@@ -66,7 +66,7 @@ class OtpVerificationController extends GetxController {
 
   Future<void> verifyOTP() async {
     if (otpController.text.isEmpty) {
-      errorMessage.value = 'Please enter OTP';
+      errorMessage.value = AppLocalization.tr.pleaseEnterOtpMessage;
       Get.snackbar(
         AppLocalization.tr.errorTitle,
         AppLocalization.tr.pleaseEnterOtpMessage,
@@ -78,7 +78,7 @@ class OtpVerificationController extends GetxController {
     }
 
     if (otpController.text.length < 6) {
-      errorMessage.value = 'Please enter valid 6-digit OTP';
+      errorMessage.value = AppLocalization.tr.invalidOtpMessage;
       Get.snackbar(
         AppLocalization.tr.errorTitle,
         AppLocalization.tr.invalidOtpMessage,
@@ -90,7 +90,7 @@ class OtpVerificationController extends GetxController {
     }
 
     if (userEmail.value.isEmpty) {
-      errorMessage.value = 'Email not found';
+      errorMessage.value = AppLocalization.tr.emailNotFoundMessage;
       Get.snackbar(
         AppLocalization.tr.errorTitle,
         AppLocalization.tr.emailNotFoundMessage,
@@ -196,7 +196,7 @@ class OtpVerificationController extends GetxController {
       } else {
         errorMessage.value = response.errorMessage.isNotEmpty
             ? response.errorMessage
-            : 'Failed to resend OTP. Please try again.';
+            : AppLocalization.tr.genericErrorMessage;
       }
     } catch (e) {
       debugPrint('otp_verification_controller: $e');

@@ -19,7 +19,7 @@ class LocaleService {
   /// Used for a fresh install, and whenever a stored value is unrecognised.
   static const Locale defaultLocale = Locale('fr');
 
-  static const List<Locale> supportedLocales = [Locale('fr'), Locale('en')];
+  static const List<Locale> supportedLocales = [Locale('fr')];
 
   /// Applies [locale] immediately and remembers it for the next launch.
   static Future<void> setLocale(Locale locale) async {
@@ -36,11 +36,14 @@ class LocaleService {
 
   /// Restores the saved locale into GetX. Call before `runApp`.
   static Future<void> restore() async {
-    Get.updateLocale(await loadSavedLocale());
+    // Always force French since it is the only supported language.
+    Get.updateLocale(defaultLocale);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(storageKey, defaultLocale.languageCode);
   }
 
-  /// Whether French is currently active.
-  static bool get isFrench => Get.locale?.languageCode == 'fr';
+  /// Whether French is currently active — always true now.
+  static bool get isFrench => true;
 
   /// Maps a stored language code onto a supported locale, falling back to
   /// [defaultLocale] rather than handing GetX a locale with no translations.

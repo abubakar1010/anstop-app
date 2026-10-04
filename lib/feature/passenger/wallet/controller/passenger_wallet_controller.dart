@@ -73,7 +73,7 @@ class PassengerWalletController extends GetxController {
     final amount = double.tryParse(amountTEController.text);
 
     if (amount == null || amount <= 0) {
-      errorMessage.value = 'Please enter a valid amount';
+      errorMessage.value = AppLocalization.tr.invalidAmountError;
       return;
     }
 

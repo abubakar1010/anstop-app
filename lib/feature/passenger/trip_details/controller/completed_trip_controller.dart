@@ -79,7 +79,7 @@ class CompletedTripController extends GetxController {
 
   Future<void> submitRating() async {
     if (rating.value == 0) {
-      errorMessage.value = 'Please provide a rating';
+      errorMessage.value = AppLocalization.tr.genericErrorMessage;
       return;
     }
 

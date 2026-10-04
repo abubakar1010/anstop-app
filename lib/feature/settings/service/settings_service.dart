@@ -1,4 +1,5 @@
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../l10n/l10n_helper.dart';
 import '../../../services/api_client.dart';
 import '../../../services/api_urls.dart';
 import '../data/change_password_request_model.dart';
@@ -17,7 +18,7 @@ class SettingsService {
         return ApiResponse(
           isSuccess: false,
           statusCode: 401,
-          errorMessage: 'Access token not found. Please login again.',
+          errorMessage: AppLocalization.tr.sessionExpiredMessage,
         );
       }
 
@@ -47,7 +48,7 @@ class SettingsService {
         return ApiResponse(
           isSuccess: false,
           statusCode: 401,
-          errorMessage: 'Access token not found. Please login again.',
+          errorMessage: AppLocalization.tr.sessionExpiredMessage,
         );
       }
 
