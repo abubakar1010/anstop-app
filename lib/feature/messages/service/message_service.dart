@@ -35,6 +35,7 @@ class MessageService {
         isSuccess: false,
         statusCode: -1,
         errorMessage: e.toString(),
+
       );
     }
   }
