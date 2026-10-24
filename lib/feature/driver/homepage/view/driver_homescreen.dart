@@ -129,13 +129,13 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
                 });
 
                 _animationController.forward();
-               // _homeController.startLocationUpdates();
+                _homeController.startLocationUpdates();
               } else {
                 _animationController.stop();
                 // Immediately hide pulse when going offline
                 _showPulseIndicator = false;
                 _pulseTimer?.cancel();
-              //  _homeController.stopLocationUpdates();
+                _homeController.stopLocationUpdates();
               }
             });
           },

@@ -10,6 +10,8 @@ import 'package:ride_sharing/routes/app_routes.dart';
 import 'package:ride_sharing/services/fcm_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ride_sharing/l10n/l10n_helper.dart';
+import 'package:ride_sharing/services/locale_service.dart';
+import 'package:ride_sharing/services/session_controller.dart';
 
 class LoginController extends GetxController {
   // ==================== Text Controllers ====================
@@ -25,7 +27,6 @@ class LoginController extends GetxController {
   // ==================== Services ====================
   final AuthService _authService = AuthService();
   final FcmService _fcmService = FcmService();
-
 
   // ==================== Lifecycle ====================
   @override
@@ -64,11 +65,16 @@ class LoginController extends GetxController {
       final response = await _authService.signIn(signInRequest);
       if (response.isSuccess) {
         // Parse the response data
-        final signInResponse = SignInResponseModel.fromJson(response.responseData);
+        final signInResponse = SignInResponseModel.fromJson(
+          response.responseData,
+        );
 
         // Check if user needs email verification
         if (signInResponse.data.needsVerification) {
-          AppSnackbar.warning(AppLocalization.tr.verificationRequiredTitle, AppLocalization.tr.verifyEmailToContinueMessage);
+          AppSnackbar.warning(
+            AppLocalization.tr.verificationRequiredTitle,
+            AppLocalization.tr.verifyEmailToContinueMessage,
+          );
           Get.toNamed(
             AppRoutes.emailValidationScreen,
             arguments: {'email': emailTEController.text.trim()},
@@ -79,12 +85,22 @@ class LoginController extends GetxController {
         // Validate tokens before proceeding
         if (signInResponse.data.accessToken.isEmpty ||
             signInResponse.data.refreshToken.isEmpty) {
-          AppSnackbar.error(AppLocalization.tr.loginFailedTitle, AppLocalization.tr.invalidServerResponseMessage);
+          AppSnackbar.error(
+            AppLocalization.tr.loginFailedTitle,
+            AppLocalization.tr.invalidServerResponseMessage,
+          );
           return;
         }
 
         // Save tokens and user data to shared preferences
-         await _saveUserData(signInResponse.data);
+        await SessionController.to.saveTokens(
+          signInResponse.data.accessToken,
+          signInResponse.data.refreshToken,
+        );
+        await _saveUserData(signInResponse.data);
+        SessionController.to.accountState.value =
+            signInResponse.data.accountState;
+        SessionController.to.roles.assignAll(signInResponse.data.role);
         if (signInResponse.data.accessToken.isNotEmpty) {
           // Push registration is best-effort and must never block sign-in: the
           // user is already authenticated and their tokens are saved by here.
@@ -95,7 +111,9 @@ class LoginController extends GetxController {
           } catch (e) {
             debugPrint('FCM init failed, continuing sign-in: $e');
           }
-        }else{
+          // The account may have been created on another device or language.
+          LocaleService.syncToServer();
+        } else {
           debugPrint("No access token for fcm token");
         }
         // Show success message
@@ -108,41 +126,56 @@ class LoginController extends GetxController {
         // );
 
         // Handle navigation based on role
-        if (signInResponse.data.role.contains('RIDER')) {
+        if (SessionController.to.accountState.value == 'ACTIVE' &&
+            signInResponse.data.role.contains('RIDER')) {
           Get.toNamed(AppRoutes.passengerHomeScreen);
         } else if (signInResponse.data.role.contains('DRIVER')) {
-          // Check driver onboarding status
-          await _handleDriverNavigation(signInResponse.data.accessToken);
+          if (SessionController.to.accountState.value == 'ACTIVE') {
+            Get.toNamed(AppRoutes.driverHomeScreen);
+          } else if (SessionController.to.accountState.value ==
+              'NEEDS_ONBOARDING') {
+            Get.toNamed(AppRoutes.driverRegistrationScreen);
+          } else {
+            Get.toNamed(AppRoutes.accountStatusScreen);
+          }
         } else {
-          Get.toNamed(AppRoutes.passengerHomeScreen);
+          Get.toNamed(AppRoutes.accountStatusScreen);
         }
       } else {
         // Show error message
         debugPrint('login_controller: ${response.errorMessage}');
-        errorMessage.value = AppLocalization.tr.genericErrorMessage;
+        errorMessage.value = response.errorMessage;
         AppSnackbar.error(
           AppLocalization.tr.loginFailedTitle,
-          AppLocalization.tr.genericErrorMessage,
+          response.errorMessage,
         );
       }
     } catch (e) {
       debugPrint('login_controller: $e');
       errorMessage.value = AppLocalization.tr.genericErrorMessage;
-      AppSnackbar.error(AppLocalization.tr.errorTitle, AppLocalization.tr.genericErrorMessage);
+      AppSnackbar.error(
+        AppLocalization.tr.errorTitle,
+        AppLocalization.tr.genericErrorMessage,
+      );
     } finally {
       isLoading.value = false;
     }
   }
-  Future<void> navigateToHomeByRole() async {
-    final prefs = await SharedPreferences.getInstance();
-    final roles = prefs.getStringList('userRole') ?? [];
 
-    if (roles.contains('DRIVER')) {
-      Get.toNamed(AppRoutes.driverHomeScreen);
-    } else if (roles.contains('RIDER')) {
-      Get.toNamed(AppRoutes.passengerHomeScreen);
+  Future<void> navigateToHomeByRole() async {
+    final session = SessionController.to;
+    if (session.accountState.value != 'ACTIVE') {
+      Get.toNamed(
+        session.accountState.value == 'NEEDS_ONBOARDING'
+            ? AppRoutes.driverRegistrationScreen
+            : AppRoutes.accountStatusScreen,
+      );
     } else {
-      Get.toNamed(AppRoutes.passengerHomeScreen);
+      Get.toNamed(
+        session.roles.contains('DRIVER')
+            ? AppRoutes.driverHomeScreen
+            : AppRoutes.passengerHomeScreen,
+      );
     }
   }
 
@@ -150,8 +183,6 @@ class LoginController extends GetxController {
   Future<void> _saveUserData(SignInData data) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('accessToken', data.accessToken);
-      await prefs.setString('refreshToken', data.refreshToken);
       await prefs.setStringList('userRole', data.role);
       await prefs.setBool('needsVerification', data.needsVerification);
 
@@ -174,7 +205,6 @@ class LoginController extends GetxController {
       if (data.profilePicture != null && data.profilePicture!.isNotEmpty) {
         await prefs.setString('profilePicture', data.profilePicture!);
       }
-
     } catch (e) {
       debugPrint('Error saving user data: $e');
     }
@@ -197,35 +227,6 @@ class LoginController extends GetxController {
     } catch (e) {
       print('Error decoding JWT: $e');
       return null;
-    }
-  }
-
-  Future<void> _handleDriverNavigation(String accessToken) async {
-    try {
-      // Call onboarding status API
-      final onboardingResponse = await _authService.getDriverOnboardingStatus(
-        accessToken: accessToken,
-      );
-
-      if (onboardingResponse.isSuccess) {
-        // Check if driver is onboarded
-        final isOnboarded = onboardingResponse.responseData['data']?['isOnboarded'] ?? false;
-
-        if (isOnboarded) {
-          // Driver is fully onboarded, go to driver home screen
-          Get.toNamed(AppRoutes.driverHomeScreen);
-        } else {
-          // Driver needs to complete onboarding
-          Get.toNamed(AppRoutes.driverRegistrationScreen);
-        }
-      } else {
-        // If onboarding status check fails, assume not onboarded
-        Get.toNamed(AppRoutes.driverRegistrationScreen);
-      }
-    } catch (e) {
-      print('Error checking driver onboarding status: $e');
-      // On error, default to registration screen
-      Get.toNamed(AppRoutes.driverRegistrationScreen);
     }
   }
 
@@ -265,11 +266,7 @@ class LoginController extends GetxController {
     );
   }
 
-  void navigateToSignUp(bool isDriver) {
-    // if (isDriver) {
-    //   Get.toNamed(AppRoutes.driverRegistrationScreen);
-    // } else {
-    //   Get.toNamed(AppRoutes.passengerRegistrationScreen);
-    // }
+  void navigateToSignUp() {
+    Get.toNamed(AppRoutes.roleSelectionScreen);
   }
 }

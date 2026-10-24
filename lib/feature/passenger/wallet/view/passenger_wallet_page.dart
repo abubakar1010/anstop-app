@@ -78,10 +78,17 @@ class _PassengerWalletPageState extends State<PassengerWalletPage> {
             const SizedBox(height: 20),
 
             // Balance Card
-            BalanceCard(
+            Obx(() => BalanceCard(
               balance:_walletController.balance.value.toString(),
              // onWithdraw: _showWithdrawDialog,
-            ),
+              onDeposit: () async {
+                final result = await Get.toNamed(AppRoutes.addMoneyScreen);
+                if (result == true) {
+                  _walletController.getTransactions();
+                  _walletController.getBalance();
+                }
+              },
+            )),
 
             const SizedBox(height: 32),
 
@@ -128,7 +135,9 @@ class _PassengerWalletPageState extends State<PassengerWalletPage> {
                         final tx = _walletController.transactions[index];
 
                         return TransactionItem(
-                          title: tx.type == 'DEPOSIT' ? 'Dépôt portefeuille' : 'Retrait portefeuille',
+                          title: tx.type == 'DEPOSIT'
+                              ? AppLocalization.tr.walletDepositLabel
+                              : AppLocalization.tr.walletWithdrawalLabel,
                           time: _formatTransactionTime(tx.createdAt),
                           amount: tx.amount.toStringAsFixed(2),
                           isPositive: tx.type == 'DEPOSIT',
@@ -153,7 +162,7 @@ class _PassengerWalletPageState extends State<PassengerWalletPage> {
     final difference = now.difference(date);
 
     if (difference.inDays == 0) {
-      return 'Today at ${TimeOfDay.fromDateTime(date).format(context)}';
+      return AppLocalization.tr.todayAtLabel(TimeOfDay.fromDateTime(date).format(context));
     } else {
       return '${date.day}/${date.month}/${date.year}';
     }

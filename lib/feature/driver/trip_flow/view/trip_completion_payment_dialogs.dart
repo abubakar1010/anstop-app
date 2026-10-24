@@ -9,113 +9,6 @@ import 'package:ride_sharing/l10n/l10n_helper.dart';
 // Mock colors - replace with your actual AppColors
 
 
-// 1. Payment Confirmation Dialog (Left Image)
-class PaymentConfirmationDialog extends StatelessWidget {
-  final VoidCallback onPaymentReceived;
-  final VoidCallback onDifferentAmount;
-
-  const PaymentConfirmationDialog({
-    Key? key,
-    required this.onPaymentReceived,
-    required this.onDifferentAmount,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16.r),
-      ),
-      child: Container(
-        padding: EdgeInsets.all(24.w),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Close button
-            Align(
-              alignment: Alignment.topRight,
-              child: GestureDetector(
-                onTap: () => Navigator.of(context).pop(),
-                child: Icon(
-                  Icons.close,
-                  color: Colors.grey[600],
-                  size: 24.sp,
-                ),
-              ),
-            ),
-
-            SizedBox(height: 16.h),
-
-            // Question text
-            Text(
-              AppLocalization.tr.didYouReceivePaymentQuestion,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 18.sp,
-                fontWeight: FontWeight.w600,
-                color: AppColors.tesxtColor,
-              ),
-            ),
-
-            SizedBox(height: 32.h),
-
-            // Buttons
-            Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: onDifferentAmount,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.grey[600],
-                      padding: EdgeInsets.symmetric(vertical: 14.h),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(25.r),
-                      ),
-                    ),
-                    child: Text(
-                      AppLocalization.tr.paymentNotReceivedButton,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 13.sp,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ),
-
-                SizedBox(width: 16.w),
-
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: onPaymentReceived,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primaryColor,
-                      padding: EdgeInsets.symmetric(vertical: 14.h),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(25.r),
-                      ),
-                    ),
-                    child: Text(
-                      AppLocalization.tr.paymentReceivedYesButton,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 13.sp,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 // 2. Trip Completion Dialog (Middle Image)
 class TripCompletionDialog extends StatelessWidget {
   final VoidCallback onBackToHome;
@@ -381,22 +274,6 @@ class StayOnlineDialog extends StatelessWidget {
 
 // Helper class to show the dialogs
 class TripDialogs {
-  // Show payment confirmation dialog
-  static void showPaymentConfirmation(
-      BuildContext context, {
-        required VoidCallback onPaymentReceived,
-        required VoidCallback onDifferentAmount,
-      }) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => PaymentConfirmationDialog(
-        onPaymentReceived: onPaymentReceived,
-        onDifferentAmount: onDifferentAmount,
-      ),
-    );
-  }
-
   // Show trip completion dialog
   static void showTripCompletion(
       BuildContext context, {
@@ -427,37 +304,3 @@ class TripDialogs {
     );
   }
 }
-
-// Example usage in your trip flow:
-/*
-// When trip is completed, show payment confirmation first
-TripDialogs.showPaymentConfirmation(
-  context,
-  onPaymentReceived: () {
-    Navigator.pop(context); // Close payment dialog
-    // Show completion dialog
-    TripDialogs.showTripCompletion(
-      context,
-      onBackToHome: () {
-        Navigator.pop(context); // Close completion dialog
-        // Show stay online dialog
-        TripDialogs.showStayOnline(
-          context,
-          onGoOffline: () {
-            Navigator.pop(context);
-            // Go offline logic
-          },
-          onStayOnline: () {
-            Navigator.pop(context);
-            // Stay online and return to trip requests
-          },
-        );
-      },
-    );
-  },
-  onDifferentAmount: () {
-    Navigator.pop(context);
-    // Handle different amount logic
-  },
-);
-*/

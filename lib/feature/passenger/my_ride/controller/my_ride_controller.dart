@@ -1,3 +1,4 @@
+import 'package:ride_sharing/services/session_controller.dart';
 import 'package:get/get.dart';
 import 'package:ride_sharing/feature/passenger/my_ride/data/get_my_ride_response.dart';
 import 'package:ride_sharing/feature/passenger/my_ride/service/my_ride_service.dart';
@@ -30,7 +31,7 @@ class MyRideController extends GetxController {
       isLoading.value = true;
       errorMessage.value = '';
       final prefs = await SharedPreferences.getInstance();
-      final accessToken = prefs.getString('accessToken');
+      final accessToken = await SessionController.to.accessToken();
       final status = isOngoing.value ? 'ACCEPTED' : 'COMPLETED';
 
       final response = await _service.getMyRides(

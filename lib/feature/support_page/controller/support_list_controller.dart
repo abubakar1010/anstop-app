@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ride_sharing/app/utils/app_snackbar.dart';
 import '../data/support_message_model.dart';
 import '../service/support_service.dart';
 import 'package:ride_sharing/l10n/l10n_helper.dart';
@@ -44,14 +45,10 @@ class SupportListController extends GetxController {
           totalPages.value = supportResponse.totalPages;
           totalResults.value = supportResponse.totalResults;
         } else {
-          errorMessage.value = supportResponse.message.isNotEmpty
-              ? supportResponse.message
-              : 'Failed to load support messages';
+          errorMessage.value = AppLocalization.tr.supportLoadFailedMessage;
         }
       } else {
-        errorMessage.value = response.errorMessage.isNotEmpty
-            ? response.errorMessage
-            : 'Failed to load support messages';
+        errorMessage.value = AppLocalization.tr.supportLoadFailedMessage;
         _showErrorSnackbar();
       }
     } catch (e) {
@@ -69,13 +66,7 @@ class SupportListController extends GetxController {
   void _showErrorSnackbar() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (Get.context == null) return;
-      Get.snackbar(
-        AppLocalization.tr.errorTitle,
-        AppLocalization.tr.genericErrorMessage,
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      AppSnackbar.error(AppLocalization.tr.errorTitle, AppLocalization.tr.genericErrorMessage);
     });
   }
 

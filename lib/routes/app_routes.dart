@@ -21,6 +21,7 @@ import 'package:ride_sharing/feature/auth/driver/upload_profile_picture.dart';
 import 'package:ride_sharing/feature/auth/driver/upload_your_documents_screen.dart';
 import 'package:ride_sharing/feature/auth/view/email_validation_screen.dart';
 import 'package:ride_sharing/feature/auth/view/log_in_screen.dart';
+import 'package:ride_sharing/feature/auth/view/account_status_screen.dart';
 import 'package:ride_sharing/feature/auth/view/otp_varification_screen.dart';
 import 'package:ride_sharing/feature/auth/view/registration.dart';
 import 'package:ride_sharing/feature/auth/view/reset_password_screen.dart';
@@ -119,6 +120,7 @@ abstract class AppRoutes {
 
   /// =========== Authentication ===========
   static const String loginScreen = '/loginScreen';
+  static const String accountStatusScreen = '/accountStatusScreen';
   static const String emailValidationScreen = '/emailValidationScreen';
   static const String otpVerificationScreen = '/otpVerificationScreen';
   static const String resetPasswordScreen = '/resetPasswordScreen';
@@ -228,6 +230,7 @@ abstract class AppRoutes {
       page: () => DriverRegistration(),
       binding: DriverRegistrationBinding(),
     ),
+    GetPage(name: accountStatusScreen, page: () => const AccountStatusScreen()),
     GetPage(
       name: uploadDocumentsScreen,
       page: () => UploadYourDocuments(),

@@ -1,682 +1,198 @@
-
-import 'dart:async';
 import 'dart:convert';
-import 'package:flutter/material.dart';
-import 'package:get/get.dart' hide Response;
-import 'package:http/http.dart';
-import 'package:http_parser/http_parser.dart';
-import 'package:logger/logger.dart';
 import 'dart:io';
-import 'package:http/http.dart' as http;
-import 'package:path/path.dart' as p;
-import 'package:mime/mime.dart';
+import 'package:dio/dio.dart';
 import 'package:ride_sharing/l10n/l10n_helper.dart';
+import 'locale_service.dart';
+import 'session_controller.dart';
+
 class ApiResponse {
   final bool isSuccess;
   final int statusCode;
   final dynamic responseData;
   final String errorMessage;
-
+  final String? errorCode;
   ApiResponse({
     required this.isSuccess,
     required this.statusCode,
     this.responseData,
-    this.errorMessage = 'Something went wrong',
-  });
+    String? errorMessage,
+    this.errorCode,
+  }) : errorMessage = errorMessage ?? AppLocalization.tr.genericErrorMessage;
 }
 
+/// All API requests share authentication, one refresh attempt, and stable errors.
 class ApiClient {
-  // using the logger package
-  final Logger _logger = Logger();
-
-  // Timeout duration (30 seconds)
-  static const Duration _requestTimeout = Duration(seconds: 100);
-
-  // Show timeout dialog
-  void _showTimeoutDialog() {
-    // Close any existing loading dialogs first
-    if (Get.isDialogOpen ?? false) {
-      Get.back();
-    }
-
-    Get.dialog(
-      AlertDialog(
-        title: Text(AppLocalization.tr.serverErrorTitle),
-        content: Text(AppLocalization.tr.serverUnavailableMessage),
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: Text(AppLocalization.tr.okButton),
-          ),
-        ],
+  ApiClient() {
+    _dio.interceptors.add(
+      QueuedInterceptorsWrapper(
+        onRequest: (options, handler) async {
+          options.headers['Accept-Language'] = LocaleService.languageCode;
+          final token = await SessionController.to.accessToken();
+          if (token != null && token.isNotEmpty)
+            options.headers['Authorization'] = 'Bearer $token';
+          handler.next(options);
+        },
+        onError: (error, handler) async {
+          final request = error.requestOptions;
+          if (error.response?.statusCode != 401 ||
+              request.extra['retried'] == true ||
+              request.path.endsWith('/auth/sign-in') ||
+              request.path.endsWith('/auth/refresh')) {
+            return handler.next(error);
+          }
+          final current = await SessionController.to.accessToken();
+          final token =
+              current != null &&
+                  request.headers['Authorization'] != 'Bearer $current'
+              ? current
+              : await SessionController.to.refresh();
+          if (token == null) return handler.next(error);
+          request.extra['retried'] = true;
+          request.headers['Authorization'] = 'Bearer $token';
+          if (request.data is FormData)
+            request.data = (request.data as FormData).clone();
+          try {
+            return handler.resolve(await _dio.fetch<dynamic>(request));
+          } on DioException catch (retryError) {
+            return handler.next(retryError);
+          }
+        },
       ),
-      barrierDismissible: false,
     );
   }
 
-  /// Get Request
-  Future<ApiResponse> getRequest(String url,  {Map<String, dynamic>? queryParams, String? accessToken}) async {
-    try {
+  final Dio _dio = Dio(
+    BaseOptions(
+      connectTimeout: const Duration(seconds: 30),
+      receiveTimeout: const Duration(seconds: 100),
+      validateStatus: (status) => status != null && status < 400,
+    ),
+  );
 
-      // Map<String, String> headers = {
-      //   'content-type' : 'application/json'
-      // };
-      // if (accessToken != null) {
-      //   headers['token'] = accessToken;
-      // }
-
-      final headers = <String, String>{
-        'Authorization': accessToken != null ? 'Bearer $accessToken' : '',
-        //'Authorization': token ?? '',
-        // 'Content-Type': files != null ? 'multipart/form-data' : 'application/json',
-      };
-
-      if (queryParams != null) {
-        url += '?';
-        for (String param in queryParams.keys) {
-          url += '$param=${queryParams[param]}&';
-        }
-      }
-
-      Uri uri = Uri.parse(url);
-      //_logger.i('URL => $url');
-      _logRequest(url);
-      Response response = await get(uri, headers: headers).timeout(
-        _requestTimeout,
-        onTimeout: () {
-          throw TimeoutException('Request timed out after ${_requestTimeout.inSeconds} seconds');
-        },
-      );
-
-      // Log status code immediately
-      _logger.i('📊 STATUS CODE => ${response.statusCode}');
-
-      _logResponse(url, response.statusCode, response.headers, response.body);
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        if (response.body.isEmpty) {
-          return ApiResponse(
-            isSuccess: false,
-            statusCode: response.statusCode,
-            errorMessage: 'Empty response body',
-          );
-        }
-        final decodedMessage = jsonDecode(response.body);
-        return ApiResponse(
-          isSuccess: true,
-          statusCode: response.statusCode,
-          responseData: decodedMessage,
-        );
-      } else {
-        if (response.body.isEmpty) {
-          return ApiResponse(
-            isSuccess: false,
-            statusCode: response.statusCode,
-            errorMessage: '',
-          );
-        }
-        try {
-          final decodedMessage = jsonDecode(response.body);
-          // Try to extract errorMessage field first (backend format), fallback to msg, then message
-          String errorMsg = decodedMessage['errorMessage'] ??
-              decodedMessage['msg'] ??
-              decodedMessage['message'] ??
-              'Something went wrong';
-          return ApiResponse(
-            isSuccess: false,
-            statusCode: response.statusCode,
-            errorMessage: errorMsg,
-          );
-        } catch (e) {
-          return ApiResponse(
-            isSuccess: false,
-            statusCode: response.statusCode,
-            errorMessage: '',
-          );
-        }
-      }
-    } on TimeoutException catch (e) {
-      _logger.e('Timeout: ${e.message}');
-      _showTimeoutDialog();
-      return ApiResponse(
-        isSuccess: false,
-        statusCode: 408, // Request Timeout
-        errorMessage: 'The server is not working. Please try again later.',
-      );
-    } catch (e) {
-      _logResponse(url, -1, null, '');
-      return ApiResponse(
-        isSuccess: false,
-        statusCode: -1,
-        errorMessage: e.toString(),
-      );
-    }
-  }
-
-
-  /// Post Request
-  /// POST JSON Request — ✅ Now supports headers
+  Future<ApiResponse> getRequest(
+    String url, {
+    Map<String, dynamic>? queryParams,
+    String? accessToken,
+  }) => _request('GET', url, queryParams: queryParams);
   Future<ApiResponse> postRequest(
-      String url, {
-        Map<String, dynamic>? body,
-        String? accessToken,
-        Map<String, String>? customHeaders,
-      }) async {
-    try {
-      // Start with default JSON header
-      final headers = <String, String>{
-        'Content-Type': 'application/json',
-      };
-
-      // Add Authorization if token provided
-      if (accessToken != null) {
-        headers['Authorization'] = 'Bearer $accessToken';
-      }
-
-      // Merge custom headers (if any)
-      if (customHeaders != null) {
-        headers.addAll(customHeaders);
-      }
-
-      _logRequest(url, headers, body);
-
-      _logger.i('🚀 Sending POST request... (timeout: ${_requestTimeout.inSeconds}s)');
-      final startTime = DateTime.now();
-
-      final response = await post(
-        Uri.parse(url),
-        headers: headers,
-        body: jsonEncode(body),
-      ).timeout(
-        _requestTimeout,
-        onTimeout: () {
-          final elapsed = DateTime.now().difference(startTime);
-          _logger.e('⏱️ Request timeout triggered after ${elapsed.inSeconds}s');
-          throw TimeoutException('Request timed out after ${_requestTimeout.inSeconds} seconds');
-        },
-      );
-
-      final elapsed = DateTime.now().difference(startTime);
-      _logger.i('✅ Response received in ${elapsed.inMilliseconds}ms');
-
-      // Log status code immediately
-      _logger.i('📊 STATUS CODE => ${response.statusCode}');
-
-      _logResponse(url, response.statusCode, response.headers, response.body);
-
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        final decoded = jsonDecode(response.body);
-        return ApiResponse(
-          isSuccess: true,
-          statusCode: response.statusCode,
-          responseData: decoded,
-        );
-      } else {
-        try {
-          final decoded = jsonDecode(response.body);
-          // Try to extract error message from multiple possible fields
-          String errorMsg = decoded is Map
-              ? (decoded['errorMessage'] ??
-              decoded['msg'] ??
-              decoded['message'] ??
-              '').toString()
-              : '';
-          return ApiResponse(
-            isSuccess: false,
-            statusCode: response.statusCode,
-            errorMessage: errorMsg,
-          );
-        } catch (_) {
-          return ApiResponse(
-            isSuccess: false,
-            statusCode: response.statusCode,
-            errorMessage: 'Something went wrong. Please try again.',
-          );
-        }
-      }
-    } on TimeoutException catch (e) {
-      _logger.e('⏱️ TimeoutException caught: ${e.message}');
-      _showTimeoutDialog();
-      return ApiResponse(
-        isSuccess: false,
-        statusCode: 408, // Request Timeout
-        errorMessage: 'The server is not working. Please try again later.',
-      );
-    } on SocketException catch (e) {
-      _logger.e('🔌 SocketException: ${e.message}');
-      _logger.e('   Address: ${e.address}');
-      _logger.e('   Port: ${e.port}');
-      return ApiResponse(
-        isSuccess: false,
-        statusCode: -1,
-        errorMessage: 'Network error: ${e.message}',
-      );
-    } on FormatException catch (e) {
-      _logger.e('📝 FormatException: ${e.message}');
-      _logger.e('   Source: ${e.source}');
-      return ApiResponse(
-        isSuccess: false,
-        statusCode: -1,
-        errorMessage: 'Format error: ${e.message}',
-      );
-    } catch (e, stackTrace) {
-      _logger.e('❌ Unexpected exception type: ${e.runtimeType}');
-      _logger.e('   Exception: $e');
-      _logger.e('   StackTrace: $stackTrace');
-      return ApiResponse(
-        isSuccess: false,
-        statusCode: -1,
-        errorMessage: e.toString(),
-      );
-    }
-  }
-
-  /// DELETE Request
-  Future<ApiResponse> deleteRequest(
-      String url, {
-        String? accessToken,
-        Map<String, String>? customHeaders,
-      }) async {
-    try {
-      final headers = <String, String>{};
-
-      if (accessToken != null) headers['Authorization'] = 'Bearer $accessToken';
-      if (customHeaders != null) headers.addAll(customHeaders);
-
-      _logRequest(url, headers, null);
-
-      final response = await delete(
-        Uri.parse(url),
-        headers: headers,
-      ).timeout(
-        _requestTimeout,
-        onTimeout: () {
-          throw TimeoutException('Request timed out after ${_requestTimeout.inSeconds} seconds');
-        },
-      );
-
-      // Log status code immediately
-      _logger.i('📊 STATUS CODE => ${response.statusCode}');
-
-      _logResponse(url, response.statusCode, response.headers, response.body);
-
-      if (response.statusCode == 200 || response.statusCode == 201 || response.statusCode == 204) {
-        // 204 = No Content (common for successful DELETE)
-        if (response.body.isEmpty) {
-          return ApiResponse(
-            isSuccess: true,
-            statusCode: response.statusCode,
-            responseData: {'message': 'Deleted successfully'},
-          );
-        }
-        return ApiResponse(
-          isSuccess: true,
-          statusCode: response.statusCode,
-          responseData: jsonDecode(response.body),
-        );
-      } else {
-        try {
-          final decoded = jsonDecode(response.body);
-          // Try to extract errorMessage field first, fallback to msg, then message
-          String errorMsg = decoded['errorMessage'] ??
-              decoded['msg'] ??
-              decoded['message'] ??
-              '';
-          return ApiResponse(
-            isSuccess: false,
-            statusCode: response.statusCode,
-            errorMessage: errorMsg,
-          );
-        } catch (_) {
-          return ApiResponse(
-            isSuccess: false,
-            statusCode: response.statusCode,
-            errorMessage: '',
-          );
-        }
-      }
-    } on TimeoutException catch (e) {
-      _logger.e('Timeout: ${e.message}');
-      _showTimeoutDialog();
-      return ApiResponse(
-        isSuccess: false,
-        statusCode: 408, // Request Timeout
-        errorMessage: 'The server is not working. Please try again later.',
-      );
-    } catch (e) {
-      return ApiResponse(
-        isSuccess: false,
-        statusCode: -1,
-        errorMessage: e.toString(),
-      );
-    }
-  }
-
-  /// PATCH JSON Request
+    String url, {
+    Map<String, dynamic>? body,
+    String? accessToken,
+    Map<String, String>? customHeaders,
+  }) => _request('POST', url, data: body, headers: customHeaders);
   Future<ApiResponse> patchRequest(
-      String url, {
-        Map<String, dynamic>? body,
-        String? accessToken,
-        Map<String, String>? customHeaders,
-      }) async {
-    try {
-      final headers = <String, String>{
-        'Content-Type': 'application/json',
-      };
+    String url, {
+    Map<String, dynamic>? body,
+    String? accessToken,
+    Map<String, String>? customHeaders,
+  }) => _request('PATCH', url, data: body ?? {}, headers: customHeaders);
+  Future<ApiResponse> deleteRequest(
+    String url, {
+    String? accessToken,
+    Map<String, String>? customHeaders,
+  }) => _request('DELETE', url, headers: customHeaders);
 
-      if (accessToken != null) headers['Authorization'] = 'Bearer $accessToken';
-      if (customHeaders != null) headers.addAll(customHeaders);
-
-      // 🛑 Prevent sending `"null"`
-      final encodedBody = body == null ? '{}' : jsonEncode(body);
-
-      _logRequest(url, headers, body);
-
-      final response = await patch(
-        Uri.parse(url),
-        headers: headers,
-        body: encodedBody,   // ✔ Always valid JSON
-      ).timeout(
-        _requestTimeout,
-        onTimeout: () {
-          throw TimeoutException('Request timed out after ${_requestTimeout.inSeconds} seconds');
-        },
-      );
-
-      _logResponse(url, response.statusCode, response.headers, response.body);
-
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        return ApiResponse(
-          isSuccess: true,
-          statusCode: response.statusCode,
-          responseData: jsonDecode(response.body),
-        );
-      } else {
-        try {
-          final decoded = json.decode(response.body);
-          // Try to extract error message from multiple possible fields
-          String errorMsg = decoded is Map
-              ? (decoded['errorMessage'] ??
-              decoded['msg'] ??
-              decoded['message'] ??
-              '').toString()
-              : '';
-
-          return ApiResponse(
-            isSuccess: false,
-            statusCode: response.statusCode,
-            errorMessage: errorMsg,
-          );
-        } catch (_) {
-          return ApiResponse(
-            isSuccess: false,
-            statusCode: response.statusCode,
-            errorMessage: '',
-          );
-        }
-      }
-    } on TimeoutException catch (e) {
-      _logger.e('Timeout: ${e.message}');
-      _showTimeoutDialog();
-      return ApiResponse(
-        isSuccess: false,
-        statusCode: 408, // Request Timeout
-        errorMessage: 'The server is not working. Please try again later.',
-      );
-    } catch (e) {
-      return ApiResponse(
-        isSuccess: false,
-        statusCode: -1,
-        errorMessage: e.toString(),
-      );
-    }
-  }
-
-
-
-  void _logRequest(String url,
-      [Map<String, dynamic>? headers, Map<String, dynamic>? body]) {
-    // the params in [] means these are optional params
-    _logger.i('URL => $url\nHEADERS => $headers\nBODY => $body');
-  }
-
-  void _logResponse(String url, int statusCode, Map<String, String>? headers,
-      String body, [String? errorMessage]) {
-    if (errorMessage != null) {
-      _logger.e(
-          'URL => $url\nERROR MESSAGE => $errorMessage');
-    } else {
-      _logger.i(
-          'URL => $url\nHEADERS => $headers\nSTATUS CODE => $statusCode\nBODY => $body');
-    }
-  }
-
-
-
-  /// PATCH Multipart Request (for file uploads + form fields with PATCH method)
   Future<ApiResponse> patchMultipartRequest(
-      String url, {
-        Map<String, String>? fields,
-        Map<String, File>? files,
-        String? accessToken,
-      }) async {
-    try {
-      final request = http.MultipartRequest('PATCH', Uri.parse(url));
+    String url, {
+    Map<String, String>? fields,
+    Map<String, File>? files,
+    String? accessToken,
+  }) async => _request('PATCH', url, data: await _form(fields, files));
+  Future<ApiResponse> postMultipartRequest(
+    String url, {
+    Map<String, String>? fields,
+    Map<String, File>? files,
+    String? accessToken,
+    Map<String, dynamic>? jsonBody,
+  }) async => _request(
+    'POST',
+    url,
+    data: await _form({
+      ...?fields,
+      if (jsonBody != null) 'body': jsonEncode(jsonBody),
+    }, files),
+  );
 
-      // Add headers
-      request.headers['Authorization'] = accessToken != null ? 'Bearer $accessToken' : '';
-
-      // Add text fields
-      if (fields != null) {
-        request.fields.addAll(fields);
-      }
-
-      // Add files
-      if (files != null) {
-        for (final entry in files.entries) {
-          final String fieldName = entry.key;
-          final File file = entry.value;
-
-          final mimeType = lookupMimeType(file.path) ?? 'application/octet-stream';
-          final filename = p.basename(file.path);
-
-          final fileStream = http.ByteStream(file.openRead());
-          final length = await file.length();
-
-          final multipartFile = http.MultipartFile(fieldName, fileStream, length,
-              filename: filename, contentType: MediaType.parse(mimeType));
-
-          request.files.add(multipartFile);
-        }
-      }
-
-      _logRequest(url, request.headers, {'fields': fields?.keys, 'files': files?.keys});
-
-      final streamedResponse = await request.send().timeout(
-        _requestTimeout,
-        onTimeout: () {
-          throw TimeoutException('Request timed out after ${_requestTimeout.inSeconds} seconds');
-        },
-      );
-      final response = await http.Response.fromStream(streamedResponse);
-      _logResponse(url, response.statusCode, response.headers, response.body);
-
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        final decodedData = jsonDecode(response.body);
-        return ApiResponse(
-          isSuccess: true,
-          statusCode: response.statusCode,
-          responseData: decodedData,
+  Future<FormData> _form(
+    Map<String, String>? fields,
+    Map<String, File>? files,
+  ) async {
+    final form = FormData();
+    fields?.forEach((key, value) => form.fields.add(MapEntry(key, value)));
+    if (files != null) {
+      for (final entry in files.entries) {
+        form.files.add(
+          MapEntry(entry.key, await MultipartFile.fromFile(entry.value.path)),
         );
-      } else {
-        try {
-          final decoded = jsonDecode(response.body);
-          // Try to extract error message from multiple possible fields
-          String errorMsg = decoded is Map
-              ? (decoded['errorMessage'] ??
-              decoded['msg'] ??
-              decoded['message'] ??
-              '').toString()
-              : '';
-          return ApiResponse(
-            isSuccess: false,
-            statusCode: response.statusCode,
-            errorMessage: errorMsg,
-          );
-        } catch (_) {
-          return ApiResponse(
-            isSuccess: false,
-            statusCode: response.statusCode,
-            errorMessage: '',
-          );
-        }
       }
-    } on TimeoutException catch (e) {
-      _logger.e('Timeout: ${e.message}');
-      _showTimeoutDialog();
+    }
+    return form;
+  }
+
+  Future<ApiResponse> _request(
+    String method,
+    String url, {
+    dynamic data,
+    Map<String, dynamic>? queryParams,
+    Map<String, String>? headers,
+  }) async {
+    try {
+      final response = await _dio.request<dynamic>(
+        url,
+        data: data,
+        queryParameters: queryParams,
+        options: Options(method: method, headers: headers),
+      );
+      return ApiResponse(
+        isSuccess: true,
+        statusCode: response.statusCode ?? 200,
+        responseData: response.data,
+      );
+    } on DioException catch (error) {
+      final body = error.response?.data;
+      final code = body is Map ? body['code'] as String? : null;
+      SessionController.to.updateFromErrorCode(code);
       return ApiResponse(
         isSuccess: false,
-        statusCode: 408, // Request Timeout
-        errorMessage: 'The server is not working. Please try again later.',
+        statusCode: error.response?.statusCode ?? -1,
+        responseData: body,
+        errorCode: code,
+        errorMessage: _messageFor(code),
       );
-    } catch (e, stackTrace) {
-      _logger.e(stackTrace);
-      _logResponse(url, -1, null, '', e.toString());
+    } catch (_) {
       return ApiResponse(
         isSuccess: false,
         statusCode: -1,
-        errorMessage: e.toString(),
+        errorMessage: AppLocalization.tr.networkErrorMessage,
       );
     }
   }
 
-  /// Post Multipart Request (for file uploads + form fields)
-  Future<ApiResponse> postMultipartRequest(
-      String url, {
-        Map<String, String>? fields,
-        Map<String, File>? files,
-        String? accessToken,
-        Map<String, dynamic>? jsonBody,
-      }) async {
-    try {
-      final request = http.MultipartRequest('POST', Uri.parse(url));
-
-      // Add headers
-      request.headers['Authorization'] = accessToken != null ? 'Bearer $accessToken' : '';
-
-      // If jsonBody is provided, add it as a JSON string in the body field
-      if (jsonBody != null) {
-        request.fields['body'] = jsonEncode(jsonBody);
-      }
-
-      // Add text fields
-      if (fields != null) {
-        request.fields.addAll(fields);
-      }
-
-      // Add files
-      if (files != null) {
-        _logger.i('🔸 NetworkCaller.postMultipartRequest - Processing ${files.length} files');
-        for (final entry in files.entries) {
-          final String fieldName = entry.key;
-          final File file = entry.value;
-
-          _logger.i('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-          _logger.i('📎 File Field: $fieldName');
-          _logger.i('   Path: ${file.path}');
-          _logger.i('   Exists: ${file.existsSync()}');
-
-          final mimeType = lookupMimeType(file.path) ?? 'application/octet-stream';
-          final filename = p.basename(file.path);
-
-          _logger.i('   Filename: $filename');
-          _logger.i('   MIME Type: $mimeType');
-
-          final fileStream = http.ByteStream(file.openRead());
-          final length = await file.length();
-
-          _logger.i('   File Size: $length bytes');
-          _logger.i('   MediaType object: ${MediaType.parse(mimeType)}');
-
-          final multipartFile = http.MultipartFile(fieldName, fileStream, length,
-              filename: filename, contentType: MediaType.parse(mimeType));
-
-          request.files.add(multipartFile);
-          _logger.i('✅ File added to multipart request');
-          _logger.i('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-        }
-      }
-
-      _logRequest(url, request.headers, {'fields': fields?.keys, 'files': files?.keys});
-
-      _logger.i('🚀 Sending multipart POST request to: $url');
-      _logger.i('   Total files: ${request.files.length}');
-      _logger.i('   Total fields: ${request.fields.length}');
-
-      final streamedResponse = await request.send().timeout(
-        _requestTimeout,
-        onTimeout: () {
-          throw TimeoutException('Request timed out after ${_requestTimeout.inSeconds} seconds');
-        },
-      );
-      final response = await http.Response.fromStream(streamedResponse);
-
-      _logger.i('📥 Response received:');
-      _logger.i('   Status Code: ${response.statusCode}');
-      _logger.i('   Body length: ${response.body.length} chars');
-
-      _logResponse(url, response.statusCode, response.headers, response.body);
-
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        final decodedData = jsonDecode(response.body);
-        _logger.i('✅ POST Multipart Request SUCCESS');
-        return ApiResponse(
-          isSuccess: true,
-          statusCode: response.statusCode,
-          responseData: decodedData,
-        );
-      } else {
-        _logger.e('❌ POST Multipart Request FAILED - Status ${response.statusCode}');
-        try {
-          final decoded = jsonDecode(response.body);
-          // Try to extract error message from multiple possible fields
-          String errorMsg = decoded is Map
-              ? (decoded['errorMessage'] ??
-              decoded['msg'] ??
-              decoded['message'] ??
-              '').toString()
-              : '';
-          _logger.e('   Error message: $errorMsg');
-          return ApiResponse(
-            isSuccess: false,
-            statusCode: response.statusCode,
-            errorMessage: errorMsg,
-          );
-        } catch (_) {
-          return ApiResponse(
-            isSuccess: false,
-            statusCode: response.statusCode,
-            errorMessage: '',
-          );
-        }
-      }
-    } on TimeoutException catch (e) {
-      _logger.e('Timeout: ${e.message}');
-      _showTimeoutDialog();
-      return ApiResponse(
-        isSuccess: false,
-        statusCode: 408, // Request Timeout
-        errorMessage: 'The server is not working. Please try again later.',
-      );
-    } catch (e, stackTrace) {
-      _logger.e('❌ Exception in postMultipartRequest:');
-      _logger.e(e.toString());
-      _logger.e(stackTrace);
-      _logResponse(url, -1, null, '', e.toString());
-      return ApiResponse(
-        isSuccess: false,
-        statusCode: -1,
-        errorMessage: e.toString(),
-      );
+  String _messageFor(String? code) {
+    switch (code) {
+      case 'INVALID_CREDENTIALS':
+        return AppLocalization.tr.invalidCredentialsMessage;
+      case 'UNAUTHENTICATED':
+      case 'TOKEN_EXPIRED':
+      case 'TOKEN_INVALID':
+      case 'REFRESH_TOKEN_INVALID':
+        return AppLocalization.tr.sessionExpiredMessage;
+      case 'ONBOARDING_REQUIRED':
+        return AppLocalization.tr.onboardingRequiredMessage;
+      case 'ACCOUNT_PENDING_REVIEW':
+        return AppLocalization.tr.accountPendingReviewMessage;
+      case 'ACCOUNT_REJECTED':
+        return AppLocalization.tr.accountRejectedMessage;
+      case 'ACCOUNT_SUSPENDED':
+        return AppLocalization.tr.accountSuspendedMessage;
+      case 'ACCOUNT_DELETED':
+        return AppLocalization.tr.accountDeletedMessage;
+      case 'FORBIDDEN':
+        return AppLocalization.tr.permissionDeniedMessage;
+      case 'RATE_LIMITED':
+        return AppLocalization.tr.tooManyRequestsMessage;
+      default:
+        return AppLocalization.tr.genericErrorMessage;
     }
   }
 }

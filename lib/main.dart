@@ -11,6 +11,9 @@ import 'package:ride_sharing/app.dart';
 import 'package:ride_sharing/firebase_options.dart';
 import 'package:ride_sharing/services/location_service.dart';
 import 'package:ride_sharing/services/socket_services.dart';
+import 'package:ride_sharing/services/session_controller.dart';
+import 'package:ride_sharing/services/realtime_client.dart';
+import 'package:ride_sharing/services/ride_session_controller.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -34,11 +37,15 @@ void main() async {
   // Initialize Stripe with publishable key
   Stripe.publishableKey = dotenv.env['STRIPE_PUBLISHABLE_KEY'] ?? '';
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  final session = Get.put(SessionController(), permanent: true);
+  await session.restore();
   await Get.putAsync<SocketIoService>(() async {
     final service = SocketIoService();
     await service.init();
     return service;
   });
+  Get.put(RealtimeClient(), permanent: true);
+  Get.put(RideSessionController().initialize(), permanent: true);
 
   runApp(const RideSharingApp());
 }

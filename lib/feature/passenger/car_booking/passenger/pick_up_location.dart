@@ -2,8 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:google_places_flutter/google_places_flutter.dart';
-import 'package:google_places_flutter/model/prediction.dart';
 import 'package:ride_sharing/custom_assets/app_image.dart';
 import 'package:ride_sharing/l10n/l10n_helper.dart';
 import 'package:ride_sharing/feature/passenger/car_booking/passenger/controller/pick_up_location_controller.dart';
@@ -11,10 +9,10 @@ import 'package:ride_sharing/feature/passenger/car_booking/passenger/passenger_m
 import 'package:ride_sharing/feature/passenger/car_booking/passenger/set_on_map_screen.dart';
 import 'package:ride_sharing/feature/passenger/set_location/view/set_location_option_page.dart';
 import 'package:ride_sharing/widgets/custom_app_bar_title.dart';
+import 'package:ride_sharing/widgets/server_place_autocomplete_text_field.dart';
 import 'package:ride_sharing/widgets/app_google_map.dart';
 import 'package:ride_sharing/widgets/home_links/home_links.dart';
 import 'package:ride_sharing/app/utils/app_colors.dart';
-import 'package:ride_sharing/services/app_config.dart';
 
 class PickUpLocationScreen extends StatelessWidget {
   PickUpLocationScreen({Key? key}) : super(key: key);
@@ -98,10 +96,8 @@ class PickUpLocationScreen extends StatelessWidget {
                                   Icon(Icons.location_on, color: AppColors.primaryColor),
                                   SizedBox(width: 8),
                                   Expanded(
-                                    child: GooglePlaceAutoCompleteTextField(
+                                    child: ServerPlaceAutoCompleteTextField(
                                       textEditingController: controller.pickUpAddressController,
-                                      googleAPIKey: AppConfig.googleMapsApiKey,
-                                    //   googleAPIKey: "AIzaSyBUHqcmvmiPPwuwl33JkMP3lAzKMxREenI",
                                       inputDecoration: InputDecoration(
                                         border: InputBorder.none,
                                         hintText: AppLocalization.tr.whereAreYouHeadedHint,
@@ -183,10 +179,8 @@ class PickUpLocationScreen extends StatelessWidget {
                                   Icon(Icons.location_on, color: AppColors.primaryColor),
                                   SizedBox(width: 8),
                                   Expanded(
-                                    child: GooglePlaceAutoCompleteTextField(
+                                    child: ServerPlaceAutoCompleteTextField(
                                       textEditingController: controller.destinationAddressController,
-                                      googleAPIKey: AppConfig.googleMapsApiKey,
-                                   //   googleAPIKey: "AIzaSyBUHqcmvmiPPwuwl33JkMP3lAzKMxREenI",
                                       inputDecoration: InputDecoration(
                                         border: InputBorder.none,
                                         hintText: AppLocalization.tr.whereAreYouHeadedHint,
@@ -349,7 +343,9 @@ class PickUpLocationScreen extends StatelessWidget {
                                   return DropdownMenuItem<String>(
                                     value: value,
                                     child: Text(
-                                      value,
+                                      value == 'Book for myself'
+                                          ? AppLocalization.tr.bookForMyselfOption
+                                          : AppLocalization.tr.bookForFriendOption,
                                       style: TextStyle(
                                         fontSize: 16,
                                         color: AppColors.darkColor,
@@ -450,7 +446,8 @@ class PickUpLocationScreen extends StatelessWidget {
                         // Calculate fare before showing the bottom sheet
                         bool success = await controller.calculateFare();
                         if (success) {
-                          Navigator.pop(context);
+                          // Keep this screen on the stack so backing out of
+                          // the map returns here with the addresses intact.
                           Get.to(() => PassengerMapScreen(
                             pickUpAddress: controller.pickUpAddressController.text,
                             destinationAddress: controller.destinationAddressController.text,

@@ -6,6 +6,7 @@ import 'package:ride_sharing/utils/support_note_widget.dart';
 import 'package:ride_sharing/utils/user_info_section.dart';
 import 'package:ride_sharing/widgets/auth_links/auth_link.dart';
 import 'package:ride_sharing/widgets/custom_vertical_line.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
 
 
 class DriverOngoingTripDetails extends StatelessWidget {
@@ -159,8 +160,8 @@ class DriverOngoingTripDetails extends StatelessWidget {
                         name: 'John Doe',
                         rating: 3.54,
                         trips: 3,
-                        profession: 'Professional',
-                        price: '\$24',
+                        profession: AppLocalization.tr.professionalLabel,
+                        price: '€24',
                         distance: '28 km',
                       ),
                     //  SupportNoteWidget(),

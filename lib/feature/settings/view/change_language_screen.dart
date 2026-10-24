@@ -19,21 +19,22 @@ class _ChangeLanguageScreenState extends State<ChangeLanguageScreen> {
   @override
   void initState() {
     super.initState();
-    selectedLanguage = 'French';
+    selectedLanguage = LocaleService.isFrench ? 'fr' : 'en';
   }
 
-  Future<void> _changeLanguage(String language) async {
+  Future<void> _changeLanguage(String code) async {
     setState(() {
-      selectedLanguage = language;
+      selectedLanguage = code;
     });
-    await LocaleService.setLocale(const Locale('fr'));
+    await LocaleService.setLocale(Locale(code));
   }
 
   @override
   Widget build(BuildContext context) {
-    final List<String> languages = [
-      AppLocalization.tr.frenchLanguage,
-    ];
+    final Map<String, String> languages = {
+      'fr': AppLocalization.tr.frenchLanguage,
+      'en': AppLocalization.tr.englishLanguage,
+    };
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -62,21 +63,20 @@ class _ChangeLanguageScreenState extends State<ChangeLanguageScreen> {
       body: Padding(
         padding:  EdgeInsets.all(20.sp),
         child: Column(
-          children: languages.map((language) {
-            return _buildLanguageOption(language);
-          }).toList(),
+          children: languages.entries
+              .map((entry) => _buildLanguageOption(entry.key, entry.value))
+              .toList(),
         ),
       ),
     );
   }
 
-  Widget _buildLanguageOption(String language) {
-    final isSelected = selectedLanguage == language ||
-        (language == AppLocalization.tr.frenchLanguage && selectedLanguage == 'French');
+  Widget _buildLanguageOption(String code, String language) {
+    final isSelected = selectedLanguage == code;
 
     return InkWell(
       onTap: () {
-        _changeLanguage(language);
+        _changeLanguage(code);
       },
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 8),

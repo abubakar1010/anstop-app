@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
 import '../data/support_message_model.dart';
 
 class SupportListItem extends StatelessWidget {
@@ -76,7 +77,7 @@ class SupportListItem extends StatelessWidget {
                 ),
                 SizedBox(width: 4.w),
                 Text(
-                  _formatDate(supportMessage.createdAt),
+                  _formatDate(context, supportMessage.createdAt),
                   style: TextStyle(
                     fontSize: 12.sp,
                     color: const Color(0xFF999999),
@@ -120,7 +121,7 @@ class SupportListItem extends StatelessWidget {
         borderRadius: BorderRadius.circular(12.r),
       ),
       child: Text(
-        status,
+        _statusLabel(status),
         style: TextStyle(
           fontSize: 12.sp,
           fontWeight: FontWeight.w500,
@@ -130,7 +131,23 @@ class SupportListItem extends StatelessWidget {
     );
   }
 
-  String _formatDate(DateTime date) {
-    return DateFormat('MMM dd, yyyy • hh:mm a').format(date);
+  String _statusLabel(String status) {
+    switch (status.toUpperCase()) {
+      case 'OPEN':
+        return AppLocalization.tr.supportStatusOpen;
+      case 'IN_PROGRESS':
+        return AppLocalization.tr.supportStatusInProgress;
+      case 'RESOLVED':
+        return AppLocalization.tr.supportStatusResolved;
+      case 'CLOSED':
+        return AppLocalization.tr.supportStatusClosed;
+      default:
+        return status;
+    }
+  }
+
+  String _formatDate(BuildContext context, DateTime date) {
+    final locale = Localizations.localeOf(context).toString();
+    return '${DateFormat.yMMMd(locale).format(date)} • ${DateFormat.jm(locale).format(date)}';
   }
 }

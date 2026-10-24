@@ -1,4 +1,3 @@
-import 'package:ride_sharing/feature/auth/view/log_in_screen.dart';
 import 'package:ride_sharing/feature/settings/data/legal_document_model.dart';
 import 'package:ride_sharing/routes/app_routes.dart';
 import 'package:ride_sharing/widgets/auth_links/auth_link.dart';
@@ -223,7 +222,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       SizedBox(height: 16.h),
                       GestureDetector(
                         onTap: (){
-                          Get.to(LogInScreen());
+                          Get.offAllNamed(AppRoutes.loginScreen);
                         },
                         child: RichText(
                           text: TextSpan(

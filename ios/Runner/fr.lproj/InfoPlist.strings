@@ -1,0 +1,8 @@
+/* Permission prompts shown by iOS. Keep in sync with Info.plist and en.lproj. */
+"NSCameraUsageDescription" = "Anstop a besoin d'accéder à l'appareil photo pour prendre votre photo de profil.";
+"NSLocationAlwaysAndWhenInUseUsageDescription" = "Anstop a besoin de votre position pour afficher les chauffeurs à proximité et suivre votre course.";
+"NSLocationAlwaysUsageDescription" = "Anstop a besoin de votre position en arrière-plan pour suivre votre course en cours.";
+"NSLocationWhenInUseUsageDescription" = "Anstop utilise votre position pour afficher les chauffeurs à proximité et suivre votre course.";
+"NSMicrophoneUsageDescription" = "Anstop a besoin d'accéder au micro pour enregistrer une vidéo pour votre profil.";
+"NSPhotoLibraryAddOnlyUsageDescription" = "Anstop a besoin de votre autorisation pour enregistrer des photos dans votre photothèque.";
+"NSPhotoLibraryUsageDescription" = "Anstop a besoin d'accéder à votre photothèque pour définir votre photo de profil.";

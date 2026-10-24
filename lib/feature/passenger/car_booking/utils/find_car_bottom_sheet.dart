@@ -14,6 +14,7 @@ import 'package:ride_sharing/services/socket_services.dart';
 import '../../../../app/utils/app_colors.dart';
 import '../../../../widgets/custom_button.dart';
 import '../../../../widgets/custom_text_field.dart';
+import 'package:ride_sharing/app/helpers/price_format.dart';
 
 class FindCarBottomSheet extends StatefulWidget {
   final String pickUpAddress;
@@ -181,6 +182,7 @@ class _FindCarBottomSheetState extends State<FindCarBottomSheet> {
       }
 
       _logger.i('Ride request successful, nearby drivers data: $_nearbyDriversData');
+      Get.find<HomePageController>().rideRequestActive = true;
       Get.find<HomePageController>().showPassengerSheet(
         (_) => AcceptCarBottomSheet(
           pickUpAddress: widget.pickUpAddress,
@@ -193,7 +195,7 @@ class _FindCarBottomSheetState extends State<FindCarBottomSheet> {
       setState(() {
         _isLoading = false;
       });
-      if (mounted) _showErrorSnackbar(context, 'Failed to create ride request: $e');
+      if (mounted) _showErrorSnackbar(context, AppLocalization.tr.rideRequestFailedMessage);
     }
   }
 
@@ -305,7 +307,7 @@ class _FindCarBottomSheetState extends State<FindCarBottomSheet> {
                             ),
                           ),
                           Text(
-                            '${widget.duration.toInt()} sec',
+                            AppLocalization.tr.durationMinutesLabel((widget.duration / 60).ceil().toString()),
                             style: TextStyle(
                               fontSize: 12.sp,
                               color: AppColors.appGreyColor,
@@ -326,7 +328,7 @@ class _FindCarBottomSheetState extends State<FindCarBottomSheet> {
                             ),
                           ),
                           Text(
-                            '€${widget.fare.toStringAsFixed(2)}',
+                            formatPrice(widget.fare),
                             style: TextStyle(
                               fontSize: 18.sp,
                               fontWeight: FontWeight.bold,
@@ -381,7 +383,7 @@ class _FindCarBottomSheetState extends State<FindCarBottomSheet> {
                             fit: BoxFit.contain,
                           ),
                           SizedBox(width: 10),
-                          Text(value),
+                          Text(_paymentMethodLabel(value)),
                         ],
                       ),
                     ),
@@ -501,6 +503,17 @@ class _FindCarBottomSheetState extends State<FindCarBottomSheet> {
         ),
       ),
     );
+  }
+
+  String _paymentMethodLabel(String paymentMethod) {
+    switch (paymentMethod) {
+      case 'By Cards':
+        return AppLocalization.tr.paymentMethodCard;
+      case 'By Cash':
+        return AppLocalization.tr.paymentMethodCash;
+      default:
+        return AppLocalization.tr.paymentMethodWallet;
+    }
   }
 
   String _getImageForPaymentMethod(String paymentMethod) {

@@ -44,7 +44,7 @@ Future<void> createInvoicePDF({required Map<String, dynamic> items}) async {
   graphics.drawString('${items['name']}', normalFont,
       bounds: Rect.fromLTWH(20, y, 200, 20));
   graphics.drawString('1', normalFont, bounds: Rect.fromLTWH(250, y, 50, 20));
-  graphics.drawString('\$${items['price']}', normalFont,
+  graphics.drawString('€${items['price']}', normalFont,
       bounds: Rect.fromLTWH(400, y, 70, 20));
   y += 50;
 

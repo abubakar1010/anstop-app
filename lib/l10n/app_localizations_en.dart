@@ -102,6 +102,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get logInButtonText => 'Lets go!!';
 
   @override
+  String get noAccountText => 'Don\'t have an account?';
+
+  @override
   String get validationErrorTitle => 'Validation Error';
 
   @override
@@ -342,7 +345,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noteToDriverHint => 'Give a short note to the driver,';
 
   @override
-  String get priceExample => '\$24';
+  String get priceExample => '€24';
 
   @override
   String get distanceExample2 => '28 km';
@@ -369,7 +372,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get previousPriceLabel => 'Previous Price';
 
   @override
-  String get previousPriceExample => '\$20';
+  String get previousPriceExample => '€20';
 
   @override
   String get carNumberExample => 'DHK METRO - 8475Dkk';
@@ -403,7 +406,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get durationExample => '90 min';
 
   @override
-  String get fareExample => '\$26.00';
+  String get fareExample => '€26.00';
 
   @override
   String get confirmPaymentTitle => 'Confirm Payment';
@@ -442,7 +445,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rideValueLabel => 'Ride value';
 
   @override
-  String get fareExample2 => '\$ 25.69';
+  String get fareExample2 => '€ 25.69';
 
   @override
   String get walletTitle => 'Wallet';
@@ -755,9 +758,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noInternetConnectionLabel => 'No Internet Connection';
 
   @override
-  String get tripsCountLabel => 'Trips';
-
-  @override
   String get goToProfileLink => 'Go to profile ';
 
   @override
@@ -959,7 +959,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get sessionExpiredMessage =>
-      'Access token not found. Please login again.';
+      'Your session has expired. Please log in again.';
 
   @override
   String get pleaseLoginToContinueMessage => 'Please login to continue';
@@ -1229,6 +1229,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get retryButton => 'Retry';
+
+  @override
+  String get supportStatusOpen => 'Open';
+
+  @override
+  String get supportStatusInProgress => 'In progress';
+
+  @override
+  String get supportStatusResolved => 'Resolved';
+
+  @override
+  String get supportStatusClosed => 'Closed';
+
+  @override
+  String get supportLoadFailedMessage => 'Failed to load support messages';
 
   @override
   String get nextButton => 'Next';
@@ -1501,4 +1516,215 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get iWillPickYouUpLabel => 'I will pick you up';
+
+  @override
+  String get withdrawNowButton => 'Withdraw Now';
+
+  @override
+  String get depositButton => 'Deposit';
+
+  @override
+  String todayAtLabel(String time) {
+    return 'Today at $time';
+  }
+
+  @override
+  String get todayLabel => 'Today';
+
+  @override
+  String get yesterdayLabel => 'Yesterday';
+
+  @override
+  String get nowLabel => 'Now';
+
+  @override
+  String get professionalLabel => 'Professional';
+
+  @override
+  String get driverLabel => 'Driver';
+
+  @override
+  String get saveChangesButton => 'Save Changes';
+
+  @override
+  String get confirmButton => 'Confirm';
+
+  @override
+  String get arrivingAtDestinationLabel => 'Arriving at destination';
+
+  @override
+  String get currentLocationLabel => 'Current Location';
+
+  @override
+  String get destinationLabel => 'Destination';
+
+  @override
+  String get paymentMethodWallet => 'Wallet';
+
+  @override
+  String get paymentMethodCard => 'By card';
+
+  @override
+  String get paymentMethodCash => 'Cash';
+
+  @override
+  String payViaLabel(String method) {
+    return 'Pay via $method';
+  }
+
+  @override
+  String durationMinutesLabel(String minutes) {
+    return '$minutes min';
+  }
+
+  @override
+  String get rideNeedWheelchair => 'Wheelchair Accessible';
+
+  @override
+  String get rideNeedExtraLuggage => 'Extra Luggage Space';
+
+  @override
+  String get rideNeedPetFriendly => 'Pet Friendly';
+
+  @override
+  String get rideNeedChildSeat => 'Child Seat';
+
+  @override
+  String get selectRideNeedsHint => 'Select ride needs';
+
+  @override
+  String get bookForMyselfOption => 'Book for myself';
+
+  @override
+  String get bookForFriendOption => 'Book for my friend';
+
+  @override
+  String get cancelReasonDriverTooLong => 'Driver is taking too long';
+
+  @override
+  String get cancelReasonFoundAnother => 'Found another ride';
+
+  @override
+  String get cancelReasonChangeOfPlans => 'Change of plans';
+
+  @override
+  String get cancelReasonWrongPickup => 'Wrong pickup location';
+
+  @override
+  String get cancelReasonDriverRequested => 'Driver requested to cancel';
+
+  @override
+  String get cancelReasonOther => 'Other';
+
+  @override
+  String get fareCalculationFailedMessage =>
+      'Could not calculate the fare. Please try again.';
+
+  @override
+  String get rideRequestFailedMessage =>
+      'Could not create the ride request. Please try again.';
+
+  @override
+  String get ratingSubmitFailedMessage =>
+      'Failed to submit rating. Please try again.';
+
+  @override
+  String get paymentConfirmedMessage =>
+      'Your payment was confirmed successfully';
+
+  @override
+  String get paymentLinkMissingMessage =>
+      'Payment could not be started — the server did not return a payment link.';
+
+  @override
+  String get paymentLinkOpenFailedMessage => 'Could not open payment link';
+
+  @override
+  String get paymentFailedMessage => 'Payment failed';
+
+  @override
+  String get noTripDetailsMessage => 'No trip details available';
+
+  @override
+  String get uploadedLabel => 'Uploaded';
+
+  @override
+  String get notUploadedLabel => 'Not Uploaded';
+
+  @override
+  String get invalidCodeMessage => 'The code seems invalid. Please try again';
+
+  @override
+  String get enterValidCodeMessage => 'Enter a valid 6-digit Code';
+
+  @override
+  String get rideNoLongerAvailableMessage => 'This ride is no longer available';
+
+  @override
+  String tripsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count trips',
+      one: '1 trip',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get walletDepositLabel => 'Wallet deposit';
+
+  @override
+  String get walletWithdrawalLabel => 'Wallet withdrawal';
+
+  @override
+  String get enterBankNameError => 'Please enter the bank name';
+
+  @override
+  String get enterAccountNumberError => 'Please enter the account number';
+
+  @override
+  String get fieldRequiredError => 'This field is required';
+
+  @override
+  String fieldRequiredNamedError(String field) {
+    return '$field is required';
+  }
+
+  @override
+  String passwordMinLengthError(int min) {
+    return 'Password must be at least $min characters';
+  }
+
+  @override
+  String get loggingInLabel => 'Logging in...';
+
+  @override
+  String get passwordChangedSuccessMessage => 'Password changed successfully';
+
+  @override
+  String get accountPendingReviewMessage =>
+      'Your driver account is awaiting approval.';
+
+  @override
+  String get accountRejectedMessage =>
+      'Your driver application was rejected. Please contact support.';
+
+  @override
+  String get accountSuspendedMessage =>
+      'Your account is suspended. Please contact support.';
+
+  @override
+  String get accountDeletedMessage => 'This account has been deleted.';
+
+  @override
+  String get onboardingRequiredMessage => 'Please complete driver onboarding.';
+
+  @override
+  String get permissionDeniedMessage =>
+      'You do not have permission to do that.';
+
+  @override
+  String get tooManyRequestsMessage =>
+      'Too many requests. Please try again later.';
 }

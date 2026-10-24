@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 import 'package:flutter/services.dart';
@@ -8,16 +7,15 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
-import 'package:ride_sharing/feature/driver/homepage/service/driver_location_service.dart';
 import 'package:ride_sharing/feature/driver/trip_flow/model/ride_request_model.dart';
 import 'package:ride_sharing/feature/driver/trip_flow/view/trip_completion_payment_dialogs.dart';
 import 'package:ride_sharing/feature/driver/trip_flow/view/driver_trip_flow.dart';
 import 'package:ride_sharing/services/location_service.dart';
 import 'package:ride_sharing/services/map_camera_mixin.dart';
 import 'package:ride_sharing/services/socket_services.dart';
-import 'package:http/http.dart' as http;
+import 'package:ride_sharing/services/ride_session_controller.dart';
+import 'package:ride_sharing/services/maps_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:ride_sharing/services/app_config.dart';
 import 'package:ride_sharing/l10n/l10n_helper.dart';
 
 class DriverHomeScreenController extends GetxController
@@ -49,6 +47,7 @@ class DriverHomeScreenController extends GetxController
   LatLng? destinationLocation;
   String? destinationName;
   StreamSubscription<Position>? _locationSubscription;
+  Worker? _rideSnapshotWorker;
 
   // Route tracking for snap-to-route and rotation
   List<LatLng> _currentRoutePoints = [];
@@ -62,7 +61,6 @@ class DriverHomeScreenController extends GetxController
   int _currentStepIndex = 0;
 
   // Location update service & timer (when driver is online)
-  final DriverLocationService _locationService = DriverLocationService();
   Timer? _locationUpdateTimer;
   static const Duration _locationUpdateInterval = Duration(seconds: 20);
 
@@ -105,6 +103,37 @@ class DriverHomeScreenController extends GetxController
     _loadCustomMarkers();
     _initializeMap();
     _setupSocketListeners();
+    _rideSnapshotWorker = ever<RideSnapshot?>(RideSessionController.to.ride,
+        _applyRideSnapshot);
+    _applyRideSnapshot(RideSessionController.to.ride.value);
+  }
+
+  void _applyRideSnapshot(RideSnapshot? snapshot) {
+    if (snapshot == null) return;
+    final data = snapshot.data;
+    if (snapshot.status == 'CANCELLED' || snapshot.status == 'PAID') {
+      if (currentRideRequest.value?.rideId == snapshot.rideId) clearRideRequest();
+      clearRideAccepted();
+      clearRidePickedUp();
+      return;
+    }
+    if (snapshot.status == 'COMPLETED') return;
+    if (snapshot.driverId == null) return;
+    final request = RideRequestModel.fromJson({
+      ...data,
+      'rider': data['rider'] ?? {'name': 'Rider'},
+      'note': data['note'] ?? '',
+      'rideNeeds': data['rideNeeds'] ?? <String>[],
+      'riderNumber': data['riderNumber'] ?? '',
+      'rideFor': data['rideFor'] ?? '',
+    });
+    currentRideRequest.value = request;
+    acceptedRideId.value = snapshot.rideId;
+    acceptedRiderId.value = snapshot.riderId;
+    isRideAccepted.value = true;
+    isRidePickedUp.value = snapshot.status == 'ONGOING' ||
+        snapshot.status == 'COMPLETED';
+    update();
   }
 
   @override
@@ -418,7 +447,7 @@ class DriverHomeScreenController extends GetxController
       socketService.onRideUnavailable((data) {
         _logger.i('ride-unavailable received: $data');
         final message = (data is Map ? data['message'] as String? : null) ??
-            'This ride is no longer available';
+            AppLocalization.tr.rideNoLongerAvailableMessage;
         final incomingRideId = data is Map ? data['rideId'] as String? : null;
 
         final ctx = Get.context;
@@ -565,28 +594,29 @@ class DriverHomeScreenController extends GetxController
       final rideId = data['_id'] as String? ?? '';
       _logger.i('Incompleted ride detected on reconnect — status: $status, rideId: $rideId. Showing PaymentConfirmationDialog.');
 
+      // The buffered event is replayed synchronously when the listener is
+      // registered, which happens while this controller is created during a
+      // build. Pushing a dialog then breaks the navigator ('!_debugLocked'),
+      // so wait for the frame to finish.
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => _showIncompletedRidePaymentDialog(rideId),
+      );
+    } catch (e) {
+      _logger.e('Error handling incompleted-ride: $e');
+    }
+  }
+
+  void _showIncompletedRidePaymentDialog(String rideId) {
+    try {
       final context = Get.context;
       if (context == null) return;
 
-      TripDialogs.showPaymentConfirmation(
+      TripDialogs.showTripCompletion(
         context,
-        onPaymentReceived: () async {
-          Get.back(); // close dialog
-          await SocketIoService.to.emitConfirmPayment(rideId: rideId);
-          _logger.i('confirm-payment emitted after reconnect for rideId: $rideId');
-          TripDialogs.showTripCompletion(
-            Get.context!,
-            onBackToHome: () {
-              Get.back(); // close trip completion dialog
-              TripDialogs.showStayOnline(
-                Get.context!,
-                onGoOffline: () => Get.back(),
-                onStayOnline: () => Get.back(),
-              );
-            },
-          );
+        onBackToHome: () {
+          Get.back();
+          _logger.i('Awaiting server-confirmed rider payment for rideId: $rideId');
         },
-        onDifferentAmount: () => Get.back(),
       );
     } catch (e) {
       _logger.e('Error handling incompleted-ride: $e');
@@ -718,23 +748,9 @@ class DriverHomeScreenController extends GetxController
     }
 
     try {
-      final origin = '${currentPosition!.latitude},${currentPosition!.longitude}';
-      final destination = '${destinationLocation!.latitude},${destinationLocation!.longitude}';
-
-      final url = Uri.parse(
-        'https://maps.googleapis.com/maps/api/directions/json?'
-        'origin=$origin&destination=$destination&key=${AppConfig.googleMapsApiKey}&mode=driving',
-      );
-
-      _logger.i('Fetching route from pickup to destination via Google Directions API');
-      _logger.i('Request URL: $url');
-      final response = await http.get(url);
-
-      _logger.i('Response status code: ${response.statusCode}');
-      _logger.i('FULL API RESPONSE: ${response.body}');
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
+      final data = await MapsService().directions(
+        currentPosition!.latitude, currentPosition!.longitude,
+        destinationLocation!.latitude, destinationLocation!.longitude);
         _logger.i('Directions API status: ${data['status']}');
         if (data['error_message'] != null) {
           _logger.e('API Error Message: ${data['error_message']}');
@@ -777,10 +793,6 @@ class DriverHomeScreenController extends GetxController
           // Fallback: draw straight line
           _drawStraightLinePickupToDestination();
         }
-      } else {
-        _logger.e('Directions API error: ${response.statusCode}');
-        _drawStraightLinePickupToDestination();
-      }
     } catch (e) {
       _logger.e('Error fetching route: $e');
       _drawStraightLinePickupToDestination();
@@ -796,24 +808,9 @@ class DriverHomeScreenController extends GetxController
     }
 
     try {
-      final origin = '${currentPosition!.latitude},${currentPosition!.longitude}';
-      final destination = '${pickupLocation!.latitude},${pickupLocation!.longitude}';
-
-      _logger.i('Route request - origin: $origin, destination: $destination');
-
-      final url = Uri.parse(
-        'https://maps.googleapis.com/maps/api/directions/json?'
-        'origin=$origin&destination=$destination&key=${AppConfig.googleMapsApiKey}&mode=driving',
-      );
-
-      _logger.i('Fetching route from Google Directions API: $url');
-      final response = await http.get(url);
-
-      _logger.i('Directions API response status code: ${response.statusCode}');
-      _logger.i('FULL API RESPONSE: ${response.body}');
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
+      final data = await MapsService().directions(
+        currentPosition!.latitude, currentPosition!.longitude,
+        pickupLocation!.latitude, pickupLocation!.longitude);
         _logger.i('Directions API response status: ${data['status']}');
         if (data['error_message'] != null) {
           _logger.e('API Error Message: ${data['error_message']}');
@@ -843,15 +840,9 @@ class DriverHomeScreenController extends GetxController
           update();
         } else {
           _logger.e('No routes found: ${data['status']}');
-          _logger.i('API response: ${response.body}');
           // Fallback: draw straight line
           _drawStraightLine();
         }
-      } else {
-        _logger.e('Directions API error: ${response.statusCode}');
-        _logger.i('API response body: ${response.body}');
-        _drawStraightLine();
-      }
     } catch (e) {
       _logger.e('Error fetching route: $e');
       _drawStraightLine();
@@ -918,7 +909,7 @@ class DriverHomeScreenController extends GetxController
     }
 
     if (_currentStepIndex >= _routeSteps.length) {
-      currentStepInstruction.value = 'Arriving at destination';
+      currentStepInstruction.value = AppLocalization.tr.arrivingAtDestinationLabel;
       currentStepDistance.value = '';
       return;
     }
@@ -1291,27 +1282,15 @@ class DriverHomeScreenController extends GetxController
       return;
     }
 
+    // The backend has no REST endpoint for this: a driver's location is only
+    // stored through the `update-location` socket event, and nearest-driver
+    // search reads that stored location.
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final accessToken = prefs.getString('accessToken') ?? '';
-
-      if (accessToken.isEmpty) {
-        _logger.e('Cannot post location — no access token found');
-        return;
-      }
-
-      final response = await _locationService.updateCurrentLocation(
-        accessToken: accessToken,
-        name: 'Current Location',
+      await SocketIoService.to.emitUpdateLocation(
+        locationName: 'Current Location',
         latitude: currentPosition!.latitude,
         longitude: currentPosition!.longitude,
       );
-
-      if (response.isSuccess) {
-        _logger.i('Current location posted successfully: ${currentPosition!.latitude}, ${currentPosition!.longitude}');
-      } else {
-        _logger.e('Failed to post current location: ${response.errorMessage}');
-      }
     } catch (e) {
       _logger.e('Error posting current location: $e');
     }
@@ -1443,6 +1422,7 @@ class DriverHomeScreenController extends GetxController
 
   @override
   void onClose() {
+    _rideSnapshotWorker?.dispose();
     WidgetsBinding.instance.removeObserver(this);
     disposeMapController();
     _locationSubscription?.cancel();

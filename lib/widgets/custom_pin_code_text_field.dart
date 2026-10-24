@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:pinput/pinput.dart';
 import '../app/utils/app_colors.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
 
 class CustomPinCodeTextField extends StatelessWidget {
   const CustomPinCodeTextField(
@@ -18,10 +19,10 @@ class CustomPinCodeTextField extends StatelessWidget {
         validator: validator ??
             (value) {
               if (value == null || value.isEmpty) {
-                return "The code seems invalid. Please try again";
+                return AppLocalization.tr.invalidCodeMessage;
               } else if (value.length != 6 ||
                   !RegExp(r'^\d{6}$').hasMatch(value)) {
-                return "Enter a valid 6-digit Code";
+                return AppLocalization.tr.enterValidCodeMessage;
               }
               return null;
             },

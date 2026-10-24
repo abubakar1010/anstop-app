@@ -5,6 +5,8 @@ import 'package:ride_sharing/utils/user_info_section.dart';
 import 'package:ride_sharing/l10n/app_localizations.dart';
 import '../../../../app/utils/app_colors.dart';
 import '../../../../widgets/custom_horizontal_line.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
+import 'package:ride_sharing/app/helpers/price_format.dart';
 
 
 class RideBegunBottomSheet extends StatefulWidget {
@@ -42,7 +44,7 @@ class _RideBegunBottomSheetState extends State<RideBegunBottomSheet> {
     final displayImageUrl = widget.driverProfilePicture ?? 'https://picsum.photos/250?image=9';
     final displayRating = widget.driverRating > 0 ? widget.driverRating : 3.54;
     final displayTrips = widget.driverTotalReviews > 0 ? widget.driverTotalReviews : 3;
-    final displayPrice = widget.bidAmount.isNotEmpty ? '\$${widget.bidAmount}' : '\$24';
+    final displayPrice = widget.bidAmount.isNotEmpty ? formatPrice(widget.bidAmount) : '€24';
     final displayDistance = widget.tripDistance.isNotEmpty ? '${widget.tripDistance} km' : '28 km';
     final displayDestination = widget.destinationAddress.isNotEmpty
         ? widget.destinationAddress
@@ -71,7 +73,7 @@ class _RideBegunBottomSheetState extends State<RideBegunBottomSheet> {
             name: displayName,
             rating: displayRating,
             trips: displayTrips,
-            profession: 'Professional',
+            profession: AppLocalization.tr.professionalLabel,
             price: displayPrice,
             distance: displayDistance,
           ),

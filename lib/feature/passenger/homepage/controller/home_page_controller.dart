@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
@@ -8,16 +7,19 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:http/http.dart' as http;
 import 'package:ride_sharing/l10n/app_localizations.dart';
 import 'package:ride_sharing/feature/passenger/payment/view/passenger_payment_screen.dart';
+import 'package:ride_sharing/feature/passenger/car_booking/utils/booking_car_bottomsheet.dart';
+import 'package:ride_sharing/feature/passenger/car_booking/utils/ride_begun_bottom_sheet.dart';
 import 'package:ride_sharing/feature/passenger/trip_details/data/get_trip_details_model.dart';
 import 'package:ride_sharing/feature/passenger/trip_details/service/trip_details_service.dart';
 import 'package:ride_sharing/services/location_service.dart';
 import 'package:ride_sharing/services/map_camera_mixin.dart';
 import 'package:ride_sharing/services/socket_services.dart';
+import 'package:ride_sharing/services/ride_session_controller.dart';
+import 'package:ride_sharing/services/maps_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:ride_sharing/services/app_config.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
 
 class HomePageController extends GetxController
     with MapCameraMixin, WidgetsBindingObserver {
@@ -32,13 +34,24 @@ class HomePageController extends GetxController
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   PersistentBottomSheetController? _currentSheetController;
 
+  // True once a ride request has been created from the booking map; backing
+  // out of the map is blocked from then on so the request isn't orphaned.
+  bool rideRequestActive = false;
+  Worker? _rideSnapshotWorker;
+  String? _paymentRideShown;
+  String? _restoredRideState;
+
   void showPassengerSheet(WidgetBuilder builder) {
     _currentSheetController?.close();
-    _currentSheetController = scaffoldKey.currentState?.showBottomSheet(
+    final shown = scaffoldKey.currentState?.showBottomSheet(
       builder,
       backgroundColor: Colors.transparent,
       enableDrag: false,
     );
+    _currentSheetController = shown;
+    shown?.closed.whenComplete(() {
+      if (identical(_currentSheetController, shown)) _currentSheetController = null;
+    });
   }
 
   void closeCurrentSheet() {
@@ -88,6 +101,62 @@ class HomePageController extends GetxController
     // dialogs below are localized and need a BuildContext.
     WidgetsBinding.instance.addPostFrameCallback((_) => _initializeMap());
     _setupIncompletedRideListener();
+    _rideSnapshotWorker = ever<RideSnapshot?>(RideSessionController.to.ride,
+        _applyRideSnapshot);
+    _applyRideSnapshot(RideSessionController.to.ride.value);
+  }
+
+  void _applyRideSnapshot(RideSnapshot? snapshot) {
+    rideRequestActive = snapshot?.isActive ?? false;
+    if (snapshot != null && _currentSheetController == null &&
+        (snapshot.status == 'ACCEPTED' || snapshot.status == 'ONGOING') &&
+        _restoredRideState != '${snapshot.rideId}:${snapshot.status}') {
+      _restoredRideState = '${snapshot.rideId}:${snapshot.status}';
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (scaffoldKey.currentState == null || _currentSheetController != null) return;
+        final driver = snapshot.data['driver'] is Map
+            ? Map<String, dynamic>.from(snapshot.data['driver'] as Map)
+            : <String, dynamic>{};
+        final car = driver['carInformation'] is Map
+            ? Map<String, dynamic>.from(driver['carInformation'] as Map)
+            : <String, dynamic>{};
+        final name = '${driver['firstName'] ?? ''} ${driver['lastName'] ?? ''}'.trim();
+        final destination = snapshot.data['destination'] is Map
+            ? snapshot.data['destination'] as Map : const {};
+        final pickup = snapshot.data['pickUp'] is Map
+            ? snapshot.data['pickUp'] as Map : const {};
+        if (snapshot.status == 'ONGOING') {
+          showPassengerSheet((_) => RideBegunBottomSheet(
+            driverName: name, driverProfilePicture: driver['profilePicture']?.toString(),
+            driverRating: num.tryParse('${driver['rating']}')?.toDouble() ?? 0,
+            driverTotalReviews: int.tryParse('${driver['totalReviews']}') ?? 0,
+            bidAmount: snapshot.data['fare']?.toString() ?? '',
+            tripDistance: snapshot.data['distance']?.toString() ?? '',
+            destinationAddress: destination['name']?.toString() ?? '',
+          ));
+        } else {
+          showPassengerSheet((_) => BookingCarsBottomSheet(
+            rideId: snapshot.rideId, driverId: snapshot.driverId ?? '',
+            driverName: name, driverProfilePicture: driver['profilePicture']?.toString(),
+            driverRating: num.tryParse('${driver['rating']}')?.toDouble() ?? 0,
+            driverTotalReviews: int.tryParse('${driver['totalReviews']}') ?? 0,
+            carBrand: car['brand']?.toString() ?? '',
+            carModel: car['model']?.toString() ?? '',
+            licensePlateNumber: car['licensePlateNumber']?.toString() ?? '',
+            bidAmount: snapshot.data['fare']?.toString() ?? '',
+            tripDistance: snapshot.data['distance']?.toString() ?? '',
+            pickUpAddress: pickup['name']?.toString() ?? '',
+            destinationAddress: destination['name']?.toString() ?? '',
+          ));
+        }
+      });
+    }
+    if (snapshot?.status == 'COMPLETED' &&
+        _paymentRideShown != snapshot!.rideId) {
+      _paymentRideShown = snapshot.rideId;
+      _resumeIncompleteRide({...snapshot.data, '_id': snapshot.rideId});
+    }
+    update();
   }
 
   @override
@@ -106,7 +175,10 @@ class HomePageController extends GetxController
     }
     if (!socketService.isSocketReady) return;
 
-    socketService.onIncompletedRide((data) async {
+    socketService.onIncompletedRide(_resumeIncompleteRide);
+  }
+
+  Future<void> _resumeIncompleteRide(dynamic data) async {
       if (data == null || data is! Map<String, dynamic>) return;
 
       final status = data['status'] as String? ?? '';
@@ -145,14 +217,13 @@ class HomePageController extends GetxController
         rideId: rideId,
         driverId: driverId,
         paymentMethod: paymentMethod,
-        bidAmount: data['fare']?.toString() ?? '',
+        bidAmount: num.tryParse('${data['fare']}')?.toStringAsFixed(2) ?? '',
         tripDistance: data['distance']?.toString() ?? '',
         pickUpAddress: pickUp?['name'] as String? ?? '',
         destinationAddress: destination?['name'] as String? ?? '',
         driverName: driverName,
         driverProfilePicture: driverProfilePicture,
       ));
-    });
   }
 
   // @override
@@ -426,7 +497,7 @@ class HomePageController extends GetxController
 
       final lat = (data['latitude'] as num).toDouble();
       final lng = (data['longitude'] as num).toDouble();
-      final locationName = data['locationName'] as String? ?? 'Driver';
+      final locationName = data['locationName'] as String? ?? AppLocalization.tr.driverLabel;
       final driverLatLng = LatLng(lat, lng);
 
       debugPrint('🟡 [SOCKET] update-location → lat=$lat, lng=$lng');
@@ -497,7 +568,7 @@ class HomePageController extends GetxController
 
       final lat = (data['latitude'] as num).toDouble();
       final lng = (data['longitude'] as num).toDouble();
-      final locationName = data['locationName'] as String? ?? 'Driver';
+      final locationName = data['locationName'] as String? ?? AppLocalization.tr.driverLabel;
       final driverLatLng = LatLng(lat, lng);
 
       // Re-fetch route only when driver moves ≥ 50 m
@@ -645,7 +716,7 @@ class HomePageController extends GetxController
 
       final lat = coords[1];
       final lng = coords[0];
-      final locationName = raw['locationName'] as String? ?? 'Driver';
+      final locationName = raw['locationName'] as String? ?? AppLocalization.tr.driverLabel;
 
       newMarkers.add(Marker(
         markerId: MarkerId('nearest_driver_$id'),
@@ -717,15 +788,8 @@ class HomePageController extends GetxController
     debugPrint('🔶 [POLYLINE DEBUG] origin (should be DRIVER) = ${origin.latitude}, ${origin.longitude}');
     debugPrint('🔶 [POLYLINE DEBUG] destination (should be PICKUP/DEST) = ${destination.latitude}, ${destination.longitude}');
     try {
-      final url = Uri.parse(
-        'https://maps.googleapis.com/maps/api/directions/json?'
-        'origin=${origin.latitude},${origin.longitude}'
-        '&destination=${destination.latitude},${destination.longitude}'
-        '&key=${AppConfig.googleMapsApiKey}&mode=driving',
-      );
-
-      final response = await http.get(url);
-      final data = jsonDecode(response.body) as Map<String, dynamic>;
+      final data = await MapsService().directions(origin.latitude,
+          origin.longitude, destination.latitude, destination.longitude);
       debugPrint('🔶 [POLYLINE DEBUG] Directions API status = ${data['status']}');
 
       if (data['status'] == 'OK') {
@@ -817,6 +881,7 @@ class HomePageController extends GetxController
 
   @override
   void onClose() {
+    _rideSnapshotWorker?.dispose();
     WidgetsBinding.instance.removeObserver(this);
     _positionSubscription?.cancel();
     disposeMapController();

@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../app/utils/app_colors.dart';
 import '../../../../custom_assets/app_image.dart';
+import 'package:ride_sharing/app/helpers/price_format.dart';
 
 class UserInfoCard extends StatefulWidget {
   final String profileImageUrl;  // Profile picture URL
@@ -92,7 +93,7 @@ class _UserInfoCardState extends State<UserInfoCard> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("\$${widget.price}"),
+                  Text(formatPrice(widget.price)),
                   Text(widget.distance)
                 ],
               ),

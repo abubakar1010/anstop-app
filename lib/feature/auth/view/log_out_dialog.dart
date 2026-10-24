@@ -4,7 +4,7 @@ import 'package:ride_sharing/feature/driver/profile/controller/driver_profile_co
 import 'package:ride_sharing/l10n/l10n_helper.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:ride_sharing/app/utils/app_colors.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:ride_sharing/services/session_controller.dart';
 
 class LogoutDialog extends StatelessWidget {
   const LogoutDialog({Key? key}) : super(key: key);
@@ -12,9 +12,7 @@ class LogoutDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20.r),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
       child: Container(
         padding: EdgeInsets.all(24.sp),
         decoration: BoxDecoration(
@@ -39,10 +37,7 @@ class LogoutDialog extends StatelessWidget {
             Text(
               AppLocalization.tr.logOutMessage,
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 14.sp,
-                color: Colors.grey[600],
-              ),
+              style: TextStyle(fontSize: 14.sp, color: Colors.grey[600]),
             ),
             SizedBox(height: 24.h),
 
@@ -60,10 +55,7 @@ class LogoutDialog extends StatelessWidget {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(25.r),
                       ),
-                      side: BorderSide(
-                        color: Colors.grey[300]!,
-                        width: 1.5,
-                      ),
+                      side: BorderSide(color: Colors.grey[300]!, width: 1.5),
                     ),
                     child: Text(
                       AppLocalization.tr.cancelButton,
@@ -81,16 +73,7 @@ class LogoutDialog extends StatelessWidget {
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () async {
-                      // Clear all saved user data
-                      final prefs = await SharedPreferences.getInstance();
-                      await prefs.remove('accessToken');
-                      await prefs.remove('refreshToken');
-                      await prefs.remove('userRole');
-                      await prefs.remove('userId');
-                      await prefs.remove('firstName');
-                      await prefs.remove('lastName');
-                      await prefs.remove('profilePicture');
-                      await prefs.remove('needsVerification');
+                      await SessionController.to.signOut();
 
                       // Delete DriverProfileController so next login starts with fresh state
                       // (it is manually Get.put'd in screens, not route-bound, so GetX won't auto-clean it)

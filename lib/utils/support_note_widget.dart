@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:ride_sharing/feature/messages/binding/chat_binding.dart';
 import 'package:ride_sharing/feature/messages/view/chat_screen.dart';
 import 'package:ride_sharing/widgets/auth_links/auth_link.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
 
 class SupportNoteWidget extends StatelessWidget {
   final String conversationId;
@@ -27,7 +28,7 @@ class SupportNoteWidget extends StatelessWidget {
       arguments: {
         'conversationId': conversationId,
         'userName': userName,
-        'userStatus': userStatus ?? 'Driver',
+        'userStatus': userStatus ?? AppLocalization.tr.driverLabel,
       },
     );
   }

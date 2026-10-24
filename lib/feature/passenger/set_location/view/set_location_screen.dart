@@ -2,14 +2,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:google_places_flutter/google_places_flutter.dart';
-import 'package:google_places_flutter/model/prediction.dart';
 import 'package:ride_sharing/feature/passenger/set_location/controller/set_location_controller.dart';
+import 'package:ride_sharing/widgets/server_place_autocomplete_text_field.dart';
 import 'package:ride_sharing/widgets/app_google_map.dart';
 import 'package:ride_sharing/widgets/auth_links/auth_link.dart';
 import 'package:ride_sharing/widgets/home_links/home_links.dart';
 import 'package:ride_sharing/app/utils/app_colors.dart';
-import 'package:ride_sharing/services/app_config.dart';
 
 class SetLocationScreen extends StatelessWidget {
   const SetLocationScreen({Key? key}) : super(key: key);
@@ -145,9 +143,8 @@ class SetLocationScreen extends StatelessWidget {
                     Icon(Icons.location_on, color: AppColors.primaryColor),
                     SizedBox(width: 8),
                     Expanded(
-                      child: GooglePlaceAutoCompleteTextField(
+                      child: ServerPlaceAutoCompleteTextField(
                         textEditingController: controller.addressController,
-                        googleAPIKey: AppConfig.googleMapsApiKey,
                         inputDecoration: InputDecoration(
                           border: InputBorder.none,
                           hintText: AppLocalization.tr.whereAreYouHeadedHint,
@@ -349,9 +346,8 @@ class SetLocationScreen extends StatelessWidget {
                     Icon(Icons.location_on, color: AppColors.primaryColor),
                     SizedBox(width: 8),
                     Expanded(
-                      child: GooglePlaceAutoCompleteTextField(
+                      child: ServerPlaceAutoCompleteTextField(
                         textEditingController: controller.addressController,
-                        googleAPIKey: AppConfig.googleMapsApiKey,
                         inputDecoration: InputDecoration(
                           border: InputBorder.none,
                           hintText: AppLocalization.tr.whereAreYouHeadedHint,

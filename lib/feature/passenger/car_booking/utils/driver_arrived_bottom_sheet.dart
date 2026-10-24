@@ -14,6 +14,8 @@ import 'package:ride_sharing/feature/passenger/payment/view/passenger_payment_sc
 
 import '../../../../app/utils/app_colors.dart';
 import '../../../../widgets/custom_button.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
+import 'package:ride_sharing/app/helpers/price_format.dart';
 
 class DriverArrivedBottomSheet extends StatefulWidget {
   final String driverName;
@@ -125,8 +127,8 @@ class _DriverArrivedBottomSheetState extends State<DriverArrivedBottomSheet> {
     final displayRating = widget.driverRating;
     // final displayTrips = widget.driverTotalReviews > 0 ? widget.driverTotalReviews : 3;
     final displayTrips = widget.driverTotalReviews;
-    // final displayPrice = widget.bidAmount.isNotEmpty ? '\$${widget.bidAmount}' : '\$24';
-    final displayPrice = widget.bidAmount.isNotEmpty ? '\$${widget.bidAmount}' : '';
+    // final displayPrice = widget.bidAmount.isNotEmpty ? '€${widget.bidAmount}' : '€24';
+    final displayPrice = widget.bidAmount.isNotEmpty ? formatPrice(widget.bidAmount) : '';
     // final displayDistance = widget.tripDistance.isNotEmpty ? '${widget.tripDistance} km' : '28 km';
     final displayDistance = widget.tripDistance.isNotEmpty ? '${widget.tripDistance} km' : '';
     // final displayCarTitle = widget.licensePlateNumber.isNotEmpty ? widget.licensePlateNumber : 'DHK METRO - 8475Dkk';
@@ -166,7 +168,7 @@ class _DriverArrivedBottomSheetState extends State<DriverArrivedBottomSheet> {
             name: displayName,
             rating: displayRating,
             trips: displayTrips,
-            profession: 'Professional',
+            profession: AppLocalization.tr.professionalLabel,
             price: displayPrice,
             distance: displayDistance,
           ),

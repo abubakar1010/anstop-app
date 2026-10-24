@@ -37,7 +37,7 @@ class CreateSupportScreen extends GetView<CreateSupportController> {
                           size: 28,
                           color: Colors.black,
                         ),
-                        onPressed: () => Get.back(),
+                        onPressed: () => Navigator.of(context).pop(),
                       ),
                       Text(
                         AppLocalization.tr.supportTitle,

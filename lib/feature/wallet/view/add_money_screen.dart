@@ -59,7 +59,7 @@ class AddMoneyScreen extends StatelessWidget {
                         prefixIcon: Padding(
                           padding: EdgeInsets.only(left: 16.w, right: 8.w),
                           child: Text(
-                            '\$',
+                            '€',
                             style: TextStyle(
                               fontSize: 24.sp,
                               fontWeight: FontWeight.w600,
@@ -139,7 +139,7 @@ class AddMoneyScreen extends StatelessWidget {
   //         border: Border.all(color: Colors.grey[300]!),
   //       ),
   //       child: Text(
-  //         '\$$amount',
+  //         '€$amount',
   //         style: TextStyle(
   //           fontSize: 14.sp,
   //           fontWeight: FontWeight.w500,

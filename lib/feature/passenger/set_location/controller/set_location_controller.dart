@@ -1,4 +1,6 @@
+import 'package:ride_sharing/services/session_controller.dart';
 import 'package:get/get.dart';
+import 'package:ride_sharing/app/utils/app_snackbar.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter/material.dart';
@@ -61,7 +63,7 @@ class SetLocationController extends GetxController with MapCameraMixin {
   Future<void> _fetchExistingAddress() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final accessToken = prefs.getString('accessToken') ?? '';
+      final accessToken = await SessionController.to.accessToken() ?? '';
 
       if (accessToken.isEmpty) {
         return;
@@ -215,24 +217,12 @@ class SetLocationController extends GetxController with MapCameraMixin {
   // Called when "Set Location" button is tapped (for SET_ON_MAP flow)
   void onSetLocationTapped() {
     if (addressController.text.isEmpty) {
-      Get.snackbar(
-        AppLocalization.tr.errorTitle,
-        AppLocalization.tr.pleaseEnterAddressMessage,
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      AppSnackbar.error(AppLocalization.tr.errorTitle, AppLocalization.tr.pleaseEnterAddressMessage);
       return;
     }
 
     if (latitudeController.text.isEmpty || longitudeController.text.isEmpty) {
-      Get.snackbar(
-        AppLocalization.tr.errorTitle,
-        AppLocalization.tr.pleaseSelectAddressMessage,
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      AppSnackbar.error(AppLocalization.tr.errorTitle, AppLocalization.tr.pleaseSelectAddressMessage);
       return;
     }
 
@@ -273,24 +263,12 @@ class SetLocationController extends GetxController with MapCameraMixin {
   // Called when confirm button is tapped
   Future<void> onConfirmAddressTapped() async {
     if (addressController.text.isEmpty) {
-      Get.snackbar(
-        AppLocalization.tr.errorTitle,
-        AppLocalization.tr.pleaseEnterAddressMessage,
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      AppSnackbar.error(AppLocalization.tr.errorTitle, AppLocalization.tr.pleaseEnterAddressMessage);
       return;
     }
 
     if (latitudeController.text.isEmpty || longitudeController.text.isEmpty) {
-      Get.snackbar(
-        AppLocalization.tr.errorTitle,
-        AppLocalization.tr.pleaseSelectAddressMessage,
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      AppSnackbar.error(AppLocalization.tr.errorTitle, AppLocalization.tr.pleaseSelectAddressMessage);
       return;
     }
 
@@ -299,16 +277,10 @@ class SetLocationController extends GetxController with MapCameraMixin {
       update();
 
       final prefs = await SharedPreferences.getInstance();
-      final accessToken = prefs.getString('accessToken') ?? '';
+      final accessToken = await SessionController.to.accessToken() ?? '';
 
       if (accessToken.isEmpty) {
-        Get.snackbar(
-          AppLocalization.tr.errorTitle,
-          AppLocalization.tr.pleaseLoginToContinueMessage,
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-        );
+        AppSnackbar.error(AppLocalization.tr.errorTitle, AppLocalization.tr.pleaseLoginToContinueMessage);
         return;
       }
 
@@ -328,33 +300,22 @@ class SetLocationController extends GetxController with MapCameraMixin {
       );
 
       if (response.isSuccess) {
-        Get.snackbar(
-          AppLocalization.tr.successTitle,
-          AppLocalization.tr.addressSavedMessage,
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
-        );
-
-        // Navigate back to previous screen
-        Get.back();
+        // Pop first via the navigator: Get.back() would close the snackbar
+        // instead of the screen (see AppSnackbar.dismiss()).
+        Get.key.currentState?.pop();
+        AppSnackbar.success(AppLocalization.tr.successTitle, AppLocalization.tr.addressSavedMessage);
       } else {
-        Get.snackbar(
+        // The server explains what went wrong (e.g. the bookmark already
+        // exists) in the user's language.
+        AppSnackbar.error(
           AppLocalization.tr.errorTitle,
-          AppLocalization.tr.genericErrorMessage,
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
+          response.errorMessage.isNotEmpty
+              ? response.errorMessage
+              : AppLocalization.tr.genericErrorMessage,
         );
       }
     } catch (e) {
-      Get.snackbar(
-        AppLocalization.tr.errorTitle,
-        AppLocalization.tr.genericErrorMessage,
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      AppSnackbar.error(AppLocalization.tr.errorTitle, AppLocalization.tr.genericErrorMessage);
     } finally {
       isSubmitting = false;
       update();

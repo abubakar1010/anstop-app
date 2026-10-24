@@ -1,3 +1,4 @@
+import 'package:ride_sharing/services/session_controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../l10n/l10n_helper.dart';
 import '../../../services/api_client.dart';
@@ -14,7 +15,7 @@ class MessageService {
   }) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final accessToken = prefs.getString('accessToken');
+      final accessToken = await SessionController.to.accessToken();
 
       if (accessToken == null || accessToken.isEmpty) {
         return ApiResponse(

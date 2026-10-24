@@ -75,8 +75,8 @@ class _MyRidePageState extends State<MyRidePage> {
                   itemCount: controller.rides.length,
                   itemBuilder: (_, index) {
                     final ride = controller.rides[index];
-                    final formattedDate = DateFormat('dd MMM yyyy').format(ride.createdAt);
-                    final formattedTime = DateFormat('hh:mm a').format(ride.createdAt);
+                    final formattedDate = DateFormat.yMMMd().format(ride.createdAt);
+                    final formattedTime = DateFormat.jm().format(ride.createdAt);
                     return MyRideCardWidget(
                       date: formattedDate,
                       time: formattedTime,

@@ -1,3 +1,4 @@
+import 'package:ride_sharing/services/session_controller.dart';
 import 'package:get/get.dart';
 import 'package:ride_sharing/app/utils/app_snackbar.dart';
 import 'package:ride_sharing/feature/auth/controller/car_information_controller.dart';
@@ -61,7 +62,7 @@ class UploadDocumentsController extends GetxController {
 
       // Get access token from shared preferences
       final prefs = await SharedPreferences.getInstance();
-      final accessToken = prefs.getString('accessToken');
+      final accessToken = await SessionController.to.accessToken();
 
       if (accessToken == null || accessToken.isEmpty) {
         errorMessage.value = AppLocalization.tr.sessionExpiredMessage;
@@ -136,8 +137,10 @@ class UploadDocumentsController extends GetxController {
           AppLocalization.tr.driverOnboardingSuccessMessage,
         );
 
-        // Navigate to driver home screen
-        Get.offAllNamed(AppRoutes.driverHomeScreen);
+        // Review is a separate account state; do not open an active-only screen.
+        await SessionController.to.loadAccount();
+        Get.offAllNamed(SessionController.to.accountState.value == 'ACTIVE'
+            ? AppRoutes.driverHomeScreen : AppRoutes.accountStatusScreen);
       } else {
         debugPrint('upload_documents_controller: ${response.errorMessage}');
         errorMessage.value = AppLocalization.tr.genericErrorMessage;

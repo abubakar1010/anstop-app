@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../app/utils/app_colors.dart';
 import 'package:ride_sharing/l10n/l10n_helper.dart';
+import 'package:ride_sharing/app/helpers/price_format.dart';
 
 
 class BalanceCard extends StatelessWidget {
@@ -57,7 +58,7 @@ class BalanceCard extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                '\$ $balance',
+                formatPrice(balance),
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 40,
@@ -69,11 +70,11 @@ class BalanceCard extends StatelessWidget {
           Column(
             children: [
               if (showWithdraw && onWithdraw != null)
-                _buildActionButton('Withdraw Now', onWithdraw!),
+                _buildActionButton(AppLocalization.tr.withdrawNowButton, onWithdraw!),
               if (showWithdraw && onWithdraw != null)
                 const SizedBox(height: 8),
               if (onDeposit != null)
-                _buildActionButton('Deposit', onDeposit!),
+                _buildActionButton(AppLocalization.tr.depositButton, onDeposit!),
             ],
           ),
         ],

@@ -1,6 +1,8 @@
+import 'package:ride_sharing/services/session_controller.dart';
 import 'package:ride_sharing/services/api_client.dart';
 import 'package:ride_sharing/services/api_urls.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
 
 class TripDetailsService {
   final ApiClient _apiClient = ApiClient();
@@ -9,12 +11,12 @@ class TripDetailsService {
   Future<ApiResponse> getTripDetails(String rideId) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final accessToken = prefs.getString('accessToken');
+      final accessToken = await SessionController.to.accessToken();
       if (accessToken == null || accessToken.isEmpty) {
         return ApiResponse(
           isSuccess: false,
           statusCode: 401,
-          errorMessage: 'Access token not found. Please login again.',
+          errorMessage: AppLocalization.tr.sessionExpiredMessage,
         );
       }
 
@@ -48,7 +50,7 @@ class TripDetailsService {
   Future<String?> getAccessToken() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      return prefs.getString('accessToken');
+      return await SessionController.to.accessToken();
     } catch (e) {
       // Error getting access token
       return null;

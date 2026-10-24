@@ -1,3 +1,4 @@
+import 'package:ride_sharing/services/session_controller.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ride_sharing/feature/driver/profile/service/driver_profile_service.dart';
@@ -29,7 +30,7 @@ class DriverProfileController extends GetxController {
       errorMessage.value = '';
 
       final prefs = await SharedPreferences.getInstance();
-      final accessToken = prefs.getString('accessToken') ?? '';
+      final accessToken = await SessionController.to.accessToken() ?? '';
 
       if (accessToken.isEmpty) {
         errorMessage.value = AppLocalization.tr.sessionExpiredMessage;

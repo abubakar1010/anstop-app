@@ -1,15 +1,10 @@
 import 'package:get/get.dart';
+import 'package:ride_sharing/routes/app_routes.dart';
 
 class OnboardingController extends GetxController {
   // ==================== State ====================
   final RxInt currentPage = 0.obs;
   final RxBool isLastPage = false.obs;
-
-  // ==================== Lifecycle ====================
-  @override
-  void onInit() {
-    super.onInit();
-  }
 
   // ==================== Business Logic ====================
   void setPage(int index) {
@@ -38,7 +33,6 @@ class OnboardingController extends GetxController {
   }
 
   void completeOnboarding() {
-    // Navigate to role selection
-    // Get.offAllNamed(AppRoutes.roleSelectionScreen);
+    Get.offAllNamed(AppRoutes.passengerAuthSelectionScreen);
   }
 }

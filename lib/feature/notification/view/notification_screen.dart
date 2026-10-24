@@ -5,6 +5,7 @@ import 'package:ride_sharing/feature/notification/utils/notification_date_header
 import 'package:ride_sharing/feature/notification/utils/notification_item.dart';
 import '../../../app/utils/app_colors.dart';
 import '../../../l10n/l10n_helper.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
 class NotificationScreen extends StatefulWidget {
   const NotificationScreen({Key? key}) : super(key: key);
 
@@ -24,7 +25,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
   void _initializeNotifications() {
     notificationGroups = [
       NotificationGroup(
-        dateLabel: 'Today',
+        dateLabel: AppLocalization.tr.todayLabel,
         notifications: [
           NotificationModel(
             title: AppLocalization.tr.notificationPaymentSuccess,
@@ -41,7 +42,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
         ],
       ),
       NotificationGroup(
-        dateLabel: 'Yesterday',
+        dateLabel: AppLocalization.tr.yesterdayLabel,
         notifications: [
           NotificationModel(
             title: AppLocalization.tr.notificationPaymentSuccess,

@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
-import 'package:ride_sharing/feature/auth/view/log_in_screen.dart';
 import 'package:ride_sharing/widgets/auth_links/auth_link.dart';
 
 import '../../../routes/app_routes.dart';
@@ -218,7 +217,7 @@ class _DriverRegistrationState extends State<DriverRegistration> {
                       SizedBox(height: 5.h),
                       GestureDetector(
                         onTap: () {
-                          Get.to(LogInScreen());
+                          Get.offAllNamed(AppRoutes.loginScreen);
                         },
                         child: RichText(
                           text: TextSpan(

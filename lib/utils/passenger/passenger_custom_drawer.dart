@@ -1,3 +1,4 @@
+import 'package:ride_sharing/services/session_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -166,7 +167,7 @@ class PassengerCustomDrawer extends StatelessWidget {
 
       // Get access token
       final prefs = await SharedPreferences.getInstance();
-      final accessToken = prefs.getString('accessToken');
+      final accessToken = await SessionController.to.accessToken();
 
 
       if (accessToken == null || accessToken.isEmpty) {

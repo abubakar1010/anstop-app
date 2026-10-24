@@ -9,6 +9,8 @@ import 'package:ride_sharing/widgets/custom_vertical_line.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../utils/custom_download_tile.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
+import 'package:ride_sharing/app/helpers/price_format.dart';
 
 class CompletedTripDetails extends StatefulWidget {
   final String rideId;
@@ -65,14 +67,14 @@ class _CompletedTripDetailsState extends State<CompletedTripDetails> {
             child: Text(
               controller.errorMessage.value.isNotEmpty
                   ? controller.errorMessage.value
-                  : 'No trip details available',
+                  : AppLocalization.tr.noTripDetailsMessage,
             ),
           );
         }
 
         final trip = controller.trip.value!;
-        final formattedDate = DateFormat('dd MMM yyyy').format(trip.createdAt);
-        final formattedTime = DateFormat('hh:mm a').format(trip.createdAt);
+        final formattedDate = DateFormat.yMMMd().format(trip.createdAt);
+        final formattedTime = DateFormat.jm().format(trip.createdAt);
 
         return Padding(
           padding: EdgeInsets.all(16.0),
@@ -180,7 +182,7 @@ class _CompletedTripDetailsState extends State<CompletedTripDetails> {
                         children: [
                           Text(AppLocalization.tr.rideValueLabel),
                           Spacer(),
-                          Text('\$${trip.fare.toStringAsFixed(2)}'),
+                          Text(formatPrice(trip.fare)),
                         ],
                       ),
                     ),
@@ -198,8 +200,8 @@ class _CompletedTripDetailsState extends State<CompletedTripDetails> {
                           name: trip.driverId.name,
                           rating: 4.5,
                           trips: 0,
-                          profession: 'Driver',
-                          price: '\$${trip.fare.toStringAsFixed(2)}',
+                          profession: AppLocalization.tr.driverLabel,
+                          price: formatPrice(trip.fare),
                           distance: trip.distance,
                         ),
                       ],

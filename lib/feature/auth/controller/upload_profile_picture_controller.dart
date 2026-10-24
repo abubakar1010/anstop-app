@@ -1,3 +1,4 @@
+import 'package:ride_sharing/services/session_controller.dart';
 import 'dart:io';
 import 'package:get/get.dart';
 import 'package:ride_sharing/app/utils/app_snackbar.dart';
@@ -32,7 +33,7 @@ class UploadProfilePictureController extends GetxController {
       errorMessage.value = '';
 
       final prefs = await SharedPreferences.getInstance();
-      final accessToken = prefs.getString('accessToken');
+      final accessToken = await SessionController.to.accessToken();
 
       if (accessToken == null || accessToken.isEmpty) {
         errorMessage.value = AppLocalization.tr.sessionExpiredMessage;

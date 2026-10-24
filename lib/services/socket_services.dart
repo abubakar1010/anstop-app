@@ -1,14 +1,30 @@
 import 'dart:async';
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import '../services/api_urls.dart';
+import 'locale_service.dart';
+import 'session_controller.dart';
+
+class RealtimeEvent {
+  final String name;
+  final dynamic data;
+  const RealtimeEvent(this.name, this.data);
+}
+
+class RealtimeAck {
+  final bool ok;
+  final String code;
+  final dynamic data;
+  const RealtimeAck(this.ok, this.code, [this.data]);
+}
 
 class SocketIoService extends GetxService {
   final Logger _logger = Logger();
   IO.Socket? _socket;
   final RxBool isConnected = false.obs;
+  final StreamController<RealtimeEvent> _events = StreamController<RealtimeEvent>.broadcast();
+  Stream<RealtimeEvent> get events => _events.stream;
 
   // Buffer for incompleted-ride — server sends it at the instant of connection,
   // before any listener can be registered. Store it here and replay on registration.
@@ -27,8 +43,8 @@ class SocketIoService extends GetxService {
       return;
     }
 
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('accessToken') ?? '';
+    if (SessionController.to.accountState.value != 'ACTIVE') return;
+    final token = await SessionController.to.accessToken() ?? '';
 
     if (token.isEmpty) {
       _logger.e('No access token found for socket connection');
@@ -40,12 +56,16 @@ class SocketIoService extends GetxService {
     final completer = Completer<void>();
 
     _incompletedRideBuffer = null;
+    _socket?.dispose();
 
     _socket = IO.io(ApiUrls.socketUrl, <String, dynamic>{
       'transports': ['websocket'],
       'autoConnect': true,
       'forceNew': true,
-      'auth': {'token': token},
+      // A function, so every reconnect sends the language active at that
+      // moment rather than the one at first connect.
+      'auth': (void Function(Map<String, dynamic>) send) =>
+          send({'token': token, 'lang': LocaleService.languageCode}),
     });
 
     // Register early — server sends incompleted-ride at the moment of connection,
@@ -81,7 +101,25 @@ class SocketIoService extends GetxService {
       if (!completer.isCompleted) {
         completer.complete();
       }
-      _retryConnection();
+      final code = data is Map
+          ? (data['data'] is Map ? data['data']['code'] : data['code'])
+          : null;
+      if (code is String) SessionController.to.updateFromErrorCode(code);
+      if (code == 'TOKEN_EXPIRED') {
+        SessionController.to.refresh().then((token) {
+          if (token != null &&
+              SessionController.to.accountState.value == 'ACTIVE')
+            connect();
+        });
+      } else if (code != 'ONBOARDING_REQUIRED' &&
+          code != 'ACCOUNT_PENDING_REVIEW' &&
+          code != 'ACCOUNT_SUSPENDED' &&
+          code != 'ACCOUNT_REJECTED' &&
+          code != 'ACCOUNT_DELETED' &&
+          code != 'TOKEN_INVALID' &&
+          code != 'UNAUTHENTICATED') {
+        _retryConnection();
+      }
     });
 
     _socket!.onError((data) {
@@ -91,12 +129,15 @@ class SocketIoService extends GetxService {
 
     _socket!.onAny((event, data) {
       _logger.i('Socket event received: $event, data: $data');
+      _events.add(RealtimeEvent(event.toString(), data));
     });
 
     // Wait for connection with timeout
     try {
       await completer.future.timeout(const Duration(seconds: 10));
-      _logger.i('Socket connection completed, isConnected: ${isConnected.value}');
+      _logger.i(
+        'Socket connection completed, isConnected: ${isConnected.value}',
+      );
     } catch (e) {
       _logger.e('Socket connection timeout: $e');
     }
@@ -104,7 +145,9 @@ class SocketIoService extends GetxService {
 
   void _retryConnection() {
     Future.delayed(const Duration(seconds: 5), () {
-      if (_socket != null && !_socket!.connected) {
+      if (_socket != null &&
+          !_socket!.connected &&
+          SessionController.to.accountState.value == 'ACTIVE') {
         _logger.i('Retrying socket connection...');
         _socket!.connect();
       }
@@ -113,6 +156,8 @@ class SocketIoService extends GetxService {
 
   void disconnect() {
     _socket?.disconnect();
+    _socket?.dispose();
+    _socket = null;
     isConnected.value = false;
   }
 
@@ -121,16 +166,35 @@ class SocketIoService extends GetxService {
       _logger.e('Cannot register listener for $event - socket is null!');
       return;
     }
-    _logger.i('Registering listener for event: $event, socket connected: ${_socket!.connected}');
+    _logger.i(
+      'Registering listener for event: $event, socket connected: ${_socket!.connected}',
+    );
     _socket!.on(event, handler);
   }
 
-  void emit(String event, [dynamic data]) {
-    if (_socket == null) {
-      _logger.e('Cannot emit $event - socket is null!');
-      return;
+  /// Tells the server which language to write socket messages in from now on.
+  /// Sent as an event so the current socket keeps its ride subscriptions.
+  void setLanguage(String languageCode) {
+    if (_socket?.connected ?? false) {
+      request('set-language', {'lang': languageCode});
     }
-    _socket!.emit(event, data);
+  }
+
+  Future<RealtimeAck> request(String event, Map<String, dynamic> payload) async {
+    if (!isSocketReady) await connect();
+    if (!isSocketReady) return const RealtimeAck(false, 'NOT_CONNECTED');
+    final completer = Completer<RealtimeAck>();
+    _socket!.emitWithAck(event, payload, ack: (dynamic raw) {
+      if (completer.isCompleted) return;
+      if (raw is Map) {
+        completer.complete(RealtimeAck(raw['ok'] == true || raw['success'] == true,
+            raw['code']?.toString() ?? 'UNKNOWN', raw['data']));
+      } else {
+        completer.complete(const RealtimeAck(false, 'INVALID_ACK'));
+      }
+    });
+    return completer.future.timeout(const Duration(seconds: 10),
+        onTimeout: () => const RealtimeAck(false, 'TIMEOUT'));
   }
 
   void off(String event) {
@@ -144,7 +208,9 @@ class SocketIoService extends GetxService {
       _logger.e('Cannot register nearest-drivers listener - socket is null!');
       return;
     }
-    _logger.i('Registering nearest-drivers listener, socket connected: ${_socket!.connected}');
+    _logger.i(
+      'Registering nearest-drivers listener, socket connected: ${_socket!.connected}',
+    );
     _socket!.on('nearest-drivers', (data) {
       _logger.i('nearest-drivers event received in service: $data');
       handler(data);
@@ -163,7 +229,9 @@ class SocketIoService extends GetxService {
       _logger.e('Cannot register ride-request listener - socket is null!');
       return;
     }
-    _logger.i('Registering ride-request listener, socket connected: ${_socket!.connected}');
+    _logger.i(
+      'Registering ride-request listener, socket connected: ${_socket!.connected}',
+    );
     _socket!.on('ride-request', (data) {
       _logger.i('ride-request event received in service: $data');
       handler(data);
@@ -180,19 +248,17 @@ class SocketIoService extends GetxService {
   bool get isSocketReady => _socket != null && _socket!.connected;
 
   // Send a new message
-  void sendMessage({
+  Future<bool> sendMessage({
     required String conversationId,
     String? text,
     String? attachments,
-  }) {
+  }) async {
     if (text == null && attachments == null) {
       _logger.e('At least one of text or attachments is required');
-      return;
+      return false;
     }
 
-    final payload = <String, dynamic>{
-      'conversationId': conversationId,
-    };
+    final payload = <String, dynamic>{'conversationId': conversationId};
 
     if (text != null && text.isNotEmpty) {
       payload['text'] = text;
@@ -203,7 +269,7 @@ class SocketIoService extends GetxService {
     }
 
     _logger.i('Sending message: $payload');
-    emit('send-new-message', payload);
+    return (await request('send-new-message', payload)).ok;
   }
 
   // Listen for new messages
@@ -216,86 +282,15 @@ class SocketIoService extends GetxService {
     off('new-message');
   }
 
-  // Emit new bid (for drivers)
-  Future<void> emitNewBid({
-    required String rideId,
-    required String amount,
-  }) async {
-    // Ensure socket is connected before emitting
-    if (!isSocketReady) {
-      _logger.i('Socket not ready, connecting before emitting new-bid...');
-      await connect();
-      // Wait a bit for connection to establish
-      await Future.delayed(const Duration(milliseconds: 500));
-    }
-
-    if (!isSocketReady) {
-      _logger.e('Cannot emit new-bid - socket is not ready after connect attempt');
-      return;
-    }
-
-    final payload = {
-      'rideId': rideId,
-      'amount': amount,
-    };
-
-    _logger.i('Emitting new-bid event: $payload');
-    emit('new-bid', payload);
-  }
-
-  // Listen for new bid (for passengers)
-  void onNewBid(Function(dynamic) handler) {
-    if (_socket == null) {
-      _logger.e('Cannot register new-bid listener - socket is null!');
-      return;
-    }
-    _logger.i('Registering new-bid listener, socket connected: ${_socket!.connected}');
-    _socket!.on('new-bid', (data) {
-      _logger.i('new-bid event received in service: $data');
-      handler(data);
-    });
-  }
-
-  // Stop listening for new bid
-  void offNewBid() {
-    _logger.i('Removing new-bid listener');
-    _socket?.off('new-bid');
-  }
-
-  // Emit accept bid (for passengers)
-  Future<void> emitAcceptBid({
-    required String rideId,
-    required String driverId,
-  }) async {
-    // Ensure socket is connected before emitting
-    if (!isSocketReady) {
-      _logger.i('Socket not ready, connecting before emitting accept-bid...');
-      await connect();
-      // Wait a bit for connection to establish
-      await Future.delayed(const Duration(milliseconds: 500));
-    }
-
-    if (!isSocketReady) {
-      _logger.e('Cannot emit accept-bid - socket is not ready after connect attempt');
-      return;
-    }
-
-    final payload = {
-      'rideId': rideId,
-      'driverId': driverId,
-    };
-
-    _logger.i('Emitting accept-bid event: $payload');
-    emit('accept-bid', payload);
-  }
-
   // Listen for ride accepted (for drivers)
   void onRideAccepted(Function(dynamic) handler) {
     if (_socket == null) {
       _logger.e('Cannot register ride-accepted listener - socket is null!');
       return;
     }
-    _logger.i('Registering ride-accepted listener, socket connected: ${_socket!.connected}');
+    _logger.i(
+      'Registering ride-accepted listener, socket connected: ${_socket!.connected}',
+    );
     _socket!.on('ride-accepted', (data) {
       _logger.i('ride-accepted event received in service: $data');
       handler(data);
@@ -308,61 +303,9 @@ class SocketIoService extends GetxService {
     _socket?.off('ride-accepted');
   }
 
-  // Emit pickup rider (for drivers) - returns true if server ack success
-  Future<bool> emitPickupRider() async {
-    if (!isSocketReady) {
-      _logger.i('Socket not ready, connecting before emitting pickup-rider...');
-      await connect();
-      await Future.delayed(const Duration(milliseconds: 500));
-    }
+  Future<bool> emitPickupRider() async => (await request('pickup-rider', {})).ok;
 
-    if (!isSocketReady) {
-      _logger.e('Cannot emit pickup-rider - socket is not ready after connect attempt');
-      return false;
-    }
-
-    final completer = Completer<bool>();
-
-    _logger.i('Emitting pickup-rider event with ack');
-    _socket!.emitWithAck('pickup-rider', {}, ack: (data) {
-      _logger.i('pickup-rider ack received: $data');
-      try {
-        final ack = data as Map<String, dynamic>;
-        final success = ack['success'] == true;
-        _logger.i('pickup-rider ack success: $success, message: ${ack['message']}');
-        if (!completer.isCompleted) completer.complete(success);
-      } catch (e) {
-        _logger.e('Error parsing pickup-rider ack: $e');
-        if (!completer.isCompleted) completer.complete(false);
-      }
-    });
-
-    return completer.future.timeout(
-      const Duration(seconds: 10),
-      onTimeout: () {
-        _logger.e('pickup-rider ack timed out');
-        return false;
-      },
-    );
-  }
-
-  // Emit drop-off rider (for drivers)
-  Future<void> emitDropOffRider() async {
-    // Ensure socket is connected before emitting
-    if (!isSocketReady) {
-      _logger.i('Socket not ready, connecting before emitting drop-off-rider...');
-      await connect();
-      await Future.delayed(const Duration(milliseconds: 500));
-    }
-
-    if (!isSocketReady) {
-      _logger.e('Cannot emit drop-off-rider - socket is not ready after connect attempt');
-      return;
-    }
-
-    _logger.i('Emitting drop-off-rider event with empty body');
-    emit('drop-off-rider', {});
-  }
+  Future<bool> emitDropOffRider() async => (await request('drop-off-rider', {})).ok;
 
   // Listen for update-location (for passengers - receives driver's real-time GPS position)
   void onUpdateLocation(Function(dynamic) handler) {
@@ -370,7 +313,9 @@ class SocketIoService extends GetxService {
       _logger.e('Cannot register update-location listener - socket is null!');
       return;
     }
-    _logger.i('Registering update-location listener, socket connected: ${_socket!.connected}');
+    _logger.i(
+      'Registering update-location listener, socket connected: ${_socket!.connected}',
+    );
     _socket!.on('update-location', (data) {
       _logger.i('update-location event received in service: $data');
       handler(data);
@@ -384,42 +329,16 @@ class SocketIoService extends GetxService {
   }
 
   // Emit update-location (for drivers - continuously sends current GPS position)
-  Future<void> emitUpdateLocation({
-    required String locationName,
-    required double latitude,
-    required double longitude,
-  }) async {
-    if (!isSocketReady) {
-      _logger.w('Cannot emit update-location - socket not ready');
-      return;
-    }
-
-    final payload = {
-      'locationName': locationName,
-      'latitude': latitude,
-      'longitude': longitude,
-    };
-    _logger.i('Emitting update-location: $payload');
-    emit('update-location', payload);
+  Future<bool> emitUpdateLocation({required String locationName, required double latitude,
+      required double longitude}) async {
+    final ack = await request('update-location', {
+      'locationName': locationName, 'latitude': latitude, 'longitude': longitude,
+    });
+    return ack.ok;
   }
 
-  // Emit new-offer (for drivers - when accepting a ride request directly)
-  Future<void> emitNewOffer({required String rideId}) async {
-    if (!isSocketReady) {
-      _logger.i('Socket not ready, connecting before emitting new-offer...');
-      await connect();
-      await Future.delayed(const Duration(milliseconds: 500));
-    }
-
-    if (!isSocketReady) {
-      _logger.e('Cannot emit new-offer - socket is not ready after connect attempt');
-      return;
-    }
-
-    final payload = {'rideId': rideId};
-    _logger.i('Emitting new-offer event: $payload');
-    emit('new-offer', payload);
-  }
+  Future<bool> emitNewOffer({required String rideId}) async =>
+      (await request('new-offer', {'rideId': rideId})).ok;
 
   // Listen for new-offer (for passengers - driver sends a direct offer)
   void onNewOffer(Function(dynamic) handler) {
@@ -427,7 +346,9 @@ class SocketIoService extends GetxService {
       _logger.e('Cannot register new-offer listener - socket is null!');
       return;
     }
-    _logger.i('Registering new-offer listener, socket connected: ${_socket!.connected}');
+    _logger.i(
+      'Registering new-offer listener, socket connected: ${_socket!.connected}',
+    );
     _socket!.on('new-offer', (data) {
       _logger.i('new-offer event received in service: $data');
       handler(data);
@@ -440,30 +361,8 @@ class SocketIoService extends GetxService {
     _socket?.off('new-offer');
   }
 
-  // Emit accept-ride (for passengers - when accepting a driver's offer)
-  Future<void> emitAcceptRide({
-    required String rideId,
-    required String driverId,
-  }) async {
-    if (!isSocketReady) {
-      _logger.i('Socket not ready, connecting before emitting accept-ride...');
-      await connect();
-      await Future.delayed(const Duration(milliseconds: 500));
-    }
-
-    if (!isSocketReady) {
-      _logger.e('Cannot emit accept-ride - socket is not ready after connect attempt');
-      return;
-    }
-
-    final payload = {
-      'rideId': rideId,
-      'driverId': driverId,
-    };
-
-    _logger.i('Emitting accept-ride event: $payload');
-    emit('accept-ride', payload);
-  }
+  Future<bool> emitAcceptRide({required String rideId, required String driverId}) async =>
+      (await request('accept-ride', {'rideId': rideId, 'driverId': driverId})).ok;
 
   // Listen for ride picked up (for drivers - when passenger is picked up)
   void onRidePickedUp(Function(dynamic) handler) {
@@ -471,7 +370,9 @@ class SocketIoService extends GetxService {
       _logger.e('Cannot register ride-picked-up listener - socket is null!');
       return;
     }
-    _logger.i('Registering ride-picked-up listener, socket connected: ${_socket!.connected}');
+    _logger.i(
+      'Registering ride-picked-up listener, socket connected: ${_socket!.connected}',
+    );
     _socket!.on('ride-picked-up', (data) {
       _logger.i('ride-picked-up event received in service: $data');
       handler(data);
@@ -484,50 +385,15 @@ class SocketIoService extends GetxService {
     _socket?.off('ride-picked-up');
   }
 
-  // Listen for accept-bid response (for passengers - when driver accepts)
-  void onAcceptBid(Function(dynamic) handler) {
-    if (_socket == null) {
-      _logger.e('Cannot register accept-bid listener - socket is null!');
-      return;
-    }
-    _logger.i('Registering accept-bid listener, socket connected: ${_socket!.connected}');
-    _socket!.on('accept-bid', (data) {
-      _logger.i('accept-bid event received in service: $data');
-      handler(data);
-    });
-  }
-
-  // Stop listening for accept-bid
-  void offAcceptBid() {
-    _logger.i('Removing accept-bid listener');
-    _socket?.off('accept-bid');
-  }
-
-  // Emit confirm-payment (for drivers - when cash payment is received)
-  Future<void> emitConfirmPayment({required String rideId}) async {
-    if (!isSocketReady) {
-      _logger.i('Socket not ready, connecting before emitting confirm-payment...');
-      await connect();
-      await Future.delayed(const Duration(milliseconds: 500));
-    }
-
-    if (!isSocketReady) {
-      _logger.e('Cannot emit confirm-payment - socket is not ready after connect attempt');
-      return;
-    }
-
-    final payload = {'rideId': rideId};
-    _logger.i('Emitting confirm-payment event: $payload');
-    emit('confirm-payment', payload);
-  }
-
   // Listen for payment-confirmed (for passengers - when driver confirms cash payment received)
   void onPaymentConfirmed(Function(dynamic) handler) {
     if (_socket == null) {
       _logger.e('Cannot register payment-confirmed listener - socket is null!');
       return;
     }
-    _logger.i('Registering payment-confirmed listener, socket connected: ${_socket!.connected}');
+    _logger.i(
+      'Registering payment-confirmed listener, socket connected: ${_socket!.connected}',
+    );
     _socket!.on('payment-confirmed', (data) {
       _logger.i('payment-confirmed event received in service: $data');
       handler(data);
@@ -544,7 +410,9 @@ class SocketIoService extends GetxService {
       _logger.e('Cannot register ride-unavailable listener - socket is null!');
       return;
     }
-    _logger.i('Registering ride-unavailable listener, socket connected: ${_socket!.connected}');
+    _logger.i(
+      'Registering ride-unavailable listener, socket connected: ${_socket!.connected}',
+    );
     _socket!.on('ride-unavailable', (data) {
       _logger.i('ride-unavailable event received in service: $data');
       handler(data);
@@ -562,7 +430,9 @@ class SocketIoService extends GetxService {
       _logger.e('Cannot register ride-completed listener - socket is null!');
       return;
     }
-    _logger.i('Registering ride-completed listener, socket connected: ${_socket!.connected}');
+    _logger.i(
+      'Registering ride-completed listener, socket connected: ${_socket!.connected}',
+    );
     _socket!.on('ride-completed', (data) {
       _logger.i('ride-completed event received in service: $data');
       handler(data);
@@ -596,4 +466,3 @@ class SocketIoService extends GetxService {
     _incompletedRideBuffer = null;
   }
 }
-

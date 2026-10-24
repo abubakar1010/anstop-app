@@ -1,7 +1,9 @@
+import 'package:ride_sharing/services/session_controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../services/api_client.dart';
 import '../../../services/api_urls.dart';
 import '../data/create_support_request_model.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
 
 class SupportService {
   final ApiClient _apiClient = ApiClient();
@@ -10,13 +12,13 @@ class SupportService {
   Future<ApiResponse> getMySupportMessages() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final accessToken = prefs.getString('accessToken');
+      final accessToken = await SessionController.to.accessToken();
 
       if (accessToken == null || accessToken.isEmpty) {
         return ApiResponse(
           isSuccess: false,
           statusCode: 401,
-          errorMessage: 'Access token not found. Please login again.',
+          errorMessage: AppLocalization.tr.sessionExpiredMessage,
         );
       }
 
@@ -39,13 +41,13 @@ class SupportService {
   Future<ApiResponse> createSupport(CreateSupportRequestModel request) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final accessToken = prefs.getString('accessToken');
+      final accessToken = await SessionController.to.accessToken();
 
       if (accessToken == null || accessToken.isEmpty) {
         return ApiResponse(
           isSuccess: false,
           statusCode: 401,
-          errorMessage: 'Access token not found. Please login again.',
+          errorMessage: AppLocalization.tr.sessionExpiredMessage,
         );
       }
 

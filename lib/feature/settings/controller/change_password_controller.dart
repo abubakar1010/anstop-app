@@ -69,7 +69,7 @@ class ChangePasswordController extends GetxController {
         );
         successMessage.value = changePasswordResponse.message.isNotEmpty
             ? changePasswordResponse.message
-            : 'Password changed successfully';
+            : AppLocalization.tr.passwordChangedSuccessMessage;
         return true;
       } else {
         errorMessage.value = response.errorMessage.isNotEmpty

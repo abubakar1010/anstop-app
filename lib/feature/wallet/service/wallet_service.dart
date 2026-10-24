@@ -7,21 +7,18 @@ import 'package:ride_sharing/services/api_urls.dart';
 class WalletService {
   final ApiClient _apiClient = ApiClient();
 
-  Future<ApiResponse> createTransaction({
+  /// Asks the server for a wallet top-up PaymentIntent. The response carries
+  /// `clientSecret` for the payment sheet; the server credits the wallet itself
+  /// once Stripe confirms the payment.
+  Future<ApiResponse> createDepositIntent({
     required String accessToken,
-    required String transactionId,
-    required int amount,
-    required String type,
-    String status = 'COMPLETED',
+    required double amount,
   }) async {
     try {
       final response = await _apiClient.postRequest(
-        ApiUrls.createTransactions,
+        ApiUrls.depositIntent,
         body: {
-          'transactionId': transactionId,
           'amount': amount,
-          'type': type,
-          'status': status,
         },
         accessToken: accessToken,
       );

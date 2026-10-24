@@ -21,6 +21,7 @@ class SignInResponseModel {
 class SignInData {
   final String accessToken;
   final String refreshToken;
+  final String? accountState;
   final List<String> role;
   final bool needsVerification;
   final String? userId;
@@ -31,6 +32,7 @@ class SignInData {
   SignInData({
     required this.accessToken,
     required this.refreshToken,
+    this.accountState,
     required this.role,
     required this.needsVerification,
     this.userId,
@@ -45,8 +47,9 @@ class SignInData {
     return SignInData(
       accessToken: json['accessToken'] ?? '',
       refreshToken: json['refreshToken'] ?? '',
-      role: json['role'] != null
-          ? List<String>.from(json['role'])
+      accountState: json['accountState'] as String?,
+      role: (json['role'] ?? user?['role']) != null
+          ? List<String>.from(json['role'] ?? user!['role'])
           : [],
       needsVerification: json['needsVerification'] ?? false,
       userId: user?['_id'] ?? json['userId'] ?? json['_id'],
@@ -60,6 +63,7 @@ class SignInData {
     return {
       'accessToken': accessToken,
       'refreshToken': refreshToken,
+      'accountState': accountState,
       'role': role,
       'needsVerification': needsVerification,
       'userId': userId,

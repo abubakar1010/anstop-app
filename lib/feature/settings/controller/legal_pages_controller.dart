@@ -97,11 +97,11 @@ class LegalPagesController extends GetxController {
   String _getDefaultTitle() {
     switch (documentType.value) {
       case LegalDocumentType.privacyPolicy:
-        return 'Privacy Policy';
+        return AppLocalization.tr.privacyPolicyTitle;
       case LegalDocumentType.termsAndConditions:
-        return 'Terms of Service';
+        return AppLocalization.tr.termsOfServiceTitle;
       case LegalDocumentType.aboutUs:
-        return 'About Us';
+        return AppLocalization.tr.aboutUsTitle;
     }
   }
 }

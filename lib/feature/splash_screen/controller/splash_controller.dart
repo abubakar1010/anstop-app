@@ -2,11 +2,10 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:ride_sharing/feature/auth/service/auth_service.dart';
 import 'package:ride_sharing/routes/app_routes.dart';
 import 'package:ride_sharing/services/fcm_service.dart';
 import 'package:ride_sharing/services/locale_service.dart';
+import 'package:ride_sharing/services/session_controller.dart';
 
 class SplashController extends GetxController {
   // ==================== State ====================
@@ -17,7 +16,6 @@ class SplashController extends GetxController {
 
   // ==================== Services ====================
   final FcmService _fcmService = FcmService();
-  final AuthService _authService = AuthService();
 
   // ==================== Lifecycle ====================
   @override
@@ -52,57 +50,37 @@ class SplashController extends GetxController {
   }
 
   Future<void> _checkAuthAndNavigate() async {
-    final prefs = await SharedPreferences.getInstance();
-    final accessToken = prefs.getString('accessToken');
-    final roles = prefs.getStringList('userRole') ?? [];
-
-    if (accessToken != null && accessToken.isNotEmpty) {
-      isAuthenticated.value = true;
-      userRoles.value = roles;
-
-      // Initialize FCM for already logged in user
-      await _fcmService.initFCM(accessToken: accessToken);
-
-      // Navigate based on role
-      if (roles.contains('DRIVER')) {
-        await _handleDriverNavigation(accessToken);
+    final session = SessionController.to;
+    final restored = await session.loadAccount();
+    if (!restored) {
+      if (await session.accessToken() == null) {
+        Get.offAllNamed(AppRoutes.onboardingScreen);
       } else {
-        Get.offAllNamed(AppRoutes.passengerHomeScreen);
+        // Keep credentials on a transient network failure. The next launch
+        // can retry without forcing the user through sign-in.
+        Get.offAllNamed(AppRoutes.loginScreen);
       }
-    } else {
-      isAuthenticated.value = false;
-      userRoles.value = [];
-      Get.offAllNamed(AppRoutes.onboardingScreen);
+      return;
     }
-  }
-
-  Future<void> _handleDriverNavigation(String accessToken) async {
-    try {
-      // Call onboarding status API
-      final onboardingResponse = await _authService.getDriverOnboardingStatus(
-        accessToken: accessToken,
-      );
-
-      if (onboardingResponse.isSuccess) {
-        // Check if driver is onboarded
-        final isOnboarded =
-            onboardingResponse.responseData['data']?['isOnboarded'] ?? false;
-
-        if (isOnboarded) {
-          // Driver is fully onboarded, go to driver home screen
-          Get.offAllNamed(AppRoutes.driverHomeScreen);
-        } else {
-          // Driver needs to complete onboarding
-          Get.offAllNamed(AppRoutes.driverRegistrationScreen);
-        }
-      } else {
-        // If onboarding status check fails, assume not onboarded
-        Get.offAllNamed(AppRoutes.driverRegistrationScreen);
+    isAuthenticated.value = true;
+    userRoles.assignAll(session.roles);
+    final token = await session.accessToken();
+    if (token != null) {
+      try {
+        await _fcmService.initFCM(accessToken: token);
+      } catch (_) {
+        /* best effort */
       }
-    } catch (e) {
-      debugPrint('Error checking driver onboarding status: $e');
-      // On error, default to registration screen
+      LocaleService.syncToServer();
+    }
+    if (session.accountState.value == 'NEEDS_ONBOARDING') {
       Get.offAllNamed(AppRoutes.driverRegistrationScreen);
+    } else if (session.accountState.value != 'ACTIVE') {
+      Get.offAllNamed(AppRoutes.accountStatusScreen);
+    } else if (session.roles.contains('DRIVER')) {
+      Get.offAllNamed(AppRoutes.driverHomeScreen);
+    } else {
+      Get.offAllNamed(AppRoutes.passengerHomeScreen);
     }
   }
 }

@@ -1,6 +1,5 @@
+import 'package:ride_sharing/services/session_controller.dart';
 import 'dart:math';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
@@ -13,7 +12,6 @@ import 'package:ride_sharing/services/map_camera_mixin.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ride_sharing/feature/passenger/car_booking/service/ride_request_service.dart';
 
-import 'package:ride_sharing/services/app_config.dart';
 
 class PickUpLocationController extends GetxController with MapCameraMixin {
   final _logger = logger(PickUpLocationController);
@@ -54,27 +52,7 @@ class PickUpLocationController extends GetxController with MapCameraMixin {
   @override
   void onInit() {
     super.onInit();
-    _debugGooglePlacesApi();
     _initializeMap();
-  }
-
-  Future<void> _debugGooglePlacesApi() async {
-    const testInput = 'Paris';
-    final uri = Uri.parse(
-      'https://maps.googleapis.com/maps/api/place/autocomplete/json'
-      '?input=$testInput&key=${AppConfig.googleMapsApiKey}&language=en',
-    );
-    try {
-      final response = await http.get(uri);
-      final decoded = jsonDecode(response.body);
-      _logger.i('Places API status: ${decoded['status']}');
-      if (decoded['error_message'] != null) {
-        _logger.e('Places API error_message: ${decoded['error_message']}');
-      }
-      _logger.d('Places API raw response: ${response.body}');
-    } catch (e) {
-      _logger.e('Places API debug call failed: $e');
-    }
   }
 
   Future<void> _initializeMap() async {
@@ -117,12 +95,12 @@ class PickUpLocationController extends GetxController with MapCameraMixin {
               .toList();
           pickUpAddressController.text = parts.isNotEmpty
               ? parts.join(', ')
-              : 'Current Location';
+              : AppLocalization.tr.currentLocationLabel;
         } else {
-          pickUpAddressController.text = 'Current Location';
+          pickUpAddressController.text = AppLocalization.tr.currentLocationLabel;
         }
       } catch (_) {
-        pickUpAddressController.text = 'Current Location';
+        pickUpAddressController.text = AppLocalization.tr.currentLocationLabel;
       }
 
       markers.add(
@@ -197,7 +175,7 @@ class PickUpLocationController extends GetxController with MapCameraMixin {
       final double destLng = double.parse(destinationLongitudeController.text);
 
       final prefs = await SharedPreferences.getInstance();
-      final accessToken = prefs.getString('accessToken') ?? '';
+      final accessToken = await SessionController.to.accessToken() ?? '';
 
       final response = await _rideRequestService.calculateFare(
         pickUpLat: pickUpLat,
@@ -228,7 +206,7 @@ class PickUpLocationController extends GetxController with MapCameraMixin {
     } catch (e) {
       Get.snackbar(
         AppLocalization.tr.errorTitle,
-        'Failed to calculate fare: $e',
+        AppLocalization.tr.fareCalculationFailedMessage,
         snackPosition: SnackPosition.BOTTOM,
       );
       isCalculatingFare = false;
@@ -246,7 +224,7 @@ class PickUpLocationController extends GetxController with MapCameraMixin {
   }) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final accessToken = prefs.getString('accessToken') ?? '';
+      final accessToken = await SessionController.to.accessToken() ?? '';
 
       final body = {
         'pickUp': {
@@ -281,10 +259,10 @@ class PickUpLocationController extends GetxController with MapCameraMixin {
       } else {
         return response.errorMessage.isNotEmpty
             ? response.errorMessage
-            : 'Failed to create ride request';
+            : AppLocalization.tr.rideRequestFailedMessage;
       }
     } catch (e) {
-      return 'Failed to create ride request: $e';
+      return AppLocalization.tr.rideRequestFailedMessage;
     }
   }
 

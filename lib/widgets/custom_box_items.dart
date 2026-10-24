@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../app/utils/app_colors.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
 
 class CustomBoxItems extends StatelessWidget {
   final String documentTitle;
@@ -21,7 +22,7 @@ class CustomBoxItems extends StatelessWidget {
   Widget build(BuildContext context) {
     return Semantics(
       button: true,
-      label: '$documentTitle, ${isUploaded ? 'uploaded' : 'not uploaded'}',
+      label: '$documentTitle, ${isUploaded ? AppLocalization.tr.uploadedLabel : AppLocalization.tr.notUploadedLabel}',
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(12.r),
@@ -74,7 +75,7 @@ class CustomBoxItems extends StatelessWidget {
                     ),
                     SizedBox(height: 2.h),
                     Text(
-                      isUploaded ? 'Uploaded' : 'Not Uploaded',
+                      isUploaded ? AppLocalization.tr.uploadedLabel : AppLocalization.tr.notUploadedLabel,
                       style: TextStyle(
                         fontSize: 12.sp,
                         fontWeight: FontWeight.w400,

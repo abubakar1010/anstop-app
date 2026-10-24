@@ -3,9 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:ride_sharing/app/utils/app_colors.dart';
 import 'package:ride_sharing/custom_assets/app_image.dart';
-import 'package:ride_sharing/feature/auth/view/log_in_screen.dart';
-import 'package:ride_sharing/feature/splash_screen/auth_selection_screen.dart';
-import 'package:ride_sharing/feature/splash_screen/role_selection_screen.dart';
+import 'package:ride_sharing/feature/splash_screen/onboarding_skip_button.dart';
 import 'package:ride_sharing/l10n/app_localizations.dart';
 
 import '../../routes/app_routes.dart';
@@ -36,7 +34,7 @@ class OnboardingPageThird extends StatelessWidget{
                       width: 40.h,
                       fontSize: 14.sp,
                     ),
-                    _skipButton(l10n),
+                    const OnboardingSkipButton(),
                   ],
                 ),
               ),
@@ -113,8 +111,7 @@ class OnboardingPageThird extends StatelessWidget{
                 delay: 600,
                 child: ElevatedButton(
                   onPressed: () {
-                    Get.toNamed(AppRoutes.passengerAuthSelectionScreen);
-                 //   Get.to(RoleSelectionScreen());
+                    Get.offAllNamed(AppRoutes.passengerAuthSelectionScreen);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primaryColor,
@@ -136,18 +133,5 @@ class OnboardingPageThird extends StatelessWidget{
     );
   }
 }
-
-
-Widget _skipButton(AppLocalizations l10n) {
-  return Container(
-    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-    decoration: BoxDecoration(
-      color: Colors.grey[200],
-      borderRadius: BorderRadius.circular(20),
-    ),
-    child: Text(l10n.skipButton),
-  );
-}
-
 
 

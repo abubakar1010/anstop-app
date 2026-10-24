@@ -1,5 +1,5 @@
+import 'package:ride_sharing/services/session_controller.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';
 import 'package:ride_sharing/feature/wallet/data/transaction_model.dart';
@@ -45,26 +45,20 @@ class WalletController extends GetxController {
 
   // ==================== Stripe Initialization ====================
   void _initStripe() {
-    final stripeSecretKey = dotenv.env['STRIPE_SECRET_KEY'] ?? '';
-
     _stripeHelper = StripePaymentHelper(
-      config: StripeConfig(
-        secretKey: stripeSecretKey,
+      config: const StripeConfig(
         merchantDisplayName: 'Ride Sharing App',
       ),
-      onPaymentSuccess: (result) {
-        print('Payment successful: ${result.paymentData}');
-      },
-      onPaymentFailure: (result) {
-        print('Payment failed: ${result.message}');
-      },
       onLog: (message) {
-        print('[Stripe] $message');
+        debugPrint('[Stripe] $message');
       },
     );
   }
 
   // ==================== Business Logic ====================
+  /// Wallet top-up. The server creates the PaymentIntent and credits the
+  /// wallet from Stripe's webhook once the money is received; the app only
+  /// presents the payment sheet. It never reports a payment as done itself.
   Future<void> processDeposit(BuildContext context) async {
     if (!formKey.currentState!.validate()) {
       return;
@@ -80,28 +74,53 @@ class WalletController extends GetxController {
         return;
       }
 
-      // Process Stripe payment
+      final prefs = await SharedPreferences.getInstance();
+      final accessToken = await SessionController.to.accessToken() ?? '';
+      if (accessToken.isEmpty) {
+        errorMessage.value = AppLocalization.tr.sessionExpiredMessage;
+        return;
+      }
+
+      final intentResponse = await _walletService.createDepositIntent(
+        accessToken: accessToken,
+        amount: amount,
+      );
+      final String? clientSecret = intentResponse.isSuccess
+          ? (intentResponse.responseData['data']?['clientSecret'] as String?)
+          : null;
+      if (clientSecret == null || clientSecret.isEmpty) {
+        debugPrint('wallet_controller: ${intentResponse.errorMessage}');
+        throw Exception('Could not create deposit payment');
+      }
+
+      final balanceBefore = await _fetchBalance(accessToken);
+
+      if (!context.mounted) return;
       final paymentResult = await _stripeHelper.processPayment(
         context: context,
-        amount: amount,
-        currency: 'USD',
-        description: 'Wallet Deposit',
+        clientSecret: clientSecret,
         showSuccessDialog: false,
       );
 
-      if (paymentResult.isSuccess && paymentResult.paymentData != null) {
-        // Get transaction ID from Stripe response
-        final transactionId = paymentResult.paymentData!['id'] as String;
-        final amountInCents = paymentResult.paymentData!['amount'] as int;
-
-        // Call backend API to record transaction
-        await _recordTransaction(
-          transactionId: transactionId,
-          amount: amountInCents ~/ 100, // Convert cents to dollars
-        );
-      } else {
-        errorMessage.value = paymentResult.message ?? 'Payment failed';
+      if (!paymentResult.isSuccess) {
+        errorMessage.value = paymentResult.message ?? AppLocalization.tr.paymentFailedMessage;
+        return;
       }
+
+      // The webhook usually lands within a second or two; wait briefly so the
+      // wallet screen shows the new balance when we return to it.
+      await _waitForBalanceAbove(accessToken, balanceBefore);
+
+      Get.snackbar(
+        AppLocalization.tr.successTitle,
+        AppLocalization.tr.depositCompletedMessage,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+      );
+
+      // Navigate back with success result
+      Get.back(result: true);
     } catch (e) {
       debugPrint('wallet_controller: $e');
       errorMessage.value = AppLocalization.tr.genericErrorMessage;
@@ -117,51 +136,21 @@ class WalletController extends GetxController {
     }
   }
 
-  Future<void> _recordTransaction({
-    required String transactionId,
-    required int amount,
-  }) async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final accessToken = prefs.getString('accessToken') ?? '';
+  Future<num?> _fetchBalance(String accessToken) async {
+    final response = await _apiClient.getRequest(
+      ApiUrls.getBalance,
+      accessToken: accessToken,
+    );
+    if (!response.isSuccess) return null;
+    return response.responseData['data']?['balance'] as num?;
+  }
 
-      if (accessToken.isEmpty) {
-        errorMessage.value = AppLocalization.tr.sessionExpiredMessage;
-        return;
-      }
-
-      final response = await _walletService.createTransaction(
-        accessToken: accessToken,
-        transactionId: transactionId,
-        amount: amount,
-        type: 'DEPOSIT',
-      );
-
-      if (response.isSuccess) {
-        Get.snackbar(
-          AppLocalization.tr.successTitle,
-          AppLocalization.tr.depositCompletedMessage,
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
-        );
-
-        // Navigate back with success result
-        Get.back(result: true);
-      } else {
-        debugPrint('wallet_controller: ${response.errorMessage}');
-        errorMessage.value = AppLocalization.tr.genericErrorMessage;
-        Get.snackbar(
-          AppLocalization.tr.errorTitle,
-          AppLocalization.tr.genericErrorMessage,
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-        );
-      }
-    } catch (e) {
-      debugPrint('wallet_controller: $e');
-      errorMessage.value = AppLocalization.tr.genericErrorMessage;
+  Future<void> _waitForBalanceAbove(String accessToken, num? before) async {
+    if (before == null) return;
+    for (var attempt = 0; attempt < 6; attempt++) {
+      await Future.delayed(const Duration(seconds: 1));
+      final current = await _fetchBalance(accessToken);
+      if (current != null && current > before) return;
     }
   }
 
@@ -186,10 +175,10 @@ class WalletController extends GetxController {
       errorMessage.value = '';
 
       final prefs = await SharedPreferences.getInstance();
-      final accessToken = prefs.getString('accessToken') ?? '';
+      final accessToken = await SessionController.to.accessToken() ?? '';
 
       if (accessToken.isEmpty) {
-        const msg = 'Not authenticated';
+        final msg = AppLocalization.tr.sessionExpiredMessage;
         errorMessage.value = msg;
         Get.snackbar(
           AppLocalization.tr.errorTitle,
@@ -232,7 +221,7 @@ class WalletController extends GetxController {
   Future<void> getBalance() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final accessToken = prefs.getString('accessToken') ?? '';
+      final accessToken = await SessionController.to.accessToken() ?? '';
 
       if (accessToken.isEmpty) return;
 
@@ -274,7 +263,7 @@ class WalletController extends GetxController {
       errorMessage.value = '';
 
       final prefs = await SharedPreferences.getInstance();
-      final accessToken = prefs.getString('accessToken') ?? '';
+      final accessToken = await SessionController.to.accessToken() ?? '';
 
       if (accessToken.isEmpty) {
         errorMessage.value = AppLocalization.tr.sessionExpiredMessage;

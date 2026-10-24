@@ -11,8 +11,10 @@ import 'package:ride_sharing/widgets/custom_button.dart';
 import 'package:ride_sharing/widgets/logo.dart';
 import 'package:ride_sharing/services/socket_services.dart';
 import 'package:ride_sharing/l10n/app_localizations.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
 
 import 'booking_car_bottomsheet.dart';
+import 'package:ride_sharing/app/helpers/price_format.dart';
 
 // Model for car information from driver
 class CarInformation {
@@ -125,7 +127,8 @@ class BidData {
 
     return BidData(
       rideId: json['rideId'] ?? '',
-      amount: json['amount']?.toString() ?? '0',
+      // Server sends raw floats (e.g. 5.2174999999999); show cents only.
+      amount: num.tryParse('${json['amount']}')?.toStringAsFixed(2) ?? '0',
       driverId: driver?['_id'] ?? '',
       driverName: '$first $last'.trim(),
       profilePicture: driver?['profilePicture'],
@@ -320,7 +323,7 @@ class _AcceptCarBottomSheetState extends State<AcceptCarBottomSheet> {
 
             isLoading = false;
           });
-          _logger.i('Stored offer for driver ${offerData.driverId}: \$${offerData.amount}, rideId: ${offerData.rideId}');
+          _logger.i('Stored offer for driver ${offerData.driverId}: €${offerData.amount}, rideId: ${offerData.rideId}');
         }
       }
     });
@@ -371,7 +374,12 @@ class _AcceptCarBottomSheetState extends State<AcceptCarBottomSheet> {
     SocketIoService.to.offNearestDrivers();
     SocketIoService.to.offNewOffer();
     SocketIoService.to.offRideAccepted();
-    Get.find<HomePageController>().clearNearestDriverMarkers();
+    // Deferred: update() can't rebuild GetBuilders while the tree is being
+    // torn down, so clearing here directly throws and leaves the markers up.
+    final homeController = Get.find<HomePageController>();
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => homeController.clearNearestDriverMarkers(),
+    );
     super.dispose();
   }
 
@@ -642,9 +650,9 @@ class _AcceptCarBottomSheetState extends State<AcceptCarBottomSheet> {
                   Text(
                     // Display dynamic bid amount or default '--'
                     driverBids[driver.id] != null
-                        ? '\$${driverBids[driver.id]}'
+                        ? formatPrice(driverBids[driver.id])
                         : driver.bidAmount != null
-                            ? '\$${driver.bidAmount}'
+                            ? formatPrice(driver.bidAmount)
                             : '--',
                     style: TextStyle(
                       fontSize: 16.sp,
@@ -697,10 +705,15 @@ class _AcceptCarBottomSheetState extends State<AcceptCarBottomSheet> {
                         Get.find<HomePageController>().clearNearestDriverMarkers();
 
                         // Emit accept-ride socket event
-                        await SocketIoService.to.emitAcceptRide(
+                        final accepted = await SocketIoService.to.emitAcceptRide(
                           rideId: rideId,
                           driverId: driver.id,
                         );
+						if (!accepted && mounted) {
+						  setState(() { isAccepting = false; acceptingDriverId = null; });
+						  Get.snackbar(AppLocalization.tr.errorTitle, AppLocalization.tr.rideNoLongerAvailableMessage);
+						  return;
+						}
 
                         _logger.i('Accept-ride emitted successfully, waiting for socket response...');
                         // Navigation will happen when ride-accepted event is received from socket

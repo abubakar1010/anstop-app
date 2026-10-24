@@ -28,7 +28,7 @@ class UserInfoRow extends StatelessWidget {
         SizedBox(width: 5.w),
         CustomVerticalLine(height: 10.h, color: Colors.grey), // Your Custom Vertical Line
         SizedBox(width: 5.w),
-        Text('$trips ${AppLocalization.tr.tripsCountLabel}', style: TextStyle(fontSize: 10.sp)),
+        Text(AppLocalization.tr.tripsCount(trips), style: TextStyle(fontSize: 10.sp)),
         SizedBox(width: 5.w),
         CustomVerticalLine(height: 10.h, color: Colors.grey), // Your Custom Vertical Line
         SizedBox(width: 5.w),

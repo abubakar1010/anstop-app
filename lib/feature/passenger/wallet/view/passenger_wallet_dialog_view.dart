@@ -75,7 +75,7 @@ class _WithdrawalFormDialogState extends State<WithdrawalFormDialog> {
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(
                   hintText: AppLocalization.tr.enterAmountHint,
-                  prefixText: '\$ ',
+                  prefixText: '€ ',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                     borderSide: BorderSide(color: Colors.grey[300]!),
@@ -125,7 +125,7 @@ class _WithdrawalFormDialogState extends State<WithdrawalFormDialog> {
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Veuillez saisir le nom de la banque';
+                    return AppLocalization.tr.enterBankNameError;
                   }
                   return null;
                 },
@@ -159,7 +159,7 @@ class _WithdrawalFormDialogState extends State<WithdrawalFormDialog> {
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Veuillez saisir le numéro de compte';
+                    return AppLocalization.tr.enterAccountNumberError;
                   }
                   return null;
                 },

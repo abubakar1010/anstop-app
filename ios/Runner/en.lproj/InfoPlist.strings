@@ -1,0 +1,8 @@
+/* Permission prompts shown by iOS. Keep in sync with Info.plist and fr.lproj. */
+"NSCameraUsageDescription" = "Anstop needs camera access to take your profile photo.";
+"NSLocationAlwaysAndWhenInUseUsageDescription" = "Anstop needs location access to show nearby drivers and track your ride.";
+"NSLocationAlwaysUsageDescription" = "Anstop needs background location access to track your ride in progress.";
+"NSLocationWhenInUseUsageDescription" = "Anstop uses your location to show nearby drivers and track your ride.";
+"NSMicrophoneUsageDescription" = "Anstop needs microphone access when recording a video for your profile.";
+"NSPhotoLibraryAddOnlyUsageDescription" = "Anstop needs permission to save photos to your library.";
+"NSPhotoLibraryUsageDescription" = "Anstop needs photo library access to set your profile photo.";

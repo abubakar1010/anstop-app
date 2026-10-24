@@ -7,6 +7,7 @@ import '../app/utils/app_constants.dart';
 
 // import '../custom_assets/fonts.gen.dart';
 import '../widgets/widgets.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
 
 class CustomTextField extends StatefulWidget {
   final TextEditingController controller;
@@ -93,11 +94,13 @@ class _CustomTextFieldState extends State<CustomTextField> {
 
   /// Message shown when the field is left empty.
   String get _emptyMessage {
-    final label = widget.hintText ?? widget.labelText;
+    // Only a label names the field; a hint is a whole phrase ("Enter your
+    // email") that cannot be slotted into a sentence in either language.
+    final label = widget.labelText;
     if (label == null || label.trim().isEmpty) {
-      return 'Ce champ est obligatoire';
+      return AppLocalization.tr.fieldRequiredError;
     }
-    return 'Veuillez ${label.trim().toLowerCase()}';
+    return AppLocalization.tr.fieldRequiredNamedError(label.trim());
   }
 
   String? _defaultValidator(dynamic value) {
@@ -109,10 +112,10 @@ class _CustomTextFieldState extends State<CustomTextField> {
     if (widget.isEmail == true) {
       return AppConstants.emailValidate.hasMatch(text)
           ? null
-          : 'Veuillez vérifier votre e-mail !';
+          : AppLocalization.tr.invalidEmailError;
     }
     if (widget.isPassword && text.length < 8) {
-      return 'Mot de passe : 8 caractères minimum !';
+      return AppLocalization.tr.passwordMinLengthError(8);
     }
     return null;
   }

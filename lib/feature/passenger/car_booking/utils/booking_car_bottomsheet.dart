@@ -20,6 +20,7 @@ import 'package:ride_sharing/widgets/custom_horizontal_line.dart';
 import 'package:ride_sharing/l10n/app_localizations.dart';
 import 'package:get/get.dart';
 import 'package:ride_sharing/l10n/l10n_helper.dart';
+import 'package:ride_sharing/app/helpers/price_format.dart';
 
 class BookingCarsBottomSheet extends StatefulWidget {
   final String driverName;
@@ -137,8 +138,8 @@ class _BookingCarsBottomSheetState extends State<BookingCarsBottomSheet> {
     final displayRating = widget.driverRating;
     // final displayTrips = widget.driverTotalReviews > 0 ? widget.driverTotalReviews : 3;
     final displayTrips = widget.driverTotalReviews;
-    // final displayPrice = widget.bidAmount.isNotEmpty ? '\$${widget.bidAmount}' : '\$24';
-    final displayPrice = widget.bidAmount.isNotEmpty ? '\$${widget.bidAmount}' : '';
+    // final displayPrice = widget.bidAmount.isNotEmpty ? '€${widget.bidAmount}' : '€24';
+    final displayPrice = widget.bidAmount.isNotEmpty ? formatPrice(widget.bidAmount) : '';
     // final displayDistance = widget.tripDistance.isNotEmpty ? '${widget.tripDistance} km' : '28 km';
     final displayDistance = widget.tripDistance.isNotEmpty ? '${widget.tripDistance} km' : '';
     // final displayCarTitle = widget.licensePlateNumber.isNotEmpty ? widget.licensePlateNumber : 'DHK METRO - 8475Dkk';
@@ -181,7 +182,7 @@ class _BookingCarsBottomSheetState extends State<BookingCarsBottomSheet> {
             name: displayName,
             rating: displayRating,
             trips: displayTrips,
-            profession: 'Professional',
+            profession: AppLocalization.tr.professionalLabel,
             price: displayPrice,
             distance: displayDistance,
           ),
@@ -226,7 +227,7 @@ class _BookingCarsBottomSheetState extends State<BookingCarsBottomSheet> {
           SupportNoteWidget(
             conversationId: widget.rideId,
             userName: displayName,
-            userStatus: 'Driver',
+            userStatus: AppLocalization.tr.driverLabel,
           ),
           CustomHorizontalLine(thickness: 5.sp,),
 

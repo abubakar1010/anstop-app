@@ -28,6 +28,7 @@ class _PassengerMapScreenState extends State<PassengerMapScreen> {
   @override
   void initState() {
     super.initState();
+    Get.find<HomePageController>().rideRequestActive = false;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Get.find<HomePageController>().showPassengerSheet(
         (_) => FindCarBottomSheet(
@@ -43,9 +44,22 @@ class _PassengerMapScreenState extends State<PassengerMapScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      key: Get.find<HomePageController>().scaffoldKey,
-      body: const PassengerGoogleMapWidget(),
+    // Back must leave the screen, not just close the sheet: on its own the
+    // sheet would close and strand the user on a bare map with no controls.
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        final homeController = Get.find<HomePageController>();
+        if (homeController.rideRequestActive) return;
+        homeController.closeCurrentSheet();
+        homeController.clearDestinationRadiusCircle();
+        Navigator.of(context).pop();
+      },
+      child: Scaffold(
+        key: Get.find<HomePageController>().scaffoldKey,
+        body: const PassengerGoogleMapWidget(),
+      ),
     );
   }
 }

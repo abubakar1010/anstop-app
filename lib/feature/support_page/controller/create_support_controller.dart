@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ride_sharing/app/utils/app_snackbar.dart';
 import '../data/create_support_request_model.dart';
 import '../service/support_service.dart';
 import 'package:ride_sharing/l10n/l10n_helper.dart';
@@ -62,25 +63,13 @@ class CreateSupportController extends GetxController {
       } else {
         errorMessage.value = response.errorMessage.isNotEmpty
             ? response.errorMessage
-            : 'Failed to submit support request';
-        Get.snackbar(
-          AppLocalization.tr.errorTitle,
-          AppLocalization.tr.genericErrorMessage,
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-        );
+            : AppLocalization.tr.genericErrorMessage;
+        AppSnackbar.error(AppLocalization.tr.errorTitle, AppLocalization.tr.genericErrorMessage);
       }
     } catch (e) {
       debugPrint('create_support_controller: $e');
       errorMessage.value = AppLocalization.tr.genericErrorMessage;
-      Get.snackbar(
-        AppLocalization.tr.errorTitle,
-        AppLocalization.tr.genericErrorMessage,
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      AppSnackbar.error(AppLocalization.tr.errorTitle, AppLocalization.tr.genericErrorMessage);
     } finally {
       isLoading.value = false;
     }
@@ -125,8 +114,10 @@ class CreateSupportController extends GetxController {
               const SizedBox(height: 24),
               GestureDetector(
                 onTap: () {
-                  Get.back(); // Close dialog
-                  Get.back(); // Go back to support list
+                  // Get.back() crashes (LateInitializationError) when a
+                  // snackbar is open, so pop through the navigator directly.
+                  Get.key.currentState?.pop(); // Close dialog
+                  Get.key.currentState?.pop(); // Go back to support list
                 },
                 child: Container(
                   height: 48,

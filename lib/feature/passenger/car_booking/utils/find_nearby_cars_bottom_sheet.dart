@@ -112,7 +112,7 @@ class _FindNearbyCarsBottomSheetState extends State<FindNearbyCarsBottomSheet> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("\$24"), // Price
+                    Text("€24"), // Price
                     Text('28 km') // Distance
                   ],
                 )

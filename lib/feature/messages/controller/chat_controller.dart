@@ -311,10 +311,11 @@ class ChatController extends GetxController {
       _logger.i('Conversation ID: $conversationId');
 
       // Send message via socket
-      _socketService.sendMessage(
+      final sent = await _socketService.sendMessage(
         conversationId: conversationId,
         text: text,
       );
+      if (!sent) throw StateError('Message was not accepted by the server');
 
       // Optimistically add message to UI
       final newMessage = ChatMessage.local(

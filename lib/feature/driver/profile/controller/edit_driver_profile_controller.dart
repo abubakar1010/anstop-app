@@ -1,3 +1,4 @@
+import 'package:ride_sharing/services/session_controller.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -85,7 +86,7 @@ class EditDriverProfileController extends GetxController {
       errorMessage.value = '';
 
       final prefs = await SharedPreferences.getInstance();
-      final accessToken = prefs.getString('accessToken') ?? '';
+      final accessToken = await SessionController.to.accessToken() ?? '';
 
       if (accessToken.isEmpty) {
         errorMessage.value = AppLocalization.tr.sessionExpiredMessage;

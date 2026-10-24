@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ride_sharing/l10n/l10n_helper.dart';
+import 'package:ride_sharing/services/ride_session_controller.dart';
 
 class CancelTaxiController extends GetxController {
   // ==================== Text Controllers ====================
@@ -11,13 +12,13 @@ class CancelTaxiController extends GetxController {
   final RxList<String> selectedReasons = <String>[].obs;
   final RxString errorMessage = ''.obs;
 
-  final List<String> cancellationReasons = [
-    'Driver is taking too long',
-    'Found another ride',
-    'Change of plans',
-    'Wrong pickup location',
-    'Driver requested to cancel',
-    'Other',
+  late final List<String> cancellationReasons = [
+    AppLocalization.tr.cancelReasonDriverTooLong,
+    AppLocalization.tr.cancelReasonFoundAnother,
+    AppLocalization.tr.cancelReasonChangeOfPlans,
+    AppLocalization.tr.cancelReasonWrongPickup,
+    AppLocalization.tr.cancelReasonDriverRequested,
+    AppLocalization.tr.cancelReasonOther,
   ];
 
   // ==================== Lifecycle ====================
@@ -54,11 +55,22 @@ class CancelTaxiController extends GetxController {
       isLoading.value = true;
       errorMessage.value = '';
 
-      // TODO: Implement actual cancellation API call
-      await Future.delayed(const Duration(seconds: 2));
-
-      // Navigate back with cancellation confirmed
-      // Get.back(result: true);
+      final rideId = RideSessionController.to.ride.value?.rideId;
+      if (rideId == null || rideId.isEmpty) {
+        errorMessage.value = AppLocalization.tr.genericErrorMessage;
+        return;
+      }
+      final reason = [
+        ...selectedReasons,
+        if (otherReasonTEController.text.trim().isNotEmpty)
+          otherReasonTEController.text.trim(),
+      ].join('; ');
+      final ack = await RideSessionController.to.cancelRide(rideId, reason);
+      if (!ack.ok) {
+        errorMessage.value = AppLocalization.tr.genericErrorMessage;
+        return;
+      }
+      Get.back(result: true);
 
     } catch (e) {
       debugPrint('cancel_taxi_controller: $e');
@@ -74,7 +86,8 @@ class CancelTaxiController extends GetxController {
       return false;
     }
 
-    if (selectedReasons.contains('Other') && otherReasonTEController.text.isEmpty) {
+    if (selectedReasons.contains(AppLocalization.tr.cancelReasonOther) &&
+        otherReasonTEController.text.trim().isEmpty) {
       errorMessage.value = AppLocalization.tr.genericErrorMessage;
       return false;
     }
@@ -89,6 +102,6 @@ class CancelTaxiController extends GetxController {
 
   // ==================== Navigation ====================
   void goBack() {
-    // Get.back();
+    Get.back();
   }
 }

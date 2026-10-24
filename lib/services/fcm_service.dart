@@ -1,8 +1,7 @@
 import 'dart:async';
-import 'dart:convert';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
-import 'package:http/http.dart' as http;
+import 'api_client.dart';
 import 'package:ride_sharing/services/api_urls.dart';
 import 'package:logger/logger.dart';
 
@@ -89,21 +88,13 @@ class FcmService {
     try {
       _logger.i('➡️ Sending FCM token to API: $fcmToken'); // log token being sent
 
-      final response = await http.post(
-        Uri.parse(ApiUrls.setFcmToken),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $accessToken',
-        },
-        body: jsonEncode({
-          'fcmToken': fcmToken,
-        }),
-      );
+      final response = await ApiClient().postRequest(ApiUrls.setFcmToken,
+          body: {'fcmToken': fcmToken});
 
-      if (response.statusCode == 200) {
+      if (response.isSuccess) {
         _logger.i('✅ FCM token sent successfully to API');
       } else {
-        _logger.w('❌ Failed to send FCM token: ${response.body}');
+        _logger.w('❌ Failed to send FCM token: ${response.errorCode}');
       }
     } catch (e) {
       _logger.e('❌ FCM API ERROR: $e');

@@ -272,6 +272,12 @@ abstract class AppLocalizations {
   /// **'Lets go!!'**
   String get logInButtonText;
 
+  /// No description provided for @noAccountText.
+  ///
+  /// In en, this message translates to:
+  /// **'Don\'t have an account?'**
+  String get noAccountText;
+
   /// No description provided for @validationErrorTitle.
   ///
   /// In en, this message translates to:
@@ -737,7 +743,7 @@ abstract class AppLocalizations {
   /// No description provided for @priceExample.
   ///
   /// In en, this message translates to:
-  /// **'\$24'**
+  /// **'€24'**
   String get priceExample;
 
   /// No description provided for @distanceExample2.
@@ -791,7 +797,7 @@ abstract class AppLocalizations {
   /// No description provided for @previousPriceExample.
   ///
   /// In en, this message translates to:
-  /// **'\$20'**
+  /// **'€20'**
   String get previousPriceExample;
 
   /// No description provided for @carNumberExample.
@@ -857,7 +863,7 @@ abstract class AppLocalizations {
   /// No description provided for @fareExample.
   ///
   /// In en, this message translates to:
-  /// **'\$26.00'**
+  /// **'€26.00'**
   String get fareExample;
 
   /// No description provided for @confirmPaymentTitle.
@@ -935,7 +941,7 @@ abstract class AppLocalizations {
   /// No description provided for @fareExample2.
   ///
   /// In en, this message translates to:
-  /// **'\$ 25.69'**
+  /// **'€ 25.69'**
   String get fareExample2;
 
   /// No description provided for @walletTitle.
@@ -1544,12 +1550,6 @@ abstract class AppLocalizations {
   /// **'No Internet Connection'**
   String get noInternetConnectionLabel;
 
-  /// No description provided for @tripsCountLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Trips'**
-  String get tripsCountLabel;
-
   /// No description provided for @goToProfileLink.
   ///
   /// In en, this message translates to:
@@ -1937,7 +1937,7 @@ abstract class AppLocalizations {
   /// No description provided for @sessionExpiredMessage.
   ///
   /// In en, this message translates to:
-  /// **'Access token not found. Please login again.'**
+  /// **'Your session has expired. Please log in again.'**
   String get sessionExpiredMessage;
 
   /// No description provided for @pleaseLoginToContinueMessage.
@@ -2425,6 +2425,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Retry'**
   String get retryButton;
+
+  /// No description provided for @supportStatusOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get supportStatusOpen;
+
+  /// No description provided for @supportStatusInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'In progress'**
+  String get supportStatusInProgress;
+
+  /// No description provided for @supportStatusResolved.
+  ///
+  /// In en, this message translates to:
+  /// **'Resolved'**
+  String get supportStatusResolved;
+
+  /// No description provided for @supportStatusClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed'**
+  String get supportStatusClosed;
+
+  /// No description provided for @supportLoadFailedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load support messages'**
+  String get supportLoadFailedMessage;
 
   /// No description provided for @nextButton.
   ///
@@ -2941,6 +2971,372 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'I will pick you up'**
   String get iWillPickYouUpLabel;
+
+  /// No description provided for @withdrawNowButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Withdraw Now'**
+  String get withdrawNowButton;
+
+  /// No description provided for @depositButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Deposit'**
+  String get depositButton;
+
+  /// No description provided for @todayAtLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Today at {time}'**
+  String todayAtLabel(String time);
+
+  /// No description provided for @todayLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get todayLabel;
+
+  /// No description provided for @yesterdayLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday'**
+  String get yesterdayLabel;
+
+  /// No description provided for @nowLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Now'**
+  String get nowLabel;
+
+  /// No description provided for @professionalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Professional'**
+  String get professionalLabel;
+
+  /// No description provided for @driverLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver'**
+  String get driverLabel;
+
+  /// No description provided for @saveChangesButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Changes'**
+  String get saveChangesButton;
+
+  /// No description provided for @confirmButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get confirmButton;
+
+  /// No description provided for @arrivingAtDestinationLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Arriving at destination'**
+  String get arrivingAtDestinationLabel;
+
+  /// No description provided for @currentLocationLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Current Location'**
+  String get currentLocationLabel;
+
+  /// No description provided for @destinationLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Destination'**
+  String get destinationLabel;
+
+  /// No description provided for @paymentMethodWallet.
+  ///
+  /// In en, this message translates to:
+  /// **'Wallet'**
+  String get paymentMethodWallet;
+
+  /// No description provided for @paymentMethodCard.
+  ///
+  /// In en, this message translates to:
+  /// **'By card'**
+  String get paymentMethodCard;
+
+  /// No description provided for @paymentMethodCash.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash'**
+  String get paymentMethodCash;
+
+  /// No description provided for @payViaLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay via {method}'**
+  String payViaLabel(String method);
+
+  /// No description provided for @durationMinutesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} min'**
+  String durationMinutesLabel(String minutes);
+
+  /// No description provided for @rideNeedWheelchair.
+  ///
+  /// In en, this message translates to:
+  /// **'Wheelchair Accessible'**
+  String get rideNeedWheelchair;
+
+  /// No description provided for @rideNeedExtraLuggage.
+  ///
+  /// In en, this message translates to:
+  /// **'Extra Luggage Space'**
+  String get rideNeedExtraLuggage;
+
+  /// No description provided for @rideNeedPetFriendly.
+  ///
+  /// In en, this message translates to:
+  /// **'Pet Friendly'**
+  String get rideNeedPetFriendly;
+
+  /// No description provided for @rideNeedChildSeat.
+  ///
+  /// In en, this message translates to:
+  /// **'Child Seat'**
+  String get rideNeedChildSeat;
+
+  /// No description provided for @selectRideNeedsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Select ride needs'**
+  String get selectRideNeedsHint;
+
+  /// No description provided for @bookForMyselfOption.
+  ///
+  /// In en, this message translates to:
+  /// **'Book for myself'**
+  String get bookForMyselfOption;
+
+  /// No description provided for @bookForFriendOption.
+  ///
+  /// In en, this message translates to:
+  /// **'Book for my friend'**
+  String get bookForFriendOption;
+
+  /// No description provided for @cancelReasonDriverTooLong.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver is taking too long'**
+  String get cancelReasonDriverTooLong;
+
+  /// No description provided for @cancelReasonFoundAnother.
+  ///
+  /// In en, this message translates to:
+  /// **'Found another ride'**
+  String get cancelReasonFoundAnother;
+
+  /// No description provided for @cancelReasonChangeOfPlans.
+  ///
+  /// In en, this message translates to:
+  /// **'Change of plans'**
+  String get cancelReasonChangeOfPlans;
+
+  /// No description provided for @cancelReasonWrongPickup.
+  ///
+  /// In en, this message translates to:
+  /// **'Wrong pickup location'**
+  String get cancelReasonWrongPickup;
+
+  /// No description provided for @cancelReasonDriverRequested.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver requested to cancel'**
+  String get cancelReasonDriverRequested;
+
+  /// No description provided for @cancelReasonOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get cancelReasonOther;
+
+  /// No description provided for @fareCalculationFailedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not calculate the fare. Please try again.'**
+  String get fareCalculationFailedMessage;
+
+  /// No description provided for @rideRequestFailedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not create the ride request. Please try again.'**
+  String get rideRequestFailedMessage;
+
+  /// No description provided for @ratingSubmitFailedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to submit rating. Please try again.'**
+  String get ratingSubmitFailedMessage;
+
+  /// No description provided for @paymentConfirmedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your payment was confirmed successfully'**
+  String get paymentConfirmedMessage;
+
+  /// No description provided for @paymentLinkMissingMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment could not be started — the server did not return a payment link.'**
+  String get paymentLinkMissingMessage;
+
+  /// No description provided for @paymentLinkOpenFailedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open payment link'**
+  String get paymentLinkOpenFailedMessage;
+
+  /// No description provided for @paymentFailedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment failed'**
+  String get paymentFailedMessage;
+
+  /// No description provided for @noTripDetailsMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'No trip details available'**
+  String get noTripDetailsMessage;
+
+  /// No description provided for @uploadedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploaded'**
+  String get uploadedLabel;
+
+  /// No description provided for @notUploadedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Not Uploaded'**
+  String get notUploadedLabel;
+
+  /// No description provided for @invalidCodeMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The code seems invalid. Please try again'**
+  String get invalidCodeMessage;
+
+  /// No description provided for @enterValidCodeMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid 6-digit Code'**
+  String get enterValidCodeMessage;
+
+  /// No description provided for @rideNoLongerAvailableMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This ride is no longer available'**
+  String get rideNoLongerAvailableMessage;
+
+  /// No description provided for @tripsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 trip} other{{count} trips}}'**
+  String tripsCount(int count);
+
+  /// No description provided for @walletDepositLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Wallet deposit'**
+  String get walletDepositLabel;
+
+  /// No description provided for @walletWithdrawalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Wallet withdrawal'**
+  String get walletWithdrawalLabel;
+
+  /// No description provided for @enterBankNameError.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter the bank name'**
+  String get enterBankNameError;
+
+  /// No description provided for @enterAccountNumberError.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter the account number'**
+  String get enterAccountNumberError;
+
+  /// No description provided for @fieldRequiredError.
+  ///
+  /// In en, this message translates to:
+  /// **'This field is required'**
+  String get fieldRequiredError;
+
+  /// No description provided for @fieldRequiredNamedError.
+  ///
+  /// In en, this message translates to:
+  /// **'{field} is required'**
+  String fieldRequiredNamedError(String field);
+
+  /// No description provided for @passwordMinLengthError.
+  ///
+  /// In en, this message translates to:
+  /// **'Password must be at least {min} characters'**
+  String passwordMinLengthError(int min);
+
+  /// No description provided for @loggingInLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Logging in...'**
+  String get loggingInLabel;
+
+  /// No description provided for @passwordChangedSuccessMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Password changed successfully'**
+  String get passwordChangedSuccessMessage;
+
+  /// No description provided for @accountPendingReviewMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your driver account is awaiting approval.'**
+  String get accountPendingReviewMessage;
+
+  /// No description provided for @accountRejectedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your driver application was rejected. Please contact support.'**
+  String get accountRejectedMessage;
+
+  /// No description provided for @accountSuspendedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account is suspended. Please contact support.'**
+  String get accountSuspendedMessage;
+
+  /// No description provided for @accountDeletedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This account has been deleted.'**
+  String get accountDeletedMessage;
+
+  /// No description provided for @onboardingRequiredMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Please complete driver onboarding.'**
+  String get onboardingRequiredMessage;
+
+  /// No description provided for @permissionDeniedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You do not have permission to do that.'**
+  String get permissionDeniedMessage;
+
+  /// No description provided for @tooManyRequestsMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many requests. Please try again later.'**
+  String get tooManyRequestsMessage;
 }
 
 class _AppLocalizationsDelegate

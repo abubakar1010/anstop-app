@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../app/utils/app_colors.dart';
+import 'package:ride_sharing/app/helpers/price_format.dart';
 
 
 class TransactionItem extends StatelessWidget {
@@ -75,7 +76,7 @@ class TransactionItem extends StatelessWidget {
             ),
           ),
           Text(
-            '${isPositive ? '' : '-'}\$$amount',
+            '${isPositive ? '' : '-'}${formatPrice(amount)}',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,

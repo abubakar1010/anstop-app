@@ -1,7 +1,9 @@
+import 'package:ride_sharing/services/session_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:ride_sharing/app/helpers/prefs_helper.dart';
+import 'package:ride_sharing/app/utils/app_snackbar.dart';
 import 'package:ride_sharing/custom_assets/app_image.dart';
 import 'package:ride_sharing/routes/app_routes.dart';
 import 'package:ride_sharing/services/api_client.dart';
@@ -15,6 +17,7 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:ride_sharing/l10n/l10n_helper.dart';
+import 'package:ride_sharing/app/helpers/price_format.dart';
 
 class PassengerPaymentScreen extends StatefulWidget {
   final String driverName;
@@ -73,7 +76,7 @@ class _PassengerPaymentScreenState extends State<PassengerPaymentScreen> {
     setState(() => _isSubmittingRating = true);
 
     try {
-      final accessToken = await PrefsHelper.getString('accessToken');
+      final accessToken = await SessionController.to.accessToken();
       _logger.i('Submitting rating — rideId: ${widget.rideId}, revieweeId (driverId): ${widget.driverId}, rating: $_selectedRating');
       final response = await ApiClient().postRequest(
         ApiUrls.createReview,
@@ -103,7 +106,7 @@ class _PassengerPaymentScreenState extends State<PassengerPaymentScreen> {
       if (mounted) {
         Get.snackbar(
           AppLocalization.tr.errorTitle,
-          'Failed to submit rating. Please try again.',
+          AppLocalization.tr.ratingSubmitFailedMessage,
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.red,
           colorText: Colors.white,
@@ -119,7 +122,7 @@ class _PassengerPaymentScreenState extends State<PassengerPaymentScreen> {
       if (mounted) {
         Get.snackbar(
           AppLocalization.tr.paymentConfirmedTitle,
-          'Your payment was confirmed successfully',
+          AppLocalization.tr.paymentConfirmedMessage,
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.green,
           colorText: Colors.white,
@@ -136,10 +139,11 @@ class _PassengerPaymentScreenState extends State<PassengerPaymentScreen> {
   }
 
   // Calls POST /ride-requests/pay-ride-fare/{rideId}
-  // For CARD/WALLET: returns the Stripe Checkout URL from response
-  // For CASH: notifies the server and returns null
-  Future<String?> _callPayRideFareApi(BuildContext context) async {
-    final accessToken = await PrefsHelper.getString('accessToken');
+  // ok is false when the request failed (the error has already been shown).
+  // For CARD/WALLET: url is the Stripe Checkout URL from the response
+  // For CASH: notifies the server and url is null
+  Future<({bool ok, String? url})> _callPayRideFareApi(BuildContext context) async {
+    final accessToken = await SessionController.to.accessToken();
     final apiClient = ApiClient();
     final response = await apiClient.postRequest(
       ApiUrls.payRideFare(widget.rideId),
@@ -169,16 +173,20 @@ class _PassengerPaymentScreenState extends State<PassengerPaymentScreen> {
           ),
         );
       }
-      return null;
+      return (ok: false, url: null);
     }
 
     // Extract checkout URL from response data
     final data = response.responseData?['data'];
     if (data != null && data is Map<String, dynamic>) {
-      return data['url'] as String?;
+      return (ok: true, url: data['url'] as String?);
     }
-    return null;
+    return (ok: true, url: null);
   }
+
+  // This screen is reached via Get.offAll, so it is the only route: popping
+  // it would close the app. Leave to the home screen instead.
+  void _leaveToHome() => Get.offAllNamed(AppRoutes.passengerHomeScreen);
 
   Future<void> _handleConfirmPayment(BuildContext context) async {
     if (_isProcessingPayment) return;
@@ -188,7 +196,10 @@ class _PassengerPaymentScreenState extends State<PassengerPaymentScreen> {
     try {
       if (_requiresOnlinePayment()) {
         // CARD / WALLET: call API → get Stripe Checkout URL → open in browser
-        final checkoutUrl = await _callPayRideFareApi(context);
+        final result = await _callPayRideFareApi(context);
+        // A failed request has already shown the server's reason.
+        if (!result.ok) return;
+        final checkoutUrl = result.url;
         if (checkoutUrl == null || checkoutUrl.isEmpty) {
           // The request succeeded but carried no checkout URL. Staying silent
           // here is what made this look like "the button does nothing" — say
@@ -198,13 +209,9 @@ class _PassengerPaymentScreenState extends State<PassengerPaymentScreen> {
             'method=${widget.paymentMethod}',
           );
           if (mounted) {
-            Get.snackbar(
+            AppSnackbar.error(
               AppLocalization.tr.errorTitle,
-              'Payment could not be started — the server did not return a payment link.',
-              snackPosition: SnackPosition.BOTTOM,
-              backgroundColor: Colors.red,
-              colorText: Colors.white,
-              duration: const Duration(seconds: 4),
+              AppLocalization.tr.paymentLinkMissingMessage,
             );
           }
           return;
@@ -215,12 +222,9 @@ class _PassengerPaymentScreenState extends State<PassengerPaymentScreen> {
           await launchUrl(uri, mode: LaunchMode.externalApplication);
         } else {
           if (mounted) {
-            Get.snackbar(
+            AppSnackbar.error(
               AppLocalization.tr.errorTitle,
-              'Could not open payment link',
-              snackPosition: SnackPosition.BOTTOM,
-              backgroundColor: Colors.red,
-              colorText: Colors.white,
+              AppLocalization.tr.paymentLinkOpenFailedMessage,
             );
           }
         }
@@ -239,8 +243,14 @@ class _PassengerPaymentScreenState extends State<PassengerPaymentScreen> {
   }
 
   String _formatPaymentMethod(String method) {
-    if (method.isEmpty) return 'Wallet';
-    return method[0].toUpperCase() + method.substring(1).toLowerCase();
+    switch (method.toUpperCase()) {
+      case 'CARD':
+        return AppLocalization.tr.paymentMethodCard.toLowerCase();
+      case 'CASH':
+        return AppLocalization.tr.paymentMethodCash.toLowerCase();
+      default:
+        return AppLocalization.tr.paymentMethodWallet.toLowerCase();
+    }
   }
 
   @override
@@ -253,8 +263,8 @@ class _PassengerPaymentScreenState extends State<PassengerPaymentScreen> {
     final displayRating = widget.driverRating;
     // final displayTrips = widget.driverTotalReviews > 0 ? widget.driverTotalReviews : 3;
     final displayTrips = widget.driverTotalReviews;
-    // final displayPrice = widget.bidAmount.isNotEmpty ? '\$${widget.bidAmount}' : '\$24';
-    final displayPrice = widget.bidAmount.isNotEmpty ? '\$${widget.bidAmount}' : '';
+    // final displayPrice = widget.bidAmount.isNotEmpty ? '€${widget.bidAmount}' : '€24';
+    final displayPrice = widget.bidAmount.isNotEmpty ? formatPrice(widget.bidAmount) : '';
     // final displayDistance = widget.tripDistance.isNotEmpty ? '${widget.tripDistance} km' : '28 km';
     final displayDistance = widget.tripDistance.isNotEmpty ? '${widget.tripDistance} km' : '';
     final displayPickup = widget.pickUpAddress.isNotEmpty
@@ -263,9 +273,14 @@ class _PassengerPaymentScreenState extends State<PassengerPaymentScreen> {
     final displayDestination = widget.destinationAddress.isNotEmpty
         ? widget.destinationAddress
         : AppLocalization.tr.dropoffLocationExample;
-    final displayPaymentMethod = 'Pay via ${_formatPaymentMethod(widget.paymentMethod)}';
+    final displayPaymentMethod = AppLocalization.tr.payViaLabel(_formatPaymentMethod(widget.paymentMethod));
 
-    return Scaffold(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _leaveToHome();
+      },
+      child: Scaffold(
       backgroundColor: const Color(0xFFEEEEEE),
       appBar: AppBar(
         leading: Container(
@@ -276,7 +291,7 @@ class _PassengerPaymentScreenState extends State<PassengerPaymentScreen> {
           ),
           child: IconButton(
             icon: const Icon(Icons.arrow_back),
-            onPressed: () => Navigator.pop(context),
+            onPressed: _leaveToHome,
           ),
         ),
         backgroundColor: const Color(0xFFEEEEEE),
@@ -293,7 +308,7 @@ class _PassengerPaymentScreenState extends State<PassengerPaymentScreen> {
               name: displayName,
               rating: displayRating,
               trips: displayTrips,
-              profession: 'Professional',
+              profession: AppLocalization.tr.professionalLabel,
               price: displayPrice,
               distance: displayDistance,
             ),
@@ -401,6 +416,7 @@ class _PassengerPaymentScreenState extends State<PassengerPaymentScreen> {
                   style: const TextStyle(color: AppColors.white),
                 ),
         ),
+      ),
       ),
     );
   }
