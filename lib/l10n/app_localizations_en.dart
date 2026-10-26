@@ -149,6 +149,12 @@ class AppLocalizationsEn extends AppLocalizations {
       'Fill the information to create a new account.';
 
   @override
+  String get driverOnboardingTitle => 'Complete your driver profile';
+
+  @override
+  String get driverOnboardingSubtitle => 'Add a few details to start driving.';
+
+  @override
   String get nameHintText => 'Name here';
 
   @override
@@ -1727,4 +1733,42 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get tooManyRequestsMessage =>
       'Too many requests. Please try again later.';
+
+  @override
+  String get accountStatusPendingTitle => 'Application under review';
+
+  @override
+  String get accountStatusPendingBody =>
+      'Thanks for applying to drive with Anstop. Our team is reviewing your documents. You can start driving as soon as your account is approved.';
+
+  @override
+  String get accountStatusRejectedTitle => 'Application not approved';
+
+  @override
+  String get accountStatusSuspendedTitle => 'Account suspended';
+
+  @override
+  String get accountStatusDeletedTitle => 'Account deleted';
+
+  @override
+  String get accountStatusStepCreated => 'Account created';
+
+  @override
+  String get accountStatusStepSubmitted => 'Documents submitted';
+
+  @override
+  String get accountStatusStepReview => 'Under review';
+
+  @override
+  String get accountStatusStepDrive => 'Start driving';
+
+  @override
+  String get checkStatusButton => 'Check status';
+
+  @override
+  String get continueSetupButton => 'Continue setup';
+
+  @override
+  String get accountStatusStillPending =>
+      'Your application is still under review.';
 }

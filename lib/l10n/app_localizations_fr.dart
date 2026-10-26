@@ -149,6 +149,13 @@ class AppLocalizationsFr extends AppLocalizations {
       'Remplissez les informations pour créer un nouveau compte.';
 
   @override
+  String get driverOnboardingTitle => 'Complétez votre profil chauffeur';
+
+  @override
+  String get driverOnboardingSubtitle =>
+      'Ajoutez quelques informations pour commencer à conduire.';
+
+  @override
   String get nameHintText => 'Nom ici';
 
   @override
@@ -1756,4 +1763,42 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get tooManyRequestsMessage =>
       'Trop de demandes. Veuillez réessayer plus tard.';
+
+  @override
+  String get accountStatusPendingTitle => 'Demande en cours d\'examen';
+
+  @override
+  String get accountStatusPendingBody =>
+      'Merci de vouloir conduire avec Anstop. Notre équipe examine vos documents. Vous pourrez commencer à conduire dès que votre compte sera approuvé.';
+
+  @override
+  String get accountStatusRejectedTitle => 'Demande non approuvée';
+
+  @override
+  String get accountStatusSuspendedTitle => 'Compte suspendu';
+
+  @override
+  String get accountStatusDeletedTitle => 'Compte supprimé';
+
+  @override
+  String get accountStatusStepCreated => 'Compte créé';
+
+  @override
+  String get accountStatusStepSubmitted => 'Documents envoyés';
+
+  @override
+  String get accountStatusStepReview => 'En cours d\'examen';
+
+  @override
+  String get accountStatusStepDrive => 'Commencez à conduire';
+
+  @override
+  String get checkStatusButton => 'Vérifier le statut';
+
+  @override
+  String get continueSetupButton => 'Continuer l\'inscription';
+
+  @override
+  String get accountStatusStillPending =>
+      'Votre demande est toujours en cours d\'examen.';
 }

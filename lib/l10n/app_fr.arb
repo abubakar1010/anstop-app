@@ -53,6 +53,8 @@
 
   "createAccountTitle": "Créer un Compte",
   "createAccountSubtitle": "Remplissez les informations pour créer un nouveau compte.",
+  "driverOnboardingTitle": "Complétez votre profil chauffeur",
+  "driverOnboardingSubtitle": "Ajoutez quelques informations pour commencer à conduire.",
   "nameHintText": "Nom ici",
   "enterEmailHintText": "Entrer l'e-mail",
   "enterPasswordHintText": "Entrer le mot de passe",
@@ -601,5 +603,17 @@
   "accountDeletedMessage": "Ce compte a été supprimé.",
   "onboardingRequiredMessage": "Veuillez terminer votre inscription comme conducteur.",
   "permissionDeniedMessage": "Vous n'avez pas l'autorisation d'effectuer cette action.",
-  "tooManyRequestsMessage": "Trop de demandes. Veuillez réessayer plus tard."
+  "tooManyRequestsMessage": "Trop de demandes. Veuillez réessayer plus tard.",
+  "accountStatusPendingTitle": "Demande en cours d'examen",
+  "accountStatusPendingBody": "Merci de vouloir conduire avec Anstop. Notre équipe examine vos documents. Vous pourrez commencer à conduire dès que votre compte sera approuvé.",
+  "accountStatusRejectedTitle": "Demande non approuvée",
+  "accountStatusSuspendedTitle": "Compte suspendu",
+  "accountStatusDeletedTitle": "Compte supprimé",
+  "accountStatusStepCreated": "Compte créé",
+  "accountStatusStepSubmitted": "Documents envoyés",
+  "accountStatusStepReview": "En cours d'examen",
+  "accountStatusStepDrive": "Commencez à conduire",
+  "checkStatusButton": "Vérifier le statut",
+  "continueSetupButton": "Continuer l'inscription",
+  "accountStatusStillPending": "Votre demande est toujours en cours d'examen."
 }

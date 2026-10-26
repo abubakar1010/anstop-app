@@ -53,6 +53,8 @@
 
   "createAccountTitle": "Create Account",
   "createAccountSubtitle": "Fill the information to create a new account.",
+  "driverOnboardingTitle": "Complete your driver profile",
+  "driverOnboardingSubtitle": "Add a few details to start driving.",
   "nameHintText": "Name here",
   "enterEmailHintText": "Enter E-mail",
   "enterPasswordHintText": "Enter Password",
@@ -607,5 +609,17 @@
   "accountDeletedMessage": "This account has been deleted.",
   "onboardingRequiredMessage": "Please complete driver onboarding.",
   "permissionDeniedMessage": "You do not have permission to do that.",
-  "tooManyRequestsMessage": "Too many requests. Please try again later."
+  "tooManyRequestsMessage": "Too many requests. Please try again later.",
+  "accountStatusPendingTitle": "Application under review",
+  "accountStatusPendingBody": "Thanks for applying to drive with Anstop. Our team is reviewing your documents. You can start driving as soon as your account is approved.",
+  "accountStatusRejectedTitle": "Application not approved",
+  "accountStatusSuspendedTitle": "Account suspended",
+  "accountStatusDeletedTitle": "Account deleted",
+  "accountStatusStepCreated": "Account created",
+  "accountStatusStepSubmitted": "Documents submitted",
+  "accountStatusStepReview": "Under review",
+  "accountStatusStepDrive": "Start driving",
+  "checkStatusButton": "Check status",
+  "continueSetupButton": "Continue setup",
+  "accountStatusStillPending": "Your application is still under review."
 }

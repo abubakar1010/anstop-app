@@ -362,6 +362,18 @@ abstract class AppLocalizations {
   /// **'Fill the information to create a new account.'**
   String get createAccountSubtitle;
 
+  /// No description provided for @driverOnboardingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete your driver profile'**
+  String get driverOnboardingTitle;
+
+  /// No description provided for @driverOnboardingSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a few details to start driving.'**
+  String get driverOnboardingSubtitle;
+
   /// No description provided for @nameHintText.
   ///
   /// In en, this message translates to:
@@ -3337,6 +3349,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Too many requests. Please try again later.'**
   String get tooManyRequestsMessage;
+
+  /// No description provided for @accountStatusPendingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Application under review'**
+  String get accountStatusPendingTitle;
+
+  /// No description provided for @accountStatusPendingBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Thanks for applying to drive with Anstop. Our team is reviewing your documents. You can start driving as soon as your account is approved.'**
+  String get accountStatusPendingBody;
+
+  /// No description provided for @accountStatusRejectedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Application not approved'**
+  String get accountStatusRejectedTitle;
+
+  /// No description provided for @accountStatusSuspendedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Account suspended'**
+  String get accountStatusSuspendedTitle;
+
+  /// No description provided for @accountStatusDeletedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Account deleted'**
+  String get accountStatusDeletedTitle;
+
+  /// No description provided for @accountStatusStepCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Account created'**
+  String get accountStatusStepCreated;
+
+  /// No description provided for @accountStatusStepSubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Documents submitted'**
+  String get accountStatusStepSubmitted;
+
+  /// No description provided for @accountStatusStepReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Under review'**
+  String get accountStatusStepReview;
+
+  /// No description provided for @accountStatusStepDrive.
+  ///
+  /// In en, this message translates to:
+  /// **'Start driving'**
+  String get accountStatusStepDrive;
+
+  /// No description provided for @checkStatusButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Check status'**
+  String get checkStatusButton;
+
+  /// No description provided for @continueSetupButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue setup'**
+  String get continueSetupButton;
+
+  /// No description provided for @accountStatusStillPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Your application is still under review.'**
+  String get accountStatusStillPending;
 }
 
 class _AppLocalizationsDelegate
