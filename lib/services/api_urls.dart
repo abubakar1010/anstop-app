@@ -1,7 +1,14 @@
 class ApiUrls {
+  /// Server origin. Override for local dev, e.g.
+  /// `flutter run --dart-define=API_HOST=http://localhost:8000`
+  static const String apiHost = String.fromEnvironment(
+    'API_HOST',
+    defaultValue: 'https://api.anstopcovoiturage.com',
+  );
+
   //static const String baseUrl = "http://217.15.170.117";
  // static const String baseUrl = "https://abu-bakar8000.merinasib.shop/api/v1";
-  static const String baseUrl = "https://api.anstopcovoiturage.com/api/v1";
+  static const String baseUrl = "$apiHost/api/v1";
  // static const String baseUrl = "https://zeron-8000.ssh.bd/api/v1";
 
 
@@ -23,11 +30,11 @@ class ApiUrls {
 
   //static const String imageBaseUrl = "http://217.15.170.117/";
  // static const String imageBaseUrl = "https://mihad4000.merinasib.shop/";
-  static const String imageBaseUrl = "https://api.anstopcovoiturage.com/";
+  static const String imageBaseUrl = "$apiHost/";
 
 
   //static const String socketUrl = "http://217.15.170.117";
-  static const String socketUrl = "https://api.anstopcovoiturage.com";
+  static const String socketUrl = apiHost;
 
   static const String myRides = '$baseUrl/rides/my-rides';
   static const String currentRide = '$baseUrl/rides/current';
