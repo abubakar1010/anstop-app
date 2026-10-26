@@ -5,6 +5,7 @@ import 'package:ride_sharing/widgets/auth_links/auth_link.dart';
 import '../../../routes/app_routes.dart';
 import 'package:ride_sharing/l10n/l10n_helper.dart';
 import 'package:ride_sharing/app/utils/app_snackbar.dart';
+import 'package:ride_sharing/feature/auth/view/log_out_dialog.dart';
 
 class DriverRegistration extends StatefulWidget {
   const DriverRegistration({super.key});
@@ -45,15 +46,30 @@ class _DriverRegistrationState extends State<DriverRegistration> {
     }
   }
 
+  /// This screen is the app's start page for a signed-in driver who has not
+  /// finished onboarding (splash opens it with offAllNamed), so there may be
+  /// nothing behind it. Popping then leaves a black screen; offer to sign out
+  /// instead, which is the only other way out of an unfinished account.
+  void _onBack() {
+    if (Navigator.canPop(context)) {
+      Navigator.pop(context);
+    } else {
+      _logOut();
+    }
+  }
+
+  Future<void> _logOut() async {
+    final result = await LogoutDialog.show(context);
+    if (result == true) Get.offAllNamed(AppRoutes.loginScreen);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CupertinoNavigationBar(
         leading: CupertinoButton(
           padding: EdgeInsets.zero,
-          onPressed: () {
-            Navigator.pop(context);
-          },
+          onPressed: _onBack,
           child: Icon(CupertinoIcons.back, color: Colors.black),
         ),
         //  middle: Text('Create Account'),
@@ -67,12 +83,12 @@ class _DriverRegistrationState extends State<DriverRegistration> {
             children: [
               SizedBox(height: 46.h),
               Text(
-                AppLocalization.tr.createAccountTitle,
+                AppLocalization.tr.driverOnboardingTitle,
                 style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w400),
               ),
               SizedBox(height: 8.h),
               Text(
-                AppLocalization.tr.createAccountSubtitle,
+                AppLocalization.tr.driverOnboardingSubtitle,
                 style: TextStyle(fontSize: 12.sp),
               ),
               SizedBox(height: 29.h),
@@ -216,32 +232,18 @@ class _DriverRegistrationState extends State<DriverRegistration> {
                         label: AppLocalization.tr.nextButton,
                       ),
                       SizedBox(height: 5.h),
+                      // Already signed in here, so offer a way out rather
+                      // than a "have an account? log in" link.
                       GestureDetector(
-                        onTap: () {
-                          Get.offAllNamed(AppRoutes.loginScreen);
-                        },
-                        child: RichText(
-                          text: TextSpan(
-                            children: [
-                              TextSpan(
-                                text: AppLocalization.tr.haveAccountText,
-                                style: TextStyle(
-                                  fontSize: 12.sp,
-                                  fontWeight: FontWeight.w400,
-                                  color: Color(0XFF4E4E4E),
-                                ),
-                              ),
-                              TextSpan(
-                                text: AppLocalization.tr.loginLink,
-                                style: TextStyle(
-                                  fontSize: 12.sp,
-                                  fontWeight: FontWeight.w400,
-                                  color: Colors.red,
-                                  decorationThickness: 2,
-                                  decoration: TextDecoration.underline,
-                                ),
-                              ),
-                            ],
+                        onTap: _logOut,
+                        child: Text(
+                          AppLocalization.tr.logoutButton,
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.w400,
+                            color: Colors.red,
+                            decorationThickness: 2,
+                            decoration: TextDecoration.underline,
                           ),
                         ),
                       ),
