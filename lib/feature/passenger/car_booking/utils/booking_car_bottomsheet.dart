@@ -231,7 +231,7 @@ class _BookingCarsBottomSheetState extends State<BookingCarsBottomSheet> {
           ),
           CustomHorizontalLine(thickness: 5.sp,),
 
-          TripIdWidget(),
+          TripIdWidget(tripId: widget.rideId),
           CustomHorizontalLine(thickness: 5.sp,),
           // Cancel Button
           // CancelDriverWidget(

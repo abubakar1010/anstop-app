@@ -4,7 +4,8 @@ import 'package:ride_sharing/feature/notification/model/notification_model.dart'
 import 'package:ride_sharing/feature/notification/utils/notification_date_header.dart';
 import 'package:ride_sharing/feature/notification/utils/notification_item.dart';
 import '../../../app/utils/app_colors.dart';
-import '../../../l10n/l10n_helper.dart';
+import 'package:get/get.dart';
+import 'package:ride_sharing/feature/notification/controller/notification_controller.dart';
 import 'package:ride_sharing/l10n/l10n_helper.dart';
 class NotificationScreen extends StatefulWidget {
   const NotificationScreen({Key? key}) : super(key: key);
@@ -14,75 +15,7 @@ class NotificationScreen extends StatefulWidget {
 }
 
 class _NotificationScreenState extends State<NotificationScreen> {
-  late List<NotificationGroup> notificationGroups;
-
-  @override
-  void initState() {
-    super.initState();
-    _initializeNotifications();
-  }
-
-  void _initializeNotifications() {
-    notificationGroups = [
-      NotificationGroup(
-        dateLabel: AppLocalization.tr.todayLabel,
-        notifications: [
-          NotificationModel(
-            title: AppLocalization.tr.notificationPaymentSuccess,
-            description: AppLocalization.tr.notificationDescription,
-            type: NotificationType.payment,
-            dateTime: DateTime.now(),
-          ),
-          NotificationModel(
-            title: AppLocalization.tr.notificationSpecialDiscount30,
-            description: AppLocalization.tr.notificationDescription,
-            type: NotificationType.discount,
-            dateTime: DateTime.now(),
-          ),
-        ],
-      ),
-      NotificationGroup(
-        dateLabel: AppLocalization.tr.yesterdayLabel,
-        notifications: [
-          NotificationModel(
-            title: AppLocalization.tr.notificationPaymentSuccess,
-            description: AppLocalization.tr.notificationDescription,
-            type: NotificationType.payment,
-            dateTime: DateTime.now().subtract(const Duration(days: 1)),
-          ),
-          NotificationModel(
-            title: AppLocalization.tr.notificationCreditCardAdded,
-            description: AppLocalization.tr.notificationDescription,
-            type: NotificationType.creditCard,
-            dateTime: DateTime.now().subtract(const Duration(days: 1)),
-          ),
-          NotificationModel(
-            title: AppLocalization.tr.notificationWalletAddedSuccess,
-            description: AppLocalization.tr.notificationDescription,
-            type: NotificationType.wallet,
-            dateTime: DateTime.now().subtract(const Duration(days: 1)),
-          ),
-          NotificationModel(
-            title: AppLocalization.tr.notificationSpecialDiscount5,
-            description: AppLocalization.tr.notificationDescription,
-            type: NotificationType.discount,
-            dateTime: DateTime.now().subtract(const Duration(days: 1)),
-          ),
-        ],
-      ),
-      NotificationGroup(
-        dateLabel: 'May, 27 2023',
-        notifications: [
-          NotificationModel(
-            title: AppLocalization.tr.notificationPaymentSuccess,
-            description: AppLocalization.tr.notificationDescription,
-            type: NotificationType.payment,
-            dateTime: DateTime(2023, 5, 27),
-          ),
-        ],
-      ),
-    ];
-  }
+  final NotificationController controller = Get.find<NotificationController>();
 
   @override
   Widget build(BuildContext context) {
@@ -110,44 +43,58 @@ class _NotificationScreenState extends State<NotificationScreen> {
         ),
         centerTitle: true,
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.only(top: 8, bottom: 20),
-              itemCount: notificationGroups.length,
-              itemBuilder: (context, groupIndex) {
-                final group = notificationGroups[groupIndex];
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+      body: Obx(() {
+        if (controller.isLoading.value && controller.notifications.isEmpty) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (controller.errorMessage.value.isNotEmpty &&
+            controller.notifications.isEmpty) {
+          return _CenteredMessage(
+            icon: Icons.wifi_off_rounded,
+            title: controller.errorMessage.value,
+            action: TextButton(
+              onPressed: controller.loadNotifications,
+              child: Text(AppLocalization.tr.retryButton),
+            ),
+          );
+        }
+        final groups = controller.groups;
+        return RefreshIndicator(
+          onRefresh: controller.loadNotifications,
+          child: groups.isEmpty
+              // Scrollable so pull-to-refresh still works on the empty state.
+              ? ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
                   children: [
-                    NotificationDateHeader(dateLabel: group.dateLabel),
-                    ...group.notifications.map((notification) {
-                      return NotificationItem(
-                        notification: notification,
-                        onTap: () {
-                          // Handle notification tap
-                          _showNotificationDetails(notification);
-                        },
-                      );
-                    }).toList(),
+                    SizedBox(height: MediaQuery.sizeOf(context).height * 0.2),
+                    _CenteredMessage(
+                      icon: Icons.notifications_none_rounded,
+                      title: AppLocalization.tr.noNotificationsTitle,
+                      message: AppLocalization.tr.noNotificationsMessage,
+                    ),
                   ],
-                );
-              },
-            ),
-          ),
-          // Bottom Indicator
-          Container(
-            width: 134,
-            height: 5,
-            margin: const EdgeInsets.only(bottom: 8),
-            decoration: BoxDecoration(
-              color: NotificationColors.bottomIndicator,
-              borderRadius: BorderRadius.circular(100),
-            ),
-          ),
-        ],
-      ),
+                )
+              : ListView.builder(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.only(top: 8, bottom: 20),
+                  itemCount: groups.length,
+                  itemBuilder: (context, groupIndex) {
+                    final group = groups[groupIndex];
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        NotificationDateHeader(dateLabel: group.dateLabel),
+                        for (final notification in group.notifications)
+                          NotificationItem(
+                            notification: notification,
+                            onTap: () => _showNotificationDetails(notification),
+                          ),
+                      ],
+                    );
+                  },
+                ),
+        );
+      }),
     );
   }
 
@@ -225,6 +172,66 @@ class _NotificationScreenState extends State<NotificationScreen> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CenteredMessage extends StatelessWidget {
+  const _CenteredMessage({
+    required this.icon,
+    required this.title,
+    this.message,
+    this.action,
+  });
+
+  final IconData icon;
+  final String title;
+  final String? message;
+  final Widget? action;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 72,
+              height: 72,
+              decoration: const BoxDecoration(
+                color: NotificationColors.iconBackground,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, size: 34, color: NotificationColors.iconColor),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: NotificationColors.titleText,
+              ),
+            ),
+            if (message != null) ...[
+              const SizedBox(height: 8),
+              Text(
+                message!,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 14,
+                  height: 1.4,
+                  color: NotificationColors.secondaryText,
+                ),
+              ),
+            ],
+            if (action != null) ...[const SizedBox(height: 8), action!],
+          ],
         ),
       ),
     );

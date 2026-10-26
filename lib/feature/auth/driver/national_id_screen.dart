@@ -42,7 +42,7 @@ class NationalIdScreen extends GetView<NationalIdController> {
                 controller.isBackImageUploading.value;
             return CustomButton(
               onPressed: isUploading ? () {} : () => _onSubmit(context),
-              label: isUploading ? 'Uploading...' : AppLocalization.tr.submitButton,
+              label: isUploading ? AppLocalization.tr.uploadingButton : AppLocalization.tr.submitButton,
             );
           }),
         ),

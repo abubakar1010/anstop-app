@@ -621,5 +621,18 @@
   "accountStatusStepDrive": "Start driving",
   "checkStatusButton": "Check status",
   "continueSetupButton": "Continue setup",
-  "accountStatusStillPending": "Your application is still under review."
+  "accountStatusStillPending": "Your application is still under review.",
+  "loadingButton": "Loading...",
+  "resettingButton": "Resetting...",
+  "savingButton": "Saving...",
+  "processingButton": "Processing...",
+  "navigatingLabel": "Navigating...",
+  "riderFallbackName": "Rider",
+  "userFallbackName": "User",
+  "unknownUserName": "Unknown",
+  "meLabel": "Me",
+  "onlineStatus": "Online",
+  "noNotificationsTitle": "No notifications yet",
+  "noNotificationsMessage": "Updates about your rides and wallet will appear here.",
+  "tripIdCopiedMessage": "Trip ID copied"
 }

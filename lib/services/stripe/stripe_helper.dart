@@ -51,8 +51,9 @@ class StripePaymentHelper {
       _log('Payment sheet initialized successfully');
     } catch (e) {
       _log('Error initializing payment sheet: $e');
+      // Shown to the user, so keep it translated; the cause is logged above.
       throw StripePaymentException(
-        'Failed to initialize payment sheet: ${e.toString()}',
+        AppLocalization.tr.paymentFailedMessage,
         originalError: e,
       );
     }

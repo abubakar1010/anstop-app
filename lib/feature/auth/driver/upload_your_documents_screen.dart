@@ -40,7 +40,7 @@ class UploadYourDocuments extends GetView<UploadDocumentsController> {
                   ? () {}
                   : () => controller.submitDriverOnboard(),
               label: controller.isLoading.value
-                  ? 'Submitting...'
+                  ? AppLocalization.tr.submittingButton
                   : AppLocalization.tr.submitButton,
             ),
           ),

@@ -85,6 +85,7 @@ class ApiUrls {
   static String payRideFare(String rideId) => '$baseUrl/ride-requests/pay-ride-fare/$rideId';
   static const String createReview = '$baseUrl/reviews';
   static const String setFcmToken = '$baseUrl/users/fcm-token';
+  static const String notifications = '$baseUrl/notifications';
 
 
 }

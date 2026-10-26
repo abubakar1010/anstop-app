@@ -48,7 +48,7 @@ class WalletController extends GetxController {
   void _initStripe() {
     _stripeHelper = StripePaymentHelper(
       config: const StripeConfig(
-        merchantDisplayName: 'Ride Sharing App',
+        merchantDisplayName: 'Anstop',
       ),
       onLog: (message) {
         debugPrint('[Stripe] $message');

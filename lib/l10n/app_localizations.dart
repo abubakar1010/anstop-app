@@ -3421,6 +3421,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Your application is still under review.'**
   String get accountStatusStillPending;
+
+  /// No description provided for @loadingButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading...'**
+  String get loadingButton;
+
+  /// No description provided for @resettingButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Resetting...'**
+  String get resettingButton;
+
+  /// No description provided for @savingButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving...'**
+  String get savingButton;
+
+  /// No description provided for @processingButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Processing...'**
+  String get processingButton;
+
+  /// No description provided for @navigatingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Navigating...'**
+  String get navigatingLabel;
+
+  /// No description provided for @riderFallbackName.
+  ///
+  /// In en, this message translates to:
+  /// **'Rider'**
+  String get riderFallbackName;
+
+  /// No description provided for @userFallbackName.
+  ///
+  /// In en, this message translates to:
+  /// **'User'**
+  String get userFallbackName;
+
+  /// No description provided for @unknownUserName.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown'**
+  String get unknownUserName;
+
+  /// No description provided for @meLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Me'**
+  String get meLabel;
+
+  /// No description provided for @onlineStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Online'**
+  String get onlineStatus;
+
+  /// No description provided for @noNotificationsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No notifications yet'**
+  String get noNotificationsTitle;
+
+  /// No description provided for @noNotificationsMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Updates about your rides and wallet will appear here.'**
+  String get noNotificationsMessage;
+
+  /// No description provided for @tripIdCopiedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Trip ID copied'**
+  String get tripIdCopiedMessage;
 }
 
 class _AppLocalizationsDelegate

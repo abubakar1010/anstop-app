@@ -1771,4 +1771,44 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get accountStatusStillPending =>
       'Your application is still under review.';
+
+  @override
+  String get loadingButton => 'Loading...';
+
+  @override
+  String get resettingButton => 'Resetting...';
+
+  @override
+  String get savingButton => 'Saving...';
+
+  @override
+  String get processingButton => 'Processing...';
+
+  @override
+  String get navigatingLabel => 'Navigating...';
+
+  @override
+  String get riderFallbackName => 'Rider';
+
+  @override
+  String get userFallbackName => 'User';
+
+  @override
+  String get unknownUserName => 'Unknown';
+
+  @override
+  String get meLabel => 'Me';
+
+  @override
+  String get onlineStatus => 'Online';
+
+  @override
+  String get noNotificationsTitle => 'No notifications yet';
+
+  @override
+  String get noNotificationsMessage =>
+      'Updates about your rides and wallet will appear here.';
+
+  @override
+  String get tripIdCopiedMessage => 'Trip ID copied';
 }

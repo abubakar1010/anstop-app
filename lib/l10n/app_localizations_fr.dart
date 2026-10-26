@@ -1801,4 +1801,44 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get accountStatusStillPending =>
       'Votre demande est toujours en cours d\'examen.';
+
+  @override
+  String get loadingButton => 'Chargement...';
+
+  @override
+  String get resettingButton => 'Réinitialisation...';
+
+  @override
+  String get savingButton => 'Enregistrement...';
+
+  @override
+  String get processingButton => 'Traitement...';
+
+  @override
+  String get navigatingLabel => 'Navigation en cours...';
+
+  @override
+  String get riderFallbackName => 'Passager';
+
+  @override
+  String get userFallbackName => 'Utilisateur';
+
+  @override
+  String get unknownUserName => 'Inconnu';
+
+  @override
+  String get meLabel => 'Moi';
+
+  @override
+  String get onlineStatus => 'En ligne';
+
+  @override
+  String get noNotificationsTitle => 'Aucune notification';
+
+  @override
+  String get noNotificationsMessage =>
+      'Les mises à jour de vos courses et de votre portefeuille apparaîtront ici.';
+
+  @override
+  String get tripIdCopiedMessage => 'Identifiant de la course copié';
 }

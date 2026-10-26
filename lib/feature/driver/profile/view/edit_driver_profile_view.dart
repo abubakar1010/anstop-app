@@ -140,7 +140,7 @@ class EditDriverProfileView extends StatelessWidget {
                                   ? null
                                   : () => controller.saveProfile(),
                               label: controller.isSaving.value
-                                  ? 'Saving...'
+                                  ? AppLocalization.tr.savingButton
                                   : AppLocalization.tr.saveChangesButton,
                             )),
                         SizedBox(height: 16.h),

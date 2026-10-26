@@ -112,8 +112,8 @@ class AddMoneyScreen extends StatelessWidget {
                               ? null
                               : () => controller.processDeposit(context),
                           label: controller.isLoading.value
-                              ? 'Processing...'
-                              : 'Confirm',
+                              ? AppLocalization.tr.processingButton
+                              : AppLocalization.tr.confirmButton,
                         )),
                     SizedBox(height: 24.h),
                   ],

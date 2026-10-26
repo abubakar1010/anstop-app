@@ -187,7 +187,7 @@ class DriverTripController extends GetxController {
                 selectedTrip.value = TripRequest(
                   id: 'default',
                   riderId: '',
-                  passengerName: 'Rider',
+                  passengerName: AppLocalization.tr.riderFallbackName,
                   passengerImage: 'assets/images/passenger1.jpg',
                   rating: 5.0,
                   pickupTime: AppLocalization.tr.nowLabel,

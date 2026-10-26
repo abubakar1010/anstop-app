@@ -54,7 +54,7 @@ class ResetPasswordScreen extends GetView<ResetPasswordController> {
                         ? null
                         : () => controller.resetPassword(),
                     label: controller.isLoading.value
-                        ? 'Resetting...'
+                        ? AppLocalization.tr.resettingButton
                         : AppLocalization.tr.resetPasswordConfirmButton,
                   )),
                   Obx(() => controller.errorMessage.value.isNotEmpty

@@ -269,10 +269,10 @@ class _PassengerPaymentScreenState extends State<PassengerPaymentScreen> {
     final displayDistance = widget.tripDistance.isNotEmpty ? '${widget.tripDistance} km' : '';
     final displayPickup = widget.pickUpAddress.isNotEmpty
         ? widget.pickUpAddress
-        : AppLocalization.tr.pickupLocationExample;
+        : AppLocalization.tr.pickupLocation;
     final displayDestination = widget.destinationAddress.isNotEmpty
         ? widget.destinationAddress
-        : AppLocalization.tr.dropoffLocationExample;
+        : AppLocalization.tr.destinationLabel;
     final displayPaymentMethod = AppLocalization.tr.payViaLabel(_formatPaymentMethod(widget.paymentMethod));
 
     return PopScope(
@@ -360,18 +360,6 @@ class _PassengerPaymentScreenState extends State<PassengerPaymentScreen> {
                       ),
                       SizedBox(width: 5.sp),
                       Text(displayDistance),
-                    ],
-                  ),
-                  SizedBox(height: 8.h),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        AppLocalization.tr.timeExample,
-                        style: TextStyle(fontSize: 18.sp, color: Colors.black),
-                      ),
-                      SizedBox(width: 5.sp),
-                      Text(AppLocalization.tr.durationExample),
                     ],
                   ),
                 ],

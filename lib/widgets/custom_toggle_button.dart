@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:ride_sharing/app/utils/app_colors.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
 
 class ToggleButtonsWidget extends StatelessWidget {
   final bool isOngoing;
@@ -22,12 +23,12 @@ class ToggleButtonsWidget extends StatelessWidget {
       child: Row(
         children: [
           _toggleButton(
-            "Ongoing",
+            AppLocalization.tr.ongoingStatus,
             isSelected: isOngoing,
             onTap: () => onToggleChanged(true),
           ),
           _toggleButton(
-            "Completed",
+            AppLocalization.tr.completedStatus,
             isSelected: !isOngoing,
             onTap: () => onToggleChanged(false),
           ),

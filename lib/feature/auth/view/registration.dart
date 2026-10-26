@@ -206,7 +206,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           _controller.register();
                         },
                         label: _controller.isLoading.value
-                          ? 'Loading...'
+                          ? AppLocalization.tr.loadingButton
                           : AppLocalization.tr.registerButton,
                       )),
                       Obx(() => _controller.errorMessage.value.isNotEmpty

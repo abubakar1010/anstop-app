@@ -97,76 +97,8 @@ class SetOnMapScreen extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: 8.h),
-                ///If location is found
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    GestureDetector(
-                      onTap: (){},
-                      child: Text(AppLocalization.tr.recentPlacesLabel,style: TextStyle(
-                        color: AppColors.grey400,fontSize: 16.sp
-                      ),),
-                    ),
-
-                    GestureDetector(
-                      onTap: (){},
-                      child: Text(AppLocalization.tr.clearAllButton,style: TextStyle(
-                          color: AppColors.green300),),
-                    )
-                  ],
-                ),
-                CustomListTile(
-                  icon: Icon(CupertinoIcons.clock,color: AppColors.appGreyColor,),
-                  title: AppLocalization.tr.coffeeCategory,
-                  subTitle: '35/3,Shantinagar Bazar Road',
-
-                  trailing: Text(
-                    '12.5 km',
-                    style: TextStyle(
-                      color: AppColors.appGreyColor,
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  onTap: () {
-                    // Define the action on tap here
-                    Navigator.pop(context);
-                    Get.toNamed(AppRoutes.pickUpLocationScreen);
-                  },
-
-                  borderRadius: 8,
-                  titleColor: Colors.black,
-                  titleFontSize: 16.sp,
-                  subtitleFontSize: 12.sp,
-                  contentPaddingHorizontal: 8.h,
-                  contentPaddingVertical: 2.h,
-                ),
-                SizedBox(height: 8.h,),
-                CustomListTile(
-                  icon: Icon(CupertinoIcons.clock,color: AppColors.appGreyColor,),
-                  title: AppLocalization.tr.restaurantCategory,
-                  subTitle: '35/3,Banani Road',  // Subtitle of the ListTile
-
-                  trailing: Text(
-                    '15.35 km',  // Trailing text (distance in km)
-                    style: TextStyle(
-                      color: AppColors.appGreyColor,
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  onTap: () {
-                    // Define the action on tap here
-
-                  },
-
-                  borderRadius: 8,
-                  titleColor: Colors.black,
-                  titleFontSize: 16.sp,
-                  subtitleFontSize: 12.sp,
-                  contentPaddingHorizontal: 10.h,
-                  contentPaddingVertical: 8.h,
-                ),
+                // Recent places will be listed here once they are stored; the
+                // previous entries were hard-coded samples.
                 ///If no location is found
                 // Center(
                 //   child: Image.asset(

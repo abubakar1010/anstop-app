@@ -39,16 +39,16 @@ class _RideBegunBottomSheetState extends State<RideBegunBottomSheet> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    // Use dynamic data or fallback to static
-    final displayName = widget.driverName.isNotEmpty ? widget.driverName : 'John Doe';
-    final displayImageUrl = widget.driverProfilePicture ?? 'https://picsum.photos/250?image=9';
-    final displayRating = widget.driverRating > 0 ? widget.driverRating : 3.54;
-    final displayTrips = widget.driverTotalReviews > 0 ? widget.driverTotalReviews : 3;
-    final displayPrice = widget.bidAmount.isNotEmpty ? formatPrice(widget.bidAmount) : '€24';
-    final displayDistance = widget.tripDistance.isNotEmpty ? '${widget.tripDistance} km' : '28 km';
+    // Missing values stay blank or generic; never show made-up ride data.
+    final displayName = widget.driverName.isNotEmpty ? widget.driverName : l10n.driverLabel;
+    final displayImageUrl = widget.driverProfilePicture ?? '';
+    final displayRating = widget.driverRating;
+    final displayTrips = widget.driverTotalReviews;
+    final displayPrice = widget.bidAmount.isNotEmpty ? formatPrice(widget.bidAmount) : '';
+    final displayDistance = widget.tripDistance.isNotEmpty ? '${widget.tripDistance} km' : '';
     final displayDestination = widget.destinationAddress.isNotEmpty
         ? widget.destinationAddress
-        : 'Green Road Dhaka';
+        : l10n.destinationLabel;
 
     return Container(
       height: MediaQuery.of(context).size.height * 0.3,

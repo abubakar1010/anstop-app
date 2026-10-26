@@ -1,13 +1,17 @@
-import 'package:get/get.dart';
-import 'package:ride_sharing/l10n/l10n_helper.dart';
 import 'package:flutter/foundation.dart';
-import 'package:ride_sharing/app/utils/app_snackbar.dart';
+import 'package:get/get.dart';
+import 'package:intl/intl.dart';
+import 'package:ride_sharing/feature/notification/model/notification_model.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
+import 'package:ride_sharing/services/api_client.dart';
+import 'package:ride_sharing/services/api_urls.dart';
 
 class NotificationController extends GetxController {
+  final ApiClient _apiClient = ApiClient();
+
   // ==================== State ====================
   final RxBool isLoading = false.obs;
-  final RxList<dynamic> notifications = <dynamic>[].obs;
-  final RxInt unreadCount = 0.obs;
+  final RxList<NotificationModel> notifications = <NotificationModel>[].obs;
   final RxString errorMessage = ''.obs;
 
   // ==================== Lifecycle ====================
@@ -23,56 +27,21 @@ class NotificationController extends GetxController {
       isLoading.value = true;
       errorMessage.value = '';
 
-      // TODO: Implement actual API call to load notifications
-      await Future.delayed(const Duration(seconds: 1));
-
-      notifications.value = [];
-      unreadCount.value = 0;
-
-    } catch (e) {
-      debugPrint('notification_controller: $e');
-      errorMessage.value = AppLocalization.tr.genericErrorMessage;
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
-  Future<void> refreshNotifications() async {
-    await loadNotifications();
-  }
-
-  Future<void> markAsRead(dynamic notification) async {
-    try {
-      // TODO: Implement mark as read API call
-      await Future.delayed(const Duration(milliseconds: 500));
-
-      // Update notification state
-      if (unreadCount.value > 0) {
-        unreadCount.value--;
-      }
-
-    } catch (e) {
-      debugPrint('notification_controller: $e');
-      errorMessage.value = AppLocalization.tr.genericErrorMessage;
-    }
-  }
-
-  Future<void> clearAll() async {
-    try {
-      isLoading.value = true;
-
-      // TODO: Implement clear all API call
-      await Future.delayed(const Duration(seconds: 1));
-
-      notifications.clear();
-      unreadCount.value = 0;
-
-      AppSnackbar.snackbar(
-        AppLocalization.tr.successTitle,
-        AppLocalization.tr.notificationsClearedMessage,
-        snackPosition: SnackPosition.BOTTOM,
+      final response = await _apiClient.getRequest(
+        ApiUrls.notifications,
+        queryParams: {'limit': 50, 'sortBy': 'createdAt', 'sortOrder': 'desc'},
       );
-
+      if (!response.isSuccess) {
+        errorMessage.value = response.errorMessage;
+        return;
+      }
+      final data = response.responseData['data'];
+      notifications.assignAll([
+        if (data is List)
+          for (final item in data)
+            if (item is Map)
+              NotificationModel.fromJson(Map<String, dynamic>.from(item)),
+      ]);
     } catch (e) {
       debugPrint('notification_controller: $e');
       errorMessage.value = AppLocalization.tr.genericErrorMessage;
@@ -81,8 +50,26 @@ class NotificationController extends GetxController {
     }
   }
 
-  void onNotificationTap(dynamic notification) {
-    markAsRead(notification);
-    // TODO: Navigate to appropriate screen based on notification type
+  /// Notifications grouped under "Today", "Yesterday" or their date, newest first.
+  List<NotificationGroup> get groups {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final grouped = <DateTime, List<NotificationModel>>{};
+    for (final notification in notifications) {
+      final d = notification.dateTime;
+      grouped.putIfAbsent(DateTime(d.year, d.month, d.day), () => []).add(notification);
+    }
+    final days = grouped.keys.toList()..sort((a, b) => b.compareTo(a));
+    return [
+      for (final day in days)
+        NotificationGroup(
+          dateLabel: day == today
+              ? AppLocalization.tr.todayLabel
+              : day == today.subtract(const Duration(days: 1))
+              ? AppLocalization.tr.yesterdayLabel
+              : DateFormat.yMMMd().format(day),
+          notifications: grouped[day]!,
+        ),
+    ];
   }
 }

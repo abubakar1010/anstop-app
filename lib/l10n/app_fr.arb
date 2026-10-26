@@ -615,5 +615,18 @@
   "accountStatusStepDrive": "Commencez à conduire",
   "checkStatusButton": "Vérifier le statut",
   "continueSetupButton": "Continuer l'inscription",
-  "accountStatusStillPending": "Votre demande est toujours en cours d'examen."
+  "accountStatusStillPending": "Votre demande est toujours en cours d'examen.",
+  "loadingButton": "Chargement...",
+  "resettingButton": "Réinitialisation...",
+  "savingButton": "Enregistrement...",
+  "processingButton": "Traitement...",
+  "navigatingLabel": "Navigation en cours...",
+  "riderFallbackName": "Passager",
+  "userFallbackName": "Utilisateur",
+  "unknownUserName": "Inconnu",
+  "meLabel": "Moi",
+  "onlineStatus": "En ligne",
+  "noNotificationsTitle": "Aucune notification",
+  "noNotificationsMessage": "Les mises à jour de vos courses et de votre portefeuille apparaîtront ici.",
+  "tripIdCopiedMessage": "Identifiant de la course copié"
 }

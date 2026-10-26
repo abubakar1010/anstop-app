@@ -240,7 +240,7 @@ class _FindCarBottomSheetState extends State<FindCarBottomSheet> {
                             child: Text(
                               widget.pickUpAddress.isNotEmpty
                                   ? widget.pickUpAddress
-                                  : AppLocalization.tr.pickupLocationExample,
+                                  : AppLocalization.tr.pickupLocation,
                               style: TextStyle(fontSize: 14.sp),
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
@@ -264,7 +264,7 @@ class _FindCarBottomSheetState extends State<FindCarBottomSheet> {
                             child: Text(
                               widget.destinationAddress.isNotEmpty
                                   ? widget.destinationAddress
-                                  : AppLocalization.tr.dropoffLocationExample,
+                                  : AppLocalization.tr.destinationLabel,
                               style: TextStyle(fontSize: 14.sp),
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,

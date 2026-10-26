@@ -60,7 +60,7 @@ class CarInformationScreen extends GetView<CarInformationController> {
                 controller.isRegCertBackImageUploading.value;
             return CustomButton(
               onPressed: isUploading ? () {} : () => _onSubmit(context),
-              label: isUploading ? 'Uploading...' : AppLocalization.tr.submitButton,
+              label: isUploading ? AppLocalization.tr.uploadingButton : AppLocalization.tr.submitButton,
             );
           }),
         ),

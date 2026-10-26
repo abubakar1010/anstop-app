@@ -1,3 +1,6 @@
+import 'package:intl/intl.dart';
+import 'package:ride_sharing/l10n/l10n_helper.dart';
+
 class Message {
   final String name;
   final String message;
@@ -28,16 +31,16 @@ class MessageSender {
   factory MessageSender.fromJson(dynamic json) {
     if (json is String) {
       // Handle case where sender is just an ID string
-      return MessageSender(id: json, name: 'Unknown');
+      return MessageSender(id: json, name: AppLocalization.tr.unknownUserName);
     }
     if (json is Map<String, dynamic>) {
       return MessageSender(
         id: json['_id'] ?? '',
-        name: json['name'] ?? 'Unknown',
+        name: json['name'] ?? AppLocalization.tr.unknownUserName,
         profilePicture: json['profilePicture'],
       );
     }
-    return MessageSender(id: '', name: 'Unknown');
+    return MessageSender(id: '', name: AppLocalization.tr.unknownUserName);
   }
 }
 
@@ -123,13 +126,8 @@ class ChatMessage {
     };
   }
 
-  String get formattedTime {
-    final hour = createdAt.hour;
-    final minute = createdAt.minute.toString().padLeft(2, '0');
-    final period = hour >= 12 ? 'PM' : 'AM';
-    final displayHour = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour);
-    return '$displayHour:$minute $period';
-  }
+  // Follows the app language: "2:05 PM" in English, "14:05" in French.
+  String get formattedTime => DateFormat.jm().format(createdAt);
 
   // Convenience getters
   String get senderName => sender.name;

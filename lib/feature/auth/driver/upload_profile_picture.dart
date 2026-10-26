@@ -43,7 +43,7 @@ class UploadProfilePictureScreen
                   ? () {}
                   : () => _onSubmit(context),
               label: controller.isImageUploading.value
-                  ? 'Uploading...'
+                  ? AppLocalization.tr.uploadingButton
                   : AppLocalization.tr.submitButton,
             ),
           ),

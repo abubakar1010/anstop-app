@@ -408,7 +408,8 @@ class HomePageController extends GetxController
         markerId: const MarkerId('driver_location'),
         position: position,
         icon: icon,
-        infoWindow: InfoWindow(title: locationName),
+        // The driver's app sends its own label; name the pin in this user's language.
+        infoWindow: InfoWindow(title: AppLocalization.tr.driverLabel),
         anchor: const Offset(0.5, 0.5),
         flat: true,
       ),
@@ -490,7 +491,7 @@ class HomePageController extends GetxController
     debugPrint('🟢 [POLYLINE DEBUG] pickupLocation = ${pickupLocation.latitude}, ${pickupLocation.longitude}');
 
     // Add pickup pin marker
-    _addPinMarker('pickup_location', pickupLocation, 'Pickup');
+    _addPinMarker('pickup_location', pickupLocation, AppLocalization.tr.pickupLabel);
 
     SocketIoService.to.onUpdateLocation((data) async {
       if (data == null || data is! Map<String, dynamic>) return;
@@ -561,7 +562,7 @@ class HomePageController extends GetxController
     // Replace pickup pin with destination pin
     markers = Set<Marker>.from(
         markers.where((m) => m.markerId.value != 'pickup_location'));
-    _addPinMarker('destination_location', destination, 'Destination');
+    _addPinMarker('destination_location', destination, AppLocalization.tr.destinationLabel);
 
     SocketIoService.to.onUpdateLocation((data) async {
       if (data == null || data is! Map<String, dynamic>) return;
@@ -723,7 +724,8 @@ class HomePageController extends GetxController
         position: LatLng(lat, lng),
         icon: _smallCarIcon ??
             BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
-        infoWindow: InfoWindow(title: locationName),
+        // The driver's app sends its own label; name the pin in this user's language.
+        infoWindow: InfoWindow(title: AppLocalization.tr.driverLabel),
         anchor: const Offset(0.5, 0.5),
         flat: true,
       ));

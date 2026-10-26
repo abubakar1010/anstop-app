@@ -92,7 +92,9 @@ class LegalPagesController extends GetxController {
   }
 
   // ==================== Getters ====================
-  String get title => legalDocument.value?.title ?? _getDefaultTitle();
+  // The server stores one English title per document; show the app's
+  // translated name for the document type instead.
+  String get title => _getDefaultTitle();
   String get description => legalDocument.value?.description ?? '';
 
   String _getDefaultTitle() {

@@ -279,7 +279,7 @@ class PickUpLocationController extends GetxController with MapCameraMixin {
             double.parse(pickUpLatitudeController.text),
             double.parse(pickUpLongitudeController.text),
           ),
-          infoWindow: InfoWindow(title: 'Prise en charge : ${pickUpAddressController.text}'),
+          infoWindow: InfoWindow(title: '${AppLocalization.tr.pickupLabel} : ${pickUpAddressController.text}'),
           icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
         ),
       );
@@ -293,7 +293,7 @@ class PickUpLocationController extends GetxController with MapCameraMixin {
             double.parse(destinationLatitudeController.text),
             double.parse(destinationLongitudeController.text),
           ),
-          infoWindow: InfoWindow(title: 'Destination : ${destinationAddressController.text}'),
+          infoWindow: InfoWindow(title: '${AppLocalization.tr.destinationLabel} : ${destinationAddressController.text}'),
           icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
         ),
       );

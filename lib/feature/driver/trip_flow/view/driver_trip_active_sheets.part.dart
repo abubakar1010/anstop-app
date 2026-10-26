@@ -253,13 +253,22 @@ class ActiveTripBottomSheet extends StatelessWidget {
                 size: 24.sp,
               ),
               SizedBox(width: 12.w),
-              Text(
-                '200 m    Turn right at block b, road no 18',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w500,
-                ),
+              Expanded(
+                child: Obx(() {
+                  final nav = Get.find<DriverHomeScreenController>();
+                  final distance = nav.currentStepDistance.value;
+                  final instruction = nav.currentStepInstruction.value;
+                  return Text(
+                    distance.isNotEmpty ? '$distance    $instruction' : instruction,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  );
+                }),
               ),
             ],
           ),
@@ -778,53 +787,21 @@ class DropOffNavigationBottomSheet extends StatelessWidget {
 
                     CustomHorizontalLine(thickness: 2,),
                     SizedBox(height: 20.h),
-                    // Navigation directions
-                    ListView(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      children: [
-                        NavigationStep(
-                          icon: Icons.straight,
-                          instruction: 'Head west on Road No. 3',
-                          distance: '240 m',
-                        ),
-                        NavigationStep(
-                          icon: Icons.turn_left,
-                          instruction: 'Turn left onto Ave 3',
-                          distance: '80 m',
-                        ),
-                        NavigationStep(
-                          icon: Icons.turn_right,
-                          instruction: 'Turn right onto Road No. 5',
-                          distance: '400 m',
-                        ),
-                        NavigationStep(
-                          icon: Icons.turn_left,
-                          instruction: 'Turn left',
-                          distance: '110 m',
-                        ),
-                        NavigationStep(
-                          icon: Icons.turn_right,
-                          instruction: 'Turn right at Titas Gas Rd',
-                          distance: '160 m',
-                        ),
-                        NavigationStep(
-                          icon: Icons.turn_left,
-                          instruction: 'Turn left',
-                          distance: '130 m',
-                        ),
-                        NavigationStep(
-                          icon: Icons.turn_right,
-                          instruction: 'Turn right at Rampura',
-                          distance: '160 m',
-                        ),
-                        NavigationStep(
-                          icon: Icons.turn_right,
-                          instruction: 'Turn right',
-                          distance: '400 m',
-                        ),
-                      ],
-                    ),
+                    // Navigation directions from the live route
+                    Obx(() {
+                      final steps =
+                          Get.find<DriverHomeScreenController>().upcomingSteps;
+                      return Column(
+                        children: [
+                          for (final step in steps)
+                            NavigationStep(
+                              icon: _maneuverIcon(step.maneuver),
+                              instruction: step.instruction,
+                              distance: step.distance,
+                            ),
+                        ],
+                      );
+                    }),
                   ],
                 ),
               ),
@@ -1199,14 +1176,11 @@ class NavigationStep extends StatelessWidget {
   }
 }
 
-
-
-
-
-
-
-
-
-
-
-
+/// Icon for a Google Directions `maneuver` value.
+IconData _maneuverIcon(String maneuver) {
+  if (maneuver.contains('uturn')) return Icons.u_turn_left;
+  if (maneuver.contains('roundabout')) return Icons.roundabout_left;
+  if (maneuver.contains('left')) return Icons.turn_left;
+  if (maneuver.contains('right')) return Icons.turn_right;
+  return Icons.straight;
+}

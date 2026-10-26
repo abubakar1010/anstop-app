@@ -56,8 +56,11 @@ class DriverHomeScreenController extends GetxController
   int _currentRouteSegmentIndex = 0;
 
   // Turn-by-turn navigation
-  final RxString currentStepInstruction = 'Navigating...'.obs;
+  final RxString currentStepInstruction = ''.obs;
   final RxString currentStepDistance = ''.obs;
+  /// The current step and the ones after it, for the directions list.
+  final RxList<({String instruction, String distance, String maneuver})>
+      upcomingSteps = <({String instruction, String distance, String maneuver})>[].obs;
   List<Map<String, dynamic>> _routeSteps = [];
   int _currentStepIndex = 0;
 
@@ -122,7 +125,7 @@ class DriverHomeScreenController extends GetxController
     if (snapshot.driverId == null) return;
     final request = RideRequestModel.fromJson({
       ...data,
-      'rider': data['rider'] ?? {'name': 'Rider'},
+      'rider': data['rider'] ?? {'name': AppLocalization.tr.riderFallbackName},
       'note': data['note'] ?? '',
       'rideNeeds': data['rideNeeds'] ?? <String>[],
       'riderNumber': data['riderNumber'] ?? '',
@@ -647,8 +650,9 @@ class DriverHomeScreenController extends GetxController
     // Reset turn-by-turn navigation
     _routeSteps = [];
     _currentStepIndex = 0;
-    currentStepInstruction.value = 'Navigating...';
+    currentStepInstruction.value = AppLocalization.tr.navigatingLabel;
     currentStepDistance.value = '';
+    upcomingSteps.clear();
 
     // Add destination marker
     markers.removeWhere((m) => m.markerId.value == 'destination_location');
@@ -903,8 +907,16 @@ class DriverHomeScreenController extends GetxController
 
   // Update reactive navigation step fields from current step index
   void _updateCurrentStep() {
+    upcomingSteps.assignAll([
+      for (final step in _routeSteps.skip(_currentStepIndex))
+        (
+          instruction: _stripHtml(step['html_instructions'] as String? ?? ''),
+          distance: (step['distance'] as Map?)?['text'] as String? ?? '',
+          maneuver: step['maneuver'] as String? ?? '',
+        ),
+    ]);
     if (_routeSteps.isEmpty) {
-      currentStepInstruction.value = 'Navigating...';
+      currentStepInstruction.value = AppLocalization.tr.navigatingLabel;
       currentStepDistance.value = '';
       return;
     }
@@ -1319,8 +1331,9 @@ class DriverHomeScreenController extends GetxController
     // Reset turn-by-turn navigation
     _routeSteps = [];
     _currentStepIndex = 0;
-    currentStepInstruction.value = 'Navigating...';
+    currentStepInstruction.value = AppLocalization.tr.navigatingLabel;
     currentStepDistance.value = '';
+    upcomingSteps.clear();
 
     markers.removeWhere((m) => m.markerId.value == 'pickup_location');
     update();

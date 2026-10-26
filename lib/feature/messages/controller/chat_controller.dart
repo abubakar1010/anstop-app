@@ -74,15 +74,15 @@ class ChatController extends GetxController {
     if (Get.arguments != null && Get.arguments is Map) {
       final args = Get.arguments as Map;
       conversationId = args['conversationId'] ?? '';
-      userName = args['userName'] ?? 'User';
-      userStatus = args['userStatus'] ?? 'Online';
+      userName = args['userName'] ?? AppLocalization.tr.userFallbackName;
+      userStatus = args['userStatus'] ?? AppLocalization.tr.onlineStatus;
     }
   }
 
   Future<void> _loadCurrentUserInfo() async {
     final userInfo = await _messageService.getCurrentUserInfo();
     currentUserId = userInfo['userId'] ?? '';
-    currentUserName = userInfo['userName'] ?? 'Me';
+    currentUserName = userInfo['userName'] ?? AppLocalization.tr.meLabel;
     currentUserProfilePicture = userInfo['profilePicture'];
     if (conversationId.isNotEmpty) {
       loadMessages();

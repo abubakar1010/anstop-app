@@ -59,7 +59,7 @@ class ChatScreen extends GetView<ChatController> {
                 ),
                 Obx(() => Text(
                   controller.isConnected.value
-                      ? 'Online'
+                      ? AppLocalization.tr.onlineStatus
                       : controller.userStatus,
                   style: TextStyle(
                     color: controller.isConnected.value
