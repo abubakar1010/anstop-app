@@ -596,15 +596,18 @@ class DriverHomeScreenController extends GetxController
       if (status != 'COMPLETED' || isPaymentCompleted) return;
 
       final rideId = data['_id'] as String? ?? '';
-      _logger.i('Incompleted ride detected on reconnect — status: $status, rideId: $rideId. Showing PaymentConfirmationDialog.');
+      _logger.i('Incompleted ride detected on reconnect — status: $status, rideId: $rideId. Showing trip completion dialog.');
 
       // The buffered event is replayed synchronously when the listener is
       // registered, which happens while this controller is created during a
       // build. Pushing a dialog then breaks the navigator ('!_debugLocked'),
-      // so wait for the frame to finish.
+      // so wait for the frame to finish. Request one too: when the event
+      // arrives while the screen is idle no frame is pending, and the dialog
+      // would wait until something else happened to redraw.
       WidgetsBinding.instance.addPostFrameCallback(
         (_) => _showIncompletedRidePaymentDialog(rideId),
       );
+      WidgetsBinding.instance.ensureVisualUpdate();
     } catch (e) {
       _logger.e('Error handling incompleted-ride: $e');
     }

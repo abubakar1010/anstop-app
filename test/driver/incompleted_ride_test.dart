@@ -6,6 +6,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:ride_sharing/feature/driver/homepage/controller/driver_home_controller.dart';
 import 'package:ride_sharing/feature/driver/trip_flow/view/trip_completion_payment_dialogs.dart';
+import 'package:ride_sharing/l10n/app_localizations.dart';
+import 'package:ride_sharing/services/ride_session_controller.dart';
 import 'package:ride_sharing/services/socket_services.dart';
 
 // ---------------------------------------------------------------------------
@@ -19,9 +21,6 @@ class MockSocketIoService extends SocketIoService {
   bool get isSocketReady => true;
 
   Function(dynamic)? _incompletedRideHandler;
-
-  /// Recorded rideId from the last emitConfirmPayment call.
-  String? lastConfirmedRideId;
 
   // ── listeners the controller registers ────────────────────────────────────
   @override
@@ -44,12 +43,6 @@ class MockSocketIoService extends SocketIoService {
 
   @override
   Future<void> connect() async {}
-
-  // ── emits ─────────────────────────────────────────────────────────────────
-  @override
-  Future<void> emitConfirmPayment({required String rideId}) async {
-    lastConfirmedRideId = rideId;
-  }
 
   // ── test helper ───────────────────────────────────────────────────────────
   /// Simulates the server firing the incompleted-ride socket event.
@@ -85,6 +78,9 @@ Future<void> _pumpDriverApp(WidgetTester tester) async {
       // is 1.0 and dialog sizes stay predictable.
       designSize: const Size(800, 600),
       child: GetMaterialApp(
+        locale: const Locale('en'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(
           body: GetBuilder<DriverHomeScreenController>(
             init: DriverHomeScreenController(),
@@ -113,6 +109,9 @@ void main() {
 
     mockSocket = MockSocketIoService();
     Get.put<SocketIoService>(mockSocket, permanent: true);
+    // The controller reads the shared ride snapshot on init. Left
+    // uninitialised it holds no ride, so only the socket event drives the flow.
+    Get.put(RideSessionController(), permanent: true);
 
     // Dialogs rendered in a test viewport overflow at 800x600.
     // Suppress overflow errors so async callbacks inside dialog actions
@@ -128,27 +127,24 @@ void main() {
     Get.reset();
   });
 
-  // ── 1 ─────────────────────────────────────────────────────────────────────
+  // Payment is confirmed server-side (webhook / rider); the driver no longer
+  // answers "did you receive the payment?". On reconnect with a completed,
+  // unpaid ride the driver just sees the trip-completed dialog.
+
   testWidgets(
-    'shows PaymentConfirmationDialog when status is COMPLETED and payment is not completed',
+    'shows TripCompletionDialog when status is COMPLETED and payment is not completed',
     (tester) async {
       await _pumpDriverApp(tester);
 
       mockSocket.triggerIncompletedRide(_completedUnpaidPayload);
       await tester.pumpAndSettle();
 
-      expect(
-        find.text('Did you receive the payment for this trip?'),
-        findsOneWidget,
-      );
-      expect(find.text('Yes, payment received'), findsOneWidget);
-      expect(find.text('No, or received\ndifferent amount'), findsOneWidget);
+      expect(find.byType(TripCompletionDialog), findsOneWidget);
     },
   );
 
-  // ── 2 ─────────────────────────────────────────────────────────────────────
   testWidgets(
-    'does NOT show dialog when isPaymentCompleted is true',
+    'does NOT show a dialog when isPaymentCompleted is true',
     (tester) async {
       await _pumpDriverApp(tester);
 
@@ -158,16 +154,12 @@ void main() {
       });
       await tester.pumpAndSettle();
 
-      expect(
-        find.text('Did you receive the payment for this trip?'),
-        findsNothing,
-      );
+      expect(find.byType(TripCompletionDialog), findsNothing);
     },
   );
 
-  // ── 3 ─────────────────────────────────────────────────────────────────────
   testWidgets(
-    'does NOT show dialog when status is not COMPLETED',
+    'does NOT show a dialog when status is not COMPLETED',
     (tester) async {
       await _pumpDriverApp(tester);
 
@@ -177,92 +169,23 @@ void main() {
       });
       await tester.pumpAndSettle();
 
-      expect(
-        find.text('Did you receive the payment for this trip?'),
-        findsNothing,
-      );
+      expect(find.byType(TripCompletionDialog), findsNothing);
     },
   );
 
-  // ── 4 ─────────────────────────────────────────────────────────────────────
   testWidgets(
-    'tapping "Yes, payment received" emits confirm-payment with the correct rideId',
+    'tapping "Back to Home" closes the TripCompletionDialog',
     (tester) async {
       await _pumpDriverApp(tester);
 
       mockSocket.triggerIncompletedRide(_completedUnpaidPayload);
       await tester.pumpAndSettle();
+      expect(find.byType(TripCompletionDialog), findsOneWidget);
 
-      await tester.tap(find.text('Yes, payment received'));
-      await tester.pumpAndSettle();
-
-      expect(mockSocket.lastConfirmedRideId, equals('ride-abc-123'));
-    },
-  );
-
-  // ── 5 ─────────────────────────────────────────────────────────────────────
-  testWidgets(
-    'shows TripCompletionDialog after tapping "Yes, payment received"',
-    (tester) async {
-      await _pumpDriverApp(tester);
-
-      mockSocket.triggerIncompletedRide(_completedUnpaidPayload);
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.text('Yes, payment received'));
-      await tester.pumpAndSettle();
-
-      expect(
-        find.text("Congratulations, you've completed another trip."),
-        findsOneWidget,
-      );
-    },
-  );
-
-  // ── 6 ─────────────────────────────────────────────────────────────────────
-  testWidgets(
-    'shows StayOnlineDialog after tapping "Back to Home" on TripCompletionDialog',
-    (tester) async {
-      // StayOnlineDialog needs more vertical space — give it a taller surface.
-      await tester.binding.setSurfaceSize(const Size(800, 900));
-      addTearDown(() => tester.binding.setSurfaceSize(null));
-
-      await _pumpDriverApp(tester);
-
-      mockSocket.triggerIncompletedRide(_completedUnpaidPayload);
-      await tester.pumpAndSettle();
-
-      // PaymentConfirmationDialog → yes
-      await tester.tap(find.text('Yes, payment received'));
-      await tester.pumpAndSettle();
-
-      // TripCompletionDialog → back to home
       await tester.tap(find.text('Back to Home'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Keep online,'), findsOneWidget);
-      expect(find.text('Stay online'), findsOneWidget);
-      expect(find.text('Go offline'), findsOneWidget);
-    },
-  );
-
-  // ── 7 ─────────────────────────────────────────────────────────────────────
-  testWidgets(
-    'tapping "No, or received different amount" dismisses the dialog without emitting confirm-payment',
-    (tester) async {
-      await _pumpDriverApp(tester);
-
-      mockSocket.triggerIncompletedRide(_completedUnpaidPayload);
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.text('No, or received\ndifferent amount'));
-      await tester.pumpAndSettle();
-
-      expect(mockSocket.lastConfirmedRideId, isNull);
-      expect(
-        find.text('Did you receive the payment for this trip?'),
-        findsNothing,
-      );
+      expect(find.byType(TripCompletionDialog), findsNothing);
     },
   );
 }
