@@ -10,6 +10,7 @@ import 'package:ride_sharing/feature/driver/profile/service/driver_profile_servi
 import 'package:ride_sharing/feature/driver/profile/data/user_profile_model.dart';
 import 'package:ride_sharing/feature/auth/service/auth_service.dart';
 import 'package:ride_sharing/l10n/l10n_helper.dart';
+import 'package:ride_sharing/app/utils/app_snackbar.dart';
 
 class EditDriverProfileController extends GetxController {
   // ==================== Services ====================
@@ -70,7 +71,7 @@ class EditDriverProfileController extends GetxController {
         selectedImage.value = File(image.path);
       }
     } catch (e) {
-      Get.snackbar(
+      AppSnackbar.snackbar(
         AppLocalization.tr.errorTitle,
         AppLocalization.tr.imagePickFailedMessage,
         snackPosition: SnackPosition.BOTTOM,
@@ -108,7 +109,7 @@ class EditDriverProfileController extends GetxController {
             uploadedImageUrl = data[0];
           }
         } else {
-          Get.snackbar(
+          AppSnackbar.snackbar(
             AppLocalization.tr.errorTitle,
             AppLocalization.tr.imageUploadFailedMessage,
             snackPosition: SnackPosition.BOTTOM,
@@ -139,7 +140,7 @@ class EditDriverProfileController extends GetxController {
       }
 
       if (body.isEmpty) {
-        Get.snackbar(
+        AppSnackbar.snackbar(
           AppLocalization.tr.infoTitle,
           AppLocalization.tr.noChangesToSaveMessage,
           snackPosition: SnackPosition.BOTTOM,
@@ -166,7 +167,7 @@ class EditDriverProfileController extends GetxController {
       } else {
         debugPrint('edit_driver_profile_controller: ${response.errorMessage}');
         errorMessage.value = AppLocalization.tr.genericErrorMessage;
-        Get.snackbar(
+        AppSnackbar.snackbar(
           AppLocalization.tr.errorTitle,
           AppLocalization.tr.genericErrorMessage,
           snackPosition: SnackPosition.BOTTOM,
@@ -177,7 +178,7 @@ class EditDriverProfileController extends GetxController {
     } catch (e) {
       debugPrint('edit_driver_profile_controller: $e');
       errorMessage.value = AppLocalization.tr.genericErrorMessage;
-      Get.snackbar(
+      AppSnackbar.snackbar(
         AppLocalization.tr.errorTitle,
         AppLocalization.tr.genericErrorMessage,
         snackPosition: SnackPosition.BOTTOM,

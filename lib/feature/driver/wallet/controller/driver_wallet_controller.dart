@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ride_sharing/l10n/l10n_helper.dart';
+import 'package:ride_sharing/app/utils/app_snackbar.dart';
 
 class DriverWalletController extends GetxController {
   // ==================== Text Controllers ====================
@@ -92,7 +93,7 @@ class DriverWalletController extends GetxController {
       balance.value -= amount;
       amountTEController.clear();
 
-      Get.snackbar(
+      AppSnackbar.snackbar(
         AppLocalization.tr.successTitle,
         AppLocalization.tr.withdrawalSuccessMessage,
         snackPosition: SnackPosition.BOTTOM,

@@ -15,6 +15,7 @@ import 'package:ride_sharing/l10n/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:ride_sharing/l10n/l10n_helper.dart';
 import 'package:ride_sharing/app/helpers/price_format.dart';
+import 'package:ride_sharing/app/utils/app_snackbar.dart';
 
 // import your app colors here
 // import '../../../../app/message_utils/app_colors.dart';

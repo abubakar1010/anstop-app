@@ -5,6 +5,7 @@ import '../../../services/socket_services.dart';
 import '../models/message_models.dart';
 import '../service/message_service.dart';
 import 'package:ride_sharing/l10n/l10n_helper.dart';
+import 'package:ride_sharing/app/utils/app_snackbar.dart';
 
 class ChatController extends GetxController {
   // ==================== Text Controllers ====================
@@ -226,7 +227,7 @@ class ChatController extends GetxController {
       } else {
         debugPrint('chat_controller: ${response.errorMessage}');
         errorMessage.value = AppLocalization.tr.genericErrorMessage;
-        Get.snackbar(
+        AppSnackbar.snackbar(
           AppLocalization.tr.errorTitle,
           AppLocalization.tr.genericErrorMessage,
           snackPosition: SnackPosition.BOTTOM,
@@ -337,7 +338,7 @@ class ChatController extends GetxController {
       debugPrint('chat_controller: $e');
       errorMessage.value = AppLocalization.tr.genericErrorMessage;
       _logger.e('Error sending message: $e');
-      Get.snackbar(
+      AppSnackbar.snackbar(
         AppLocalization.tr.errorTitle,
         AppLocalization.tr.messageSendFailedMessage,
         snackPosition: SnackPosition.BOTTOM,

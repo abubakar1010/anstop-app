@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:ride_sharing/l10n/l10n_helper.dart';
 import 'package:flutter/foundation.dart';
+import 'package:ride_sharing/app/utils/app_snackbar.dart';
 
 class DriverCompletedTripController extends GetxController {
   // ==================== State ====================
@@ -45,7 +46,7 @@ class DriverCompletedTripController extends GetxController {
       // TODO: Implement receipt download
       await Future.delayed(const Duration(seconds: 1));
 
-      Get.snackbar(
+      AppSnackbar.snackbar(
         AppLocalization.tr.successTitle,
         AppLocalization.tr.receiptDownloadedMessage,
         snackPosition: SnackPosition.BOTTOM,

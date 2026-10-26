@@ -5,6 +5,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:ride_sharing/app/theme/app_theme.dart';
+import 'package:ride_sharing/app/utils/app_snackbar.dart';
 import 'package:ride_sharing/l10n/app_localizations.dart';
 import 'package:ride_sharing/routes/app_routes.dart';
 import 'package:ride_sharing/services/locale_service.dart';
@@ -36,6 +37,7 @@ class RideSharingApp extends StatelessWidget {
       designSize: _designSizeForDevice(),
       builder: (_, _) {
         return GetMaterialApp(
+          scaffoldMessengerKey: AppSnackbar.messengerKey,
           builder: (_, Widget? child) {
             final bool bottomNavigationVisible = isBottomNavigationVisible(context);
             return SafeArea(top: false, bottom: bottomNavigationVisible, child: child!);

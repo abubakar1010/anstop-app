@@ -17,6 +17,7 @@ import 'package:ride_sharing/services/ride_session_controller.dart';
 import 'package:ride_sharing/services/maps_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ride_sharing/l10n/l10n_helper.dart';
+import 'package:ride_sharing/app/utils/app_snackbar.dart';
 
 class DriverHomeScreenController extends GetxController
     with MapCameraMixin, WidgetsBindingObserver {
@@ -433,7 +434,7 @@ class DriverHomeScreenController extends GetxController
             m.markerId.value == 'destination_radius_label');
         update();
 
-        Get.snackbar(
+        AppSnackbar.snackbar(
           AppLocalization.tr.paymentConfirmedTitle,
           AppLocalization.tr.passengerCompletedPaymentMessage,
           snackPosition: SnackPosition.BOTTOM,

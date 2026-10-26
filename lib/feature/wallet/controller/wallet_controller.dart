@@ -11,6 +11,7 @@ import 'package:ride_sharing/services/stripe/stripe_config.dart';
 
 import '../../../services/api_client.dart';
 import 'package:ride_sharing/l10n/l10n_helper.dart';
+import 'package:ride_sharing/app/utils/app_snackbar.dart';
 
 class WalletController extends GetxController {
   // ==================== Services ====================
@@ -111,7 +112,7 @@ class WalletController extends GetxController {
       // wallet screen shows the new balance when we return to it.
       await _waitForBalanceAbove(accessToken, balanceBefore);
 
-      Get.snackbar(
+      AppSnackbar.snackbar(
         AppLocalization.tr.successTitle,
         AppLocalization.tr.depositCompletedMessage,
         snackPosition: SnackPosition.BOTTOM,
@@ -124,7 +125,7 @@ class WalletController extends GetxController {
     } catch (e) {
       debugPrint('wallet_controller: $e');
       errorMessage.value = AppLocalization.tr.genericErrorMessage;
-      Get.snackbar(
+      AppSnackbar.snackbar(
         AppLocalization.tr.errorTitle,
         AppLocalization.tr.genericErrorMessage,
         snackPosition: SnackPosition.BOTTOM,
@@ -180,7 +181,7 @@ class WalletController extends GetxController {
       if (accessToken.isEmpty) {
         final msg = AppLocalization.tr.sessionExpiredMessage;
         errorMessage.value = msg;
-        Get.snackbar(
+        AppSnackbar.snackbar(
           AppLocalization.tr.errorTitle,
           msg,
           snackPosition: SnackPosition.BOTTOM,
@@ -206,7 +207,7 @@ class WalletController extends GetxController {
 
       logger.e(e);
 
-      Get.snackbar(
+      AppSnackbar.snackbar(
         AppLocalization.tr.errorTitle,
         msg,
         snackPosition: SnackPosition.BOTTOM,
@@ -233,7 +234,7 @@ class WalletController extends GetxController {
       if (response.isSuccess) {
         balance.value = response.responseData['data']['balance'] ?? 0;
       } else {
-        Get.snackbar(
+        AppSnackbar.snackbar(
           AppLocalization.tr.errorTitle,
           AppLocalization.tr.genericErrorMessage,
           snackPosition: SnackPosition.BOTTOM,
@@ -242,7 +243,7 @@ class WalletController extends GetxController {
         );
       }
     } catch (e) {
-      Get.snackbar(
+      AppSnackbar.snackbar(
         AppLocalization.tr.errorTitle,
         AppLocalization.tr.genericErrorMessage,
         snackPosition: SnackPosition.BOTTOM,
@@ -285,7 +286,7 @@ class WalletController extends GetxController {
       } else {
         debugPrint('wallet_controller: ${response.errorMessage}');
         errorMessage.value = AppLocalization.tr.genericErrorMessage;
-        Get.snackbar(
+        AppSnackbar.snackbar(
           AppLocalization.tr.errorTitle,
           AppLocalization.tr.genericErrorMessage,
           snackPosition: SnackPosition.BOTTOM,
@@ -297,7 +298,7 @@ class WalletController extends GetxController {
     } catch (e) {
       debugPrint('wallet_controller: $e');
       errorMessage.value = AppLocalization.tr.genericErrorMessage;
-      Get.snackbar(
+      AppSnackbar.snackbar(
         AppLocalization.tr.errorTitle,
         AppLocalization.tr.genericErrorMessage,
         snackPosition: SnackPosition.BOTTOM,

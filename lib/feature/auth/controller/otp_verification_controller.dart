@@ -6,6 +6,7 @@ import 'package:ride_sharing/feature/auth/data/verify_otp_request_model.dart';
 import 'package:ride_sharing/feature/auth/service/auth_service.dart';
 import 'package:ride_sharing/routes/app_routes.dart';
 import 'package:ride_sharing/l10n/l10n_helper.dart';
+import 'package:ride_sharing/app/utils/app_snackbar.dart';
 
 class OtpVerificationController extends GetxController {
   // ==================== Text Controllers ====================
@@ -67,7 +68,7 @@ class OtpVerificationController extends GetxController {
   Future<void> verifyOTP() async {
     if (otpController.text.isEmpty) {
       errorMessage.value = AppLocalization.tr.pleaseEnterOtpMessage;
-      Get.snackbar(
+      AppSnackbar.snackbar(
         AppLocalization.tr.errorTitle,
         AppLocalization.tr.pleaseEnterOtpMessage,
         snackPosition: SnackPosition.BOTTOM,
@@ -79,7 +80,7 @@ class OtpVerificationController extends GetxController {
 
     if (otpController.text.length < 6) {
       errorMessage.value = AppLocalization.tr.invalidOtpMessage;
-      Get.snackbar(
+      AppSnackbar.snackbar(
         AppLocalization.tr.errorTitle,
         AppLocalization.tr.invalidOtpMessage,
         snackPosition: SnackPosition.BOTTOM,
@@ -91,7 +92,7 @@ class OtpVerificationController extends GetxController {
 
     if (userEmail.value.isEmpty) {
       errorMessage.value = AppLocalization.tr.emailNotFoundMessage;
-      Get.snackbar(
+      AppSnackbar.snackbar(
         AppLocalization.tr.errorTitle,
         AppLocalization.tr.emailNotFoundMessage,
         snackPosition: SnackPosition.BOTTOM,
@@ -135,7 +136,7 @@ class OtpVerificationController extends GetxController {
           );
         } else {
           // Email verification flow - navigate to login screen
-          Get.snackbar(
+          AppSnackbar.snackbar(
             AppLocalization.tr.successTitle,
             AppLocalization.tr.emailVerifiedMessage,
             snackPosition: SnackPosition.BOTTOM,
@@ -149,7 +150,7 @@ class OtpVerificationController extends GetxController {
         // Show error message
         debugPrint('otp_verification_controller: ${response.errorMessage}');
         errorMessage.value = AppLocalization.tr.genericErrorMessage;
-        Get.snackbar(
+        AppSnackbar.snackbar(
           AppLocalization.tr.verificationFailedTitle,
           AppLocalization.tr.genericErrorMessage,
           snackPosition: SnackPosition.BOTTOM,
@@ -160,7 +161,7 @@ class OtpVerificationController extends GetxController {
     } catch (e) {
       debugPrint('otp_verification_controller: $e');
       errorMessage.value = AppLocalization.tr.genericErrorMessage;
-      Get.snackbar(
+      AppSnackbar.snackbar(
         AppLocalization.tr.errorTitle,
         AppLocalization.tr.genericErrorMessage,
         snackPosition: SnackPosition.BOTTOM,
@@ -186,7 +187,7 @@ class OtpVerificationController extends GetxController {
 
       if (response.isSuccess) {
         startTimer();
-        Get.snackbar(
+        AppSnackbar.snackbar(
           AppLocalization.tr.otpSentTitle,
           AppLocalization.tr.otpResentMessage,
           snackPosition: SnackPosition.BOTTOM,

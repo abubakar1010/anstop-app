@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:ride_sharing/l10n/l10n_helper.dart';
 import 'package:flutter/foundation.dart';
+import 'package:ride_sharing/app/utils/app_snackbar.dart';
 
 class InvoiceController extends GetxController {
   // ==================== State ====================
@@ -48,7 +49,7 @@ class InvoiceController extends GetxController {
 
       isPdfGenerated.value = true;
 
-      Get.snackbar(
+      AppSnackbar.snackbar(
         AppLocalization.tr.successTitle,
         AppLocalization.tr.pdfGeneratedMessage,
         snackPosition: SnackPosition.BOTTOM,
@@ -73,7 +74,7 @@ class InvoiceController extends GetxController {
       // TODO: Implement download functionality
       await Future.delayed(const Duration(seconds: 1));
 
-      Get.snackbar(
+      AppSnackbar.snackbar(
         AppLocalization.tr.successTitle,
         AppLocalization.tr.invoiceDownloadedMessage,
         snackPosition: SnackPosition.BOTTOM,

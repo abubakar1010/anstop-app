@@ -15,6 +15,7 @@ import 'package:ride_sharing/l10n/l10n_helper.dart';
 
 import 'booking_car_bottomsheet.dart';
 import 'package:ride_sharing/app/helpers/price_format.dart';
+import 'package:ride_sharing/app/utils/app_snackbar.dart';
 
 // Model for car information from driver
 class CarInformation {
@@ -711,7 +712,7 @@ class _AcceptCarBottomSheetState extends State<AcceptCarBottomSheet> {
                         );
 						if (!accepted && mounted) {
 						  setState(() { isAccepting = false; acceptingDriverId = null; });
-						  Get.snackbar(AppLocalization.tr.errorTitle, AppLocalization.tr.rideNoLongerAvailableMessage);
+						  AppSnackbar.snackbar(AppLocalization.tr.errorTitle, AppLocalization.tr.rideNoLongerAvailableMessage);
 						  return;
 						}
 

@@ -1,139 +1,104 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:get/get.dart';
 
-/// Single entry point for snackbars.
+/// Single entry point for snackbars. Never call `Get.snackbar` directly.
 ///
-/// Calling `Get.snackbar` directly is unsafe on GetX 4.7.x. `Get.snackbar`
-/// appends the snackbar to an internal queue immediately, but the snackbar's
-/// `AnimationController` is only created once it is actually displayed.
-/// Meanwhile `Get.isSnackbarOpen` already reports true for the queued one, and
-/// anything that closes it - `Get.closeCurrentSnackbar()`, or `Get.back()`,
-/// which closes the open snackbar instead of popping - reaches for that
-/// uninitialised controller and throws:
+/// GetX 4.7.x's snackbar queue (`GetQueue`) only catches `Exception`. Any
+/// `Error` raised while a snackbar is shown or closed - "No Overlay widget
+/// found", a `LateInitializationError` on its `AnimationController`, a failed
+/// assert - escapes the queue with `_active` still set. From then on:
 ///
-///     LateInitializationError: Field '_controller@...' has not been initialized.
+///  * no snackbar is ever displayed again until the app restarts, so every
+///    validation and upload error becomes a silent no-op; and
+///  * the dead job stays in GetX's list, so `Get.isSnackbarOpen` is stuck at
+///    true and every `Get.back()` tries to close it instead of popping - which
+///    is how loading dialogs ended up stuck on screen.
 ///
-/// This helper keeps at most one snackbar inside GetX's queue at a time, so a
-/// queued-but-never-shown snackbar can never exist.
+/// So snackbars are shown with Flutter's own [ScaffoldMessenger] instead, via
+/// [messengerKey] (wired into `GetMaterialApp` in app.dart), and GetX's
+/// snackbar machinery is never touched.
 class AppSnackbar {
-  /// Serialises callers so two snackbars are never handed to GetX at once.
-  static Future<void> _pending = Future<void>.value();
+  static final GlobalKey<ScaffoldMessengerState> messengerKey =
+      GlobalKey<ScaffoldMessengerState>();
 
   static void show({
     required String title,
     required String message,
     Color? backgroundColor,
     Color? colorText,
+    // Kept so call sites read the same as before; ScaffoldMessenger always
+    // shows snackbars at the bottom, which is all the app ever used.
     SnackPosition snackPosition = SnackPosition.BOTTOM,
     Duration duration = const Duration(seconds: 3),
   }) {
-    _pending = _pending.then(
-      (_) => _display(
-        title: title,
-        message: message,
-        backgroundColor: backgroundColor,
-        colorText: colorText,
-        snackPosition: snackPosition,
-        duration: duration,
-      ),
-      // Never let one failed snackbar poison the chain and silence the rest.
-      onError: (_) {},
+    final messenger = messengerKey.currentState;
+    if (messenger == null) {
+      // The very first frame is still being built; try again once it is.
+      SchedulerBinding.instance.addPostFrameCallback(
+        (_) => show(
+          title: title,
+          message: message,
+          backgroundColor: backgroundColor,
+          colorText: colorText,
+          duration: duration,
+        ),
+      );
+      return;
+    }
+
+    final textColor = colorText ?? Colors.white;
+    // Replace whatever is currently on screen rather than waiting it out.
+    // Tapping a Submit button twice must show the second message straight
+    // away - queueing behind the first one makes the button look unresponsive.
+    messenger
+      ..clearSnackBars()
+      ..showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: backgroundColor,
+          duration: duration,
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (title.isNotEmpty)
+                Text(
+                  title,
+                  style: TextStyle(color: textColor, fontWeight: FontWeight.w600),
+                ),
+              if (message.isNotEmpty)
+                Text(message, style: TextStyle(color: textColor)),
+            ],
+          ),
+        ),
+      );
+  }
+
+  /// Drop-in replacement for `Get.snackbar(title, message, ...)`.
+  static void snackbar(
+    String title,
+    String message, {
+    Color? backgroundColor,
+    Color? colorText,
+    SnackPosition snackPosition = SnackPosition.BOTTOM,
+    Duration duration = const Duration(seconds: 3),
+  }) {
+    show(
+      title: title,
+      message: message,
+      backgroundColor: backgroundColor,
+      colorText: colorText,
+      snackPosition: snackPosition,
+      duration: duration,
     );
   }
 
-  static Future<void> _display({
-    required String title,
-    required String message,
-    required Color? backgroundColor,
-    required Color? colorText,
-    required SnackPosition snackPosition,
-    required Duration duration,
-  }) async {
-    await _waitForOverlay();
-    if (!_overlayReady()) return;
-
-    try {
-      // Replace whatever is currently on screen rather than waiting it out.
-      // Tapping a Submit button twice must show the second message straight
-      // away - queueing behind the first one's full display makes the button
-      // look unresponsive.
-      await dismiss();
-      if (!_overlayReady()) return;
-
-      Get.snackbar(
-        title,
-        message,
-        backgroundColor: backgroundColor,
-        colorText: colorText,
-        snackPosition: snackPosition,
-        duration: duration,
-      );
-      // Release the chain only once GetX has actually mounted this snackbar,
-      // so its AnimationController exists before anyone can dismiss it.
-      await _nextFrame();
-    } catch (_) {
-      // A snackbar is never worth crashing a screen over.
-    }
-  }
-
-  /// Waits until GetX has an overlay to attach to (it has none while the very
-  /// first frame is still being built).
-  static Future<void> _waitForOverlay() async {
-    if (_overlayReady()) return;
-    await _nextFrame();
-  }
-
-  /// Whether GetX can actually mount a snackbar right now.
-  ///
-  /// A non-null `Get.overlayContext` is not enough. GetX resolves it by
-  /// visiting the navigator overlay's first child, handing back the private
-  /// `_Theater` element, and `SnackbarController._configureOverlay` then calls
-  /// `Overlay.of(...)` on it. If that element has been unmounted - the tree was
-  /// rebuilt between queueing and showing, e.g. the keyboard dismissing during
-  /// a failed submit - the lookup finds no OverlayState and throws
-  /// "No Overlay widget found".
-  ///
-  /// That throw cannot be caught at the call site: `Get.snackbar` only enqueues
-  /// the job, and `_SnackBarQueue` runs it later in its own async context, so
-  /// the error surfaces as an unhandled exception. It has to be prevented here.
-  static bool _overlayReady() {
-    final BuildContext? context = Get.overlayContext;
-    if (context == null || !context.mounted) return false;
-    return Overlay.maybeOf(context) != null;
-  }
-
-  static Future<void> _nextFrame() {
-    final completer = Completer<void>();
-    SchedulerBinding.instance.addPostFrameCallback((_) => completer.complete());
-    SchedulerBinding.instance.ensureVisualUpdate();
-    return completer.future;
-  }
-
-  /// Closes any visible snackbar and waits until GetX's queue has actually
-  /// drained.
-  ///
-  /// Awaiting `Get.closeCurrentSnackbar()` alone is not enough: `_SnackBarQueue`
-  /// only removes the finished job from its list a microtask *after* the close
-  /// future completes, so `Get.isSnackbarOpen` is still true when that await
-  /// returns. Anything that reacts to `isSnackbarOpen` - notably `Get.back()`,
-  /// which fires an unawaited `closeCurrentSnackbar()` on the dead controller -
-  /// then throws an unhandled LateInitializationError.
+  /// Closes any visible snackbar.
   ///
   /// Call this before popping a route that may have shown a snackbar.
   static Future<void> dismiss() async {
-    try {
-      if (!Get.isSnackbarOpen) return;
-      await Get.closeCurrentSnackbar();
-      // Bounded drain, so a snackbar that never clears can't hang the caller.
-      for (var i = 0; i < 20 && Get.isSnackbarOpen; i++) {
-        await Future<void>.delayed(Duration.zero);
-      }
-    } catch (_) {
-      // A stuck snackbar must never block navigation.
-    }
+    messengerKey.currentState?.clearSnackBars();
   }
 
   static void success(String title, String message) {

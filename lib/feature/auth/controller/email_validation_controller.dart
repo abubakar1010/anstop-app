@@ -4,6 +4,7 @@ import 'package:ride_sharing/feature/auth/data/forgot_password_request_model.dar
 import 'package:ride_sharing/feature/auth/service/auth_service.dart';
 import 'package:ride_sharing/routes/app_routes.dart';
 import 'package:ride_sharing/l10n/l10n_helper.dart';
+import 'package:ride_sharing/app/utils/app_snackbar.dart';
 
 class EmailValidationController extends GetxController {
   // ==================== Text Controllers ====================
@@ -72,7 +73,7 @@ class EmailValidationController extends GetxController {
         } else {
           debugPrint('email_validation_controller: ${response.errorMessage}');
           errorMessage.value = AppLocalization.tr.genericErrorMessage;
-          Get.snackbar(
+          AppSnackbar.snackbar(
             AppLocalization.tr.errorTitle,
             AppLocalization.tr.genericErrorMessage,
             snackPosition: SnackPosition.BOTTOM,
@@ -94,7 +95,7 @@ class EmailValidationController extends GetxController {
     } catch (e) {
       debugPrint('email_validation_controller: $e');
       errorMessage.value = AppLocalization.tr.genericErrorMessage;
-      Get.snackbar(
+      AppSnackbar.snackbar(
         AppLocalization.tr.errorTitle,
         AppLocalization.tr.genericErrorMessage,
         snackPosition: SnackPosition.BOTTOM,

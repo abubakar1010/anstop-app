@@ -351,7 +351,7 @@ class TripRequestCard extends StatelessWidget {
                         _logger.i('new-offer accepted for rideId: ${trip.id}');
                         onTap();
                       } else {
-                        Get.snackbar(l10n.errorTitle, l10n.genericErrorMessage);
+                        AppSnackbar.snackbar(l10n.errorTitle, l10n.genericErrorMessage);
                       }
                     },
                     style: ElevatedButton.styleFrom(

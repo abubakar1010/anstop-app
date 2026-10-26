@@ -5,6 +5,7 @@ import 'package:ride_sharing/feature/auth/service/auth_service.dart';
 import 'package:ride_sharing/feature/auth/view/email_validation_screen.dart';
 import 'package:ride_sharing/routes/app_routes.dart';
 import 'package:ride_sharing/l10n/l10n_helper.dart';
+import 'package:ride_sharing/app/utils/app_snackbar.dart';
 
 class RegistrationController extends GetxController {
   // ==================== Text Controllers ====================
@@ -69,7 +70,7 @@ class RegistrationController extends GetxController {
 
     if (!isAgreedToTerms.value) {
       errorMessage.value = AppLocalization.tr.pleaseAgreeToTermsMessage;
-      Get.snackbar(
+      AppSnackbar.snackbar(
         AppLocalization.tr.errorTitle,
         AppLocalization.tr.pleaseAgreeToTermsMessage,
         snackPosition: SnackPosition.BOTTOM,
@@ -117,7 +118,7 @@ class RegistrationController extends GetxController {
         // Show error message
         debugPrint('registration_controller: ${response.errorMessage}');
         errorMessage.value = AppLocalization.tr.genericErrorMessage;
-        Get.snackbar(
+        AppSnackbar.snackbar(
           AppLocalization.tr.registrationFailedTitle,
           AppLocalization.tr.genericErrorMessage,
           snackPosition: SnackPosition.BOTTOM,
@@ -128,7 +129,7 @@ class RegistrationController extends GetxController {
     } catch (e) {
       debugPrint('registration_controller: $e');
       errorMessage.value = AppLocalization.tr.genericErrorMessage;
-      Get.snackbar(
+      AppSnackbar.snackbar(
         AppLocalization.tr.errorTitle,
         AppLocalization.tr.genericErrorMessage,
         snackPosition: SnackPosition.BOTTOM,

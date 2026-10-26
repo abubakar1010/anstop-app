@@ -4,6 +4,7 @@ import 'package:ride_sharing/feature/passenger/trip_details/data/get_trip_detail
 import 'package:ride_sharing/feature/passenger/trip_details/service/trip_details_service.dart';
 import 'package:ride_sharing/l10n/l10n_helper.dart';
 import 'package:flutter/foundation.dart';
+import 'package:ride_sharing/app/utils/app_snackbar.dart';
 
 class OngoingTripController extends GetxController {
   // ==================== State ====================
@@ -53,7 +54,7 @@ class OngoingTripController extends GetxController {
       } else {
         debugPrint('ongoing_trip_controller: ${response.errorMessage}');
         errorMessage.value = AppLocalization.tr.genericErrorMessage;
-        Get.snackbar(
+        AppSnackbar.snackbar(
           AppLocalization.tr.errorTitle,
           AppLocalization.tr.genericErrorMessage,
           snackPosition: SnackPosition.BOTTOM,
@@ -63,7 +64,7 @@ class OngoingTripController extends GetxController {
     } catch (e) {
       debugPrint('ongoing_trip_controller: $e');
       errorMessage.value = AppLocalization.tr.genericErrorMessage;
-      Get.snackbar(
+      AppSnackbar.snackbar(
         AppLocalization.tr.errorTitle,
         AppLocalization.tr.tripDetailsLoadErrorMessage,
         snackPosition: SnackPosition.BOTTOM,

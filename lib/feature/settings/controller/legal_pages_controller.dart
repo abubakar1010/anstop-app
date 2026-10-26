@@ -4,6 +4,7 @@ import 'package:logger/logger.dart';
 import '../data/legal_document_model.dart';
 import '../service/settings_service.dart';
 import 'package:ride_sharing/l10n/l10n_helper.dart';
+import 'package:ride_sharing/app/utils/app_snackbar.dart';
 
 class LegalPagesController extends GetxController {
   final _logger = Logger();
@@ -66,7 +67,7 @@ class LegalPagesController extends GetxController {
             ? response.errorMessage
             : AppLocalization.tr.genericErrorMessage;
         _logger.e('API error — statusCode: ${response.statusCode}, error: ${errorMessage.value}');
-        Get.snackbar(
+        AppSnackbar.snackbar(
           AppLocalization.tr.errorTitle,
           AppLocalization.tr.genericErrorMessage,
           snackPosition: SnackPosition.BOTTOM,
@@ -78,7 +79,7 @@ class LegalPagesController extends GetxController {
       debugPrint('legal_pages_controller: $e');
       errorMessage.value = AppLocalization.tr.genericErrorMessage;
       _logger.e('Exception during fetch', error: e, stackTrace: stackTrace);
-      Get.snackbar(
+      AppSnackbar.snackbar(
         AppLocalization.tr.errorTitle,
         AppLocalization.tr.genericErrorMessage,
         snackPosition: SnackPosition.BOTTOM,

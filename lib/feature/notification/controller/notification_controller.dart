@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:ride_sharing/l10n/l10n_helper.dart';
 import 'package:flutter/foundation.dart';
+import 'package:ride_sharing/app/utils/app_snackbar.dart';
 
 class NotificationController extends GetxController {
   // ==================== State ====================
@@ -66,7 +67,7 @@ class NotificationController extends GetxController {
       notifications.clear();
       unreadCount.value = 0;
 
-      Get.snackbar(
+      AppSnackbar.snackbar(
         AppLocalization.tr.successTitle,
         AppLocalization.tr.notificationsClearedMessage,
         snackPosition: SnackPosition.BOTTOM,

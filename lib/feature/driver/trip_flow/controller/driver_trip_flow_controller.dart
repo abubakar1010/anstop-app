@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:ride_sharing/l10n/l10n_helper.dart';
 import 'package:flutter/foundation.dart';
+import 'package:ride_sharing/app/utils/app_snackbar.dart';
 
 class DriverTripFlowController extends GetxController {
   // ==================== State ====================
@@ -51,7 +52,7 @@ class DriverTripFlowController extends GetxController {
 
       tripStatus.value = 'accepted';
 
-      Get.snackbar(
+      AppSnackbar.snackbar(
         AppLocalization.tr.tripAcceptedTitle,
         AppLocalization.tr.navigateToPassengerMessage,
         snackPosition: SnackPosition.BOTTOM,
@@ -109,7 +110,7 @@ class DriverTripFlowController extends GetxController {
 
       tripStatus.value = 'arrived';
 
-      Get.snackbar(
+      AppSnackbar.snackbar(
         AppLocalization.tr.arrivedTitle,
         AppLocalization.tr.passengerNotifiedMessage,
         snackPosition: SnackPosition.BOTTOM,

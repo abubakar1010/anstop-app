@@ -4,6 +4,7 @@ import '../data/change_password_request_model.dart';
 import '../data/change_password_response_model.dart';
 import '../service/settings_service.dart';
 import 'package:ride_sharing/l10n/l10n_helper.dart';
+import 'package:ride_sharing/app/utils/app_snackbar.dart';
 
 class ChangePasswordController extends GetxController {
   // ==================== Text Controllers ====================
@@ -75,7 +76,7 @@ class ChangePasswordController extends GetxController {
         errorMessage.value = response.errorMessage.isNotEmpty
             ? response.errorMessage
             : AppLocalization.tr.genericErrorMessage;
-        Get.snackbar(
+        AppSnackbar.snackbar(
           AppLocalization.tr.errorTitle,
           AppLocalization.tr.genericErrorMessage,
           snackPosition: SnackPosition.BOTTOM,
@@ -87,7 +88,7 @@ class ChangePasswordController extends GetxController {
     } catch (e) {
       debugPrint('change_password_controller: $e');
       errorMessage.value = AppLocalization.tr.genericErrorMessage;
-      Get.snackbar(
+      AppSnackbar.snackbar(
         AppLocalization.tr.errorTitle,
         AppLocalization.tr.genericErrorMessage,
         snackPosition: SnackPosition.BOTTOM,

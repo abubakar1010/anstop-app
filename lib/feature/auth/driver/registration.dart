@@ -4,6 +4,7 @@ import 'package:ride_sharing/widgets/auth_links/auth_link.dart';
 
 import '../../../routes/app_routes.dart';
 import 'package:ride_sharing/l10n/l10n_helper.dart';
+import 'package:ride_sharing/app/utils/app_snackbar.dart';
 
 class DriverRegistration extends StatefulWidget {
   const DriverRegistration({super.key});
@@ -183,7 +184,7 @@ class _DriverRegistrationState extends State<DriverRegistration> {
                         onPressed: () {
                           // Validate required fields
                           if (_birthdayController.text.isEmpty) {
-                            Get.snackbar(
+                            AppSnackbar.snackbar(
                               AppLocalization.tr.validationErrorTitle,
                               AppLocalization.tr.dateOfBirthRequiredError,
                               snackPosition: SnackPosition.BOTTOM,
@@ -193,7 +194,7 @@ class _DriverRegistrationState extends State<DriverRegistration> {
                             return;
                           }
                           if (_addressTEController.text.trim().isEmpty) {
-                            Get.snackbar(
+                            AppSnackbar.snackbar(
                               AppLocalization.tr.validationErrorTitle,
                               AppLocalization.tr.addressRequiredError,
                               snackPosition: SnackPosition.BOTTOM,

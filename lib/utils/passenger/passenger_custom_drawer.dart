@@ -14,6 +14,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../feature/auth/view/log_out_dialog.dart';
 import '../custom_user_rating.dart';
 import 'package:ride_sharing/l10n/l10n_helper.dart';
+import 'package:ride_sharing/app/utils/app_snackbar.dart';
 
 class PassengerCustomDrawer extends StatelessWidget {
   PassengerCustomDrawer({Key? key}) : super(key: key);
@@ -157,6 +158,15 @@ class PassengerCustomDrawer extends StatelessWidget {
     action();
   }
 
+  /// Pops the loading dialog without going through `Get.back()`.
+  ///
+  /// On GetX 4.7.x `Get.back()` closes an open snackbar instead of popping, so
+  /// the spinner stayed up underneath the registration screen and blocked the
+  /// home screen once the user came back.
+  void _closeLoadingDialog() {
+    if (Get.isDialogOpen ?? false) Get.key.currentState?.pop();
+  }
+
   Future<void> _handleSwitchToDriver(BuildContext context) async {
     try {
       // Show loading indicator
@@ -171,7 +181,7 @@ class PassengerCustomDrawer extends StatelessWidget {
 
 
       if (accessToken == null || accessToken.isEmpty) {
-        Get.back(); // Close loading
+        _closeLoadingDialog();
 
         // Show dialog asking user to re-login
         await Get.dialog(
@@ -202,7 +212,7 @@ class PassengerCustomDrawer extends StatelessWidget {
         accessToken: accessToken,
       );
 
-      Get.back(); // Close loading
+      _closeLoadingDialog();
 
       if (onboardingResponse.isSuccess) {
         final isOnboarded = onboardingResponse.responseData['data']?['isOnboarded'] ?? false;
@@ -219,9 +229,9 @@ class PassengerCustomDrawer extends StatelessWidget {
         Get.toNamed(AppRoutes.driverRegistrationScreen);
       }
     } catch (e) {
-      Get.back(); // Close loading if open
+      _closeLoadingDialog();
       debugPrint('Error switching to driver: $e');
-      Get.snackbar(
+      AppSnackbar.snackbar(
         AppLocalization.tr.errorTitle,
         AppLocalization.tr.genericErrorMessage,
         snackPosition: SnackPosition.BOTTOM,

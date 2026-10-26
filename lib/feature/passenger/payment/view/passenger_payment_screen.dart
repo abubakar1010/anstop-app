@@ -94,7 +94,7 @@ class _PassengerPaymentScreenState extends State<PassengerPaymentScreen> {
       if (response.isSuccess) {
         _showThankYouDialog(dialogContext);
       } else {
-        Get.snackbar(
+        AppSnackbar.snackbar(
           AppLocalization.tr.errorTitle,
           AppLocalization.tr.genericErrorMessage,
           snackPosition: SnackPosition.BOTTOM,
@@ -104,7 +104,7 @@ class _PassengerPaymentScreenState extends State<PassengerPaymentScreen> {
       }
     } catch (e) {
       if (mounted) {
-        Get.snackbar(
+        AppSnackbar.snackbar(
           AppLocalization.tr.errorTitle,
           AppLocalization.tr.ratingSubmitFailedMessage,
           snackPosition: SnackPosition.BOTTOM,
@@ -120,7 +120,7 @@ class _PassengerPaymentScreenState extends State<PassengerPaymentScreen> {
   void _initPaymentConfirmedListener() {
     SocketIoService.to.onPaymentConfirmed((data) {
       if (mounted) {
-        Get.snackbar(
+        AppSnackbar.snackbar(
           AppLocalization.tr.paymentConfirmedTitle,
           AppLocalization.tr.paymentConfirmedMessage,
           snackPosition: SnackPosition.BOTTOM,

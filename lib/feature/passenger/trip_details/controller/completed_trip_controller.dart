@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:ride_sharing/feature/passenger/trip_details/data/get_trip_details_model.dart';
 import 'package:ride_sharing/feature/passenger/trip_details/service/trip_details_service.dart';
 import 'package:ride_sharing/l10n/l10n_helper.dart';
+import 'package:ride_sharing/app/utils/app_snackbar.dart';
 
 class CompletedTripController extends GetxController {
   // ==================== Text Controllers ====================
@@ -53,7 +54,7 @@ class CompletedTripController extends GetxController {
       } else {
         debugPrint('completed_trip_controller: ${response.errorMessage}');
         errorMessage.value = AppLocalization.tr.genericErrorMessage;
-        Get.snackbar(
+        AppSnackbar.snackbar(
           AppLocalization.tr.errorTitle,
           AppLocalization.tr.genericErrorMessage,
           snackPosition: SnackPosition.BOTTOM,
@@ -63,7 +64,7 @@ class CompletedTripController extends GetxController {
     } catch (e) {
       debugPrint('completed_trip_controller: $e');
       errorMessage.value = AppLocalization.tr.genericErrorMessage;
-      Get.snackbar(
+      AppSnackbar.snackbar(
         AppLocalization.tr.errorTitle,
         AppLocalization.tr.tripDetailsLoadErrorMessage,
         snackPosition: SnackPosition.BOTTOM,
@@ -93,7 +94,7 @@ class CompletedTripController extends GetxController {
       hasSubmittedRating.value = true;
 
       // Show success message
-      Get.snackbar(
+      AppSnackbar.snackbar(
         AppLocalization.tr.successTitle,
         AppLocalization.tr.thankYouForFeedbackMessage,
         snackPosition: SnackPosition.BOTTOM,
@@ -114,7 +115,7 @@ class CompletedTripController extends GetxController {
       // TODO: Implement receipt download
       await Future.delayed(const Duration(seconds: 1));
 
-      Get.snackbar(
+      AppSnackbar.snackbar(
         AppLocalization.tr.successTitle,
         AppLocalization.tr.receiptDownloadedMessage,
         snackPosition: SnackPosition.BOTTOM,

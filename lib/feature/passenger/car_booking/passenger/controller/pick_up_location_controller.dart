@@ -11,6 +11,7 @@ import 'package:ride_sharing/services/logger.dart';
 import 'package:ride_sharing/services/map_camera_mixin.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ride_sharing/feature/passenger/car_booking/service/ride_request_service.dart';
+import 'package:ride_sharing/app/utils/app_snackbar.dart';
 
 
 class PickUpLocationController extends GetxController with MapCameraMixin {
@@ -157,7 +158,7 @@ class PickUpLocationController extends GetxController with MapCameraMixin {
   // Calculate fare from API
   Future<bool> calculateFare() async {
     if (!areLocationsSet()) {
-      Get.snackbar(
+      AppSnackbar.snackbar(
         AppLocalization.tr.errorTitle,
         AppLocalization.tr.selectPickupAndDestinationMessage,
         snackPosition: SnackPosition.BOTTOM,
@@ -194,7 +195,7 @@ class PickUpLocationController extends GetxController with MapCameraMixin {
         update();
         return true;
       } else {
-        Get.snackbar(
+        AppSnackbar.snackbar(
           AppLocalization.tr.errorTitle,
           AppLocalization.tr.genericErrorMessage,
           snackPosition: SnackPosition.BOTTOM,
@@ -204,7 +205,7 @@ class PickUpLocationController extends GetxController with MapCameraMixin {
         return false;
       }
     } catch (e) {
-      Get.snackbar(
+      AppSnackbar.snackbar(
         AppLocalization.tr.errorTitle,
         AppLocalization.tr.fareCalculationFailedMessage,
         snackPosition: SnackPosition.BOTTOM,
