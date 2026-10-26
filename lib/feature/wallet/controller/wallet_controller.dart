@@ -87,9 +87,8 @@ class WalletController extends GetxController {
         accessToken: accessToken,
         amount: amount,
       );
-      final String? clientSecret = intentResponse.isSuccess
-          ? (intentResponse.responseData['data']?['clientSecret'] as String?)
-          : null;
+      final intentData = intentResponse.isSuccess ? intentResponse.responseData['data'] : null;
+      final String? clientSecret = intentData?['clientSecret'] as String?;
       if (clientSecret == null || clientSecret.isEmpty) {
         debugPrint('wallet_controller: ${intentResponse.errorMessage}');
         throw Exception('Could not create deposit payment');
@@ -101,9 +100,12 @@ class WalletController extends GetxController {
       final paymentResult = await _stripeHelper.processPayment(
         context: context,
         clientSecret: clientSecret,
+        customerId: intentData?['customerId'] as String?,
+        ephemeralKey: intentData?['ephemeralKey'] as String?,
         showSuccessDialog: false,
       );
 
+      if (paymentResult.isCancelled) return;
       if (!paymentResult.isSuccess) {
         errorMessage.value = paymentResult.message ?? AppLocalization.tr.paymentFailedMessage;
         return;

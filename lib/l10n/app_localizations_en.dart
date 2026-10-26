@@ -1816,4 +1816,81 @@ class AppLocalizationsEn extends AppLocalizations {
   String withdrawalMinimumError(String amount) {
     return 'Minimum withdrawal is $amount';
   }
+
+  @override
+  String get paymentMethodsTitle => 'Payment methods';
+
+  @override
+  String get addCardButton => 'Add a card';
+
+  @override
+  String get defaultCardLabel => 'Default';
+
+  @override
+  String get setAsDefaultAction => 'Set as default';
+
+  @override
+  String get removeCardAction => 'Remove card';
+
+  @override
+  String get removeCardTitle => 'Remove this card?';
+
+  @override
+  String removeCardMessage(String card) {
+    return '$card will no longer be available for your payments.';
+  }
+
+  @override
+  String get noSavedCardsTitle => 'No saved cards';
+
+  @override
+  String get noSavedCardsMessage =>
+      'Add a card to pay for your rides automatically when they end.';
+
+  @override
+  String cardExpiresLabel(String expiry) {
+    return 'Expires $expiry';
+  }
+
+  @override
+  String get cardExpiredLabel => 'Expired';
+
+  @override
+  String get cardAddedMessage => 'Your card has been saved.';
+
+  @override
+  String get cardRemovedMessage => 'Card removed.';
+
+  @override
+  String get defaultCardUpdatedMessage => 'Default card updated.';
+
+  @override
+  String get cardsSecureNote =>
+      'Card details are stored securely by Stripe. Anstop never sees your full card number.';
+
+  @override
+  String get defaultCardHint =>
+      'Your default card is charged automatically at the end of each card ride.';
+
+  @override
+  String get chargingSavedCardMessage => 'Charging your saved card…';
+
+  @override
+  String get confirmingPaymentMessage => 'Confirming your payment…';
+
+  @override
+  String payWithCardLabel(String card) {
+    return 'Pay with $card';
+  }
+
+  @override
+  String get noSavedCardHint =>
+      'No saved card: you\'ll enter one when you pay.';
+
+  @override
+  String get manageCardsAction => 'Manage';
+
+  @override
+  String get cardPaymentFailedMessage =>
+      'Your card payment failed. Please try another card.';
 }

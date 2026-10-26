@@ -87,5 +87,11 @@ class ApiUrls {
   static const String setFcmToken = '$baseUrl/users/fcm-token';
   static const String notifications = '$baseUrl/notifications';
 
+  // Saved cards (stored by Stripe; the server returns brand, last 4 and expiry)
+  static const String paymentMethods = '$baseUrl/payment-methods';
+  static const String paymentMethodsSetupIntent = '$baseUrl/payment-methods/setup-intent';
+  static String paymentMethod(String id) => '$baseUrl/payment-methods/$id';
+  static String paymentMethodDefault(String id) => '$baseUrl/payment-methods/$id/default';
+
 
 }

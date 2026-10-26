@@ -1846,4 +1846,81 @@ class AppLocalizationsFr extends AppLocalizations {
   String withdrawalMinimumError(String amount) {
     return 'Le retrait minimum est de $amount';
   }
+
+  @override
+  String get paymentMethodsTitle => 'Moyens de paiement';
+
+  @override
+  String get addCardButton => 'Ajouter une carte';
+
+  @override
+  String get defaultCardLabel => 'Par défaut';
+
+  @override
+  String get setAsDefaultAction => 'Définir par défaut';
+
+  @override
+  String get removeCardAction => 'Supprimer la carte';
+
+  @override
+  String get removeCardTitle => 'Supprimer cette carte ?';
+
+  @override
+  String removeCardMessage(String card) {
+    return '$card ne pourra plus être utilisée pour vos paiements.';
+  }
+
+  @override
+  String get noSavedCardsTitle => 'Aucune carte enregistrée';
+
+  @override
+  String get noSavedCardsMessage =>
+      'Ajoutez une carte pour payer vos courses automatiquement à leur arrivée.';
+
+  @override
+  String cardExpiresLabel(String expiry) {
+    return 'Expire fin $expiry';
+  }
+
+  @override
+  String get cardExpiredLabel => 'Expirée';
+
+  @override
+  String get cardAddedMessage => 'Votre carte a été enregistrée.';
+
+  @override
+  String get cardRemovedMessage => 'Carte supprimée.';
+
+  @override
+  String get defaultCardUpdatedMessage => 'Carte par défaut mise à jour.';
+
+  @override
+  String get cardsSecureNote =>
+      'Les données de carte sont conservées en toute sécurité par Stripe. Anstop ne voit jamais votre numéro complet.';
+
+  @override
+  String get defaultCardHint =>
+      'Votre carte par défaut est débitée automatiquement à la fin de chaque course payée par carte.';
+
+  @override
+  String get chargingSavedCardMessage => 'Débit de votre carte enregistrée…';
+
+  @override
+  String get confirmingPaymentMessage => 'Confirmation de votre paiement…';
+
+  @override
+  String payWithCardLabel(String card) {
+    return 'Payer avec $card';
+  }
+
+  @override
+  String get noSavedCardHint =>
+      'Aucune carte enregistrée : vous la saisirez au moment de payer.';
+
+  @override
+  String get manageCardsAction => 'Gérer';
+
+  @override
+  String get cardPaymentFailedMessage =>
+      'Le paiement par carte a échoué. Veuillez essayer une autre carte.';
 }

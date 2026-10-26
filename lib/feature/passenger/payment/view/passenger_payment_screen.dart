@@ -18,6 +18,11 @@ import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:ride_sharing/l10n/l10n_helper.dart';
 import 'package:ride_sharing/app/helpers/price_format.dart';
+import 'package:ride_sharing/feature/payment_methods/data/saved_card.dart';
+import 'package:ride_sharing/feature/payment_methods/service/payment_methods_service.dart';
+import 'package:ride_sharing/services/stripe/stripe_config.dart';
+import 'package:ride_sharing/services/stripe/stripe_helper.dart';
+import 'dart:async';
 
 class PassengerPaymentScreen extends StatefulWidget {
   final String driverName;
@@ -58,17 +63,84 @@ class _PassengerPaymentScreenState extends State<PassengerPaymentScreen> {
   bool _isSubmittingRating = false;
   final _logger = Logger();
 
+  // Card rides: the rider's default saved card, shown before paying.
+  SavedCard? _defaultCard;
+  bool _cardsLoaded = false;
+
+  /// Set while the server charges the card; the socket event (or the poll
+  /// below, if the event is missed) moves on to the rating.
+  String? _cardStatusMessage;
+  bool _paymentConfirmed = false;
+  Timer? _paymentPoll;
+  final _stripeHelper = StripePaymentHelper(
+    config: const StripeConfig(merchantDisplayName: 'Anstop'),
+  );
+
+  bool get _isCard => widget.paymentMethod.toUpperCase() == 'CARD';
+
   @override
   void initState() {
     super.initState();
     _initPaymentConfirmedListener();
+    if (_isCard) {
+      _loadDefaultCard();
+      SocketIoService.to.onPaymentFailed((data) {
+        if (!mounted || data is! Map || data['rideId']?.toString() != widget.rideId) return;
+        _stopWaitingForCard();
+        AppSnackbar.error(
+          AppLocalization.tr.paymentErrorTitle,
+          data['message']?.toString() ?? AppLocalization.tr.cardPaymentFailedMessage,
+        );
+      });
+    }
   }
 
   @override
   void dispose() {
     SocketIoService.to.offPaymentConfirmed();
+    SocketIoService.to.offPaymentFailed();
+    _paymentPoll?.cancel();
     _commentController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadDefaultCard() async {
+    try {
+      final response = await PaymentMethodsService().listCards();
+      if (!mounted || !response.isSuccess) return;
+      final cards = SavedCard.listFromJson(response.responseData['data']);
+      setState(() {
+        _defaultCard = cards.firstWhereOrNull((c) => c.isDefault);
+        _cardsLoaded = true;
+      });
+    } catch (e) {
+      _logger.w('Could not load saved cards: $e');
+    }
+  }
+
+  Future<void> _openPaymentMethods() async {
+    await Get.toNamed(AppRoutes.paymentMethodsScreen);
+    if (mounted) _loadDefaultCard();
+  }
+
+  void _waitForCardPayment(String message) {
+    setState(() => _cardStatusMessage = message);
+    var attempts = 0;
+    _paymentPoll?.cancel();
+    _paymentPoll = Timer.periodic(const Duration(seconds: 4), (timer) async {
+      if (++attempts > 15) {
+        timer.cancel();
+        return;
+      }
+      final response = await ApiClient().getRequest(ApiUrls.getRideDetails(widget.rideId));
+      final data = response.isSuccess ? response.responseData['data'] : null;
+      if (data is Map && data['isPaymentCompleted'] == true) _onPaymentConfirmed();
+    });
+  }
+
+  void _stopWaitingForCard() {
+    _paymentPoll?.cancel();
+    if (mounted) setState(() => _cardStatusMessage = null);
   }
 
   Future<void> _submitRating(BuildContext dialogContext) async {
@@ -118,19 +190,22 @@ class _PassengerPaymentScreenState extends State<PassengerPaymentScreen> {
   }
 
   void _initPaymentConfirmedListener() {
-    SocketIoService.to.onPaymentConfirmed((data) {
-      if (mounted) {
-        AppSnackbar.snackbar(
-          AppLocalization.tr.paymentConfirmedTitle,
-          AppLocalization.tr.paymentConfirmedMessage,
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
-          duration: const Duration(seconds: 3),
-        );
-        _showRatingDialog(context);
-      }
-    });
+    SocketIoService.to.onPaymentConfirmed((data) => _onPaymentConfirmed());
+  }
+
+  void _onPaymentConfirmed() {
+    if (!mounted || _paymentConfirmed) return;
+    _paymentConfirmed = true;
+    _stopWaitingForCard();
+    AppSnackbar.snackbar(
+      AppLocalization.tr.paymentConfirmedTitle,
+      AppLocalization.tr.paymentConfirmedMessage,
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: Colors.green,
+      colorText: Colors.white,
+      duration: const Duration(seconds: 3),
+    );
+    _showRatingDialog(context);
   }
 
   bool _requiresOnlinePayment() {
@@ -194,12 +269,19 @@ class _PassengerPaymentScreenState extends State<PassengerPaymentScreen> {
     setState(() => _isProcessingPayment = true);
 
     try {
-      if (_requiresOnlinePayment()) {
+      if (_isCard) {
+        await _payByCard(context);
+      } else if (_requiresOnlinePayment()) {
         // CARD / WALLET: call API → get Stripe Checkout URL → open in browser
         final result = await _callPayRideFareApi(context);
         // A failed request has already shown the server's reason.
         if (!result.ok) return;
         final checkoutUrl = result.url;
+        // Wallet fares are paid by the request itself; there is no page to open.
+        if (widget.paymentMethod.toUpperCase() == 'WALLET') {
+          _onPaymentConfirmed();
+          return;
+        }
         if (checkoutUrl == null || checkoutUrl.isEmpty) {
           // The request succeeded but carried no checkout URL. Staying silent
           // here is what made this look like "the button does nothing" — say
@@ -239,6 +321,46 @@ class _PassengerPaymentScreenState extends State<PassengerPaymentScreen> {
       if (mounted) {
         setState(() => _isProcessingPayment = false);
       }
+    }
+  }
+
+  /// Card fare in the app: the server charges the default saved card, or
+  /// hands back a payment sheet when there is none or the bank asks the rider
+  /// to confirm. The ride is marked paid by the server, never by the app.
+  Future<void> _payByCard(BuildContext context) async {
+    final response = await ApiClient().postRequest(
+      ApiUrls.payRideFare(widget.rideId),
+      body: {'flow': 'in_app'},
+    );
+    if (!mounted) return;
+    if (!response.isSuccess) {
+      AppSnackbar.error(AppLocalization.tr.errorTitle, response.errorMessage);
+      return;
+    }
+    final data = response.responseData['data'];
+    final status = data is Map ? data['status'] : null;
+    if (status == 'processing') {
+      _waitForCardPayment(AppLocalization.tr.chargingSavedCardMessage);
+      return;
+    }
+    final clientSecret = data is Map ? data['clientSecret'] as String? : null;
+    if (status != 'requires_payment' || clientSecret == null) {
+      _logger.e('pay-ride-fare returned an unexpected card response: $data');
+      AppSnackbar.error(AppLocalization.tr.errorTitle, AppLocalization.tr.genericErrorMessage);
+      return;
+    }
+    if (!context.mounted) return;
+    final result = await _stripeHelper.processPayment(
+      context: context,
+      clientSecret: clientSecret,
+      customerId: data['customerId'] as String?,
+      ephemeralKey: data['ephemeralKey'] as String?,
+      showSuccessDialog: false,
+    );
+    if (result.isSuccess && mounted) {
+      _waitForCardPayment(AppLocalization.tr.confirmingPaymentMessage);
+      // A card added in the sheet may now be the rider's default.
+      _loadDefaultCard();
     }
   }
 
@@ -383,14 +505,34 @@ class _PassengerPaymentScreenState extends State<PassengerPaymentScreen> {
               ),
             ),
           ),
+          if (_isCard && _cardsLoaded) _buildCardRow(),
         ],
       ),
       bottomNavigationBar: BottomAppBar(
         child: CustomButton(
-          onPressed: _isProcessingPayment
+          onPressed: _isProcessingPayment || _cardStatusMessage != null
               ? null
               : () => _handleConfirmPayment(context),
-          title: _isProcessingPayment
+          title: _cardStatusMessage != null
+              ? Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(
+                      width: 18.w,
+                      height: 18.w,
+                      child: CircularProgressIndicator(color: AppColors.white, strokeWidth: 2),
+                    ),
+                    SizedBox(width: 10.w),
+                    Flexible(
+                      child: Text(
+                        _cardStatusMessage!,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(color: AppColors.white),
+                      ),
+                    ),
+                  ],
+                )
+              : _isProcessingPayment
               ? SizedBox(
                   width: 20.w,
                   height: 20.h,
@@ -405,6 +547,33 @@ class _PassengerPaymentScreenState extends State<PassengerPaymentScreen> {
                 ),
         ),
       ),
+      ),
+    );
+  }
+
+  Widget _buildCardRow() {
+    final card = _defaultCard;
+    return Container(
+      color: AppColors.white,
+      width: double.infinity,
+      padding: EdgeInsets.fromLTRB(12.w, 0, 4.w, 8.h),
+      child: Row(
+        children: [
+          Icon(Icons.credit_card, size: 20.sp, color: AppColors.appGreyColor),
+          SizedBox(width: 8.w),
+          Expanded(
+            child: Text(
+              card != null
+                  ? AppLocalization.tr.payWithCardLabel('${card.brandName} ${card.maskedNumber}')
+                  : AppLocalization.tr.noSavedCardHint,
+              style: TextStyle(fontSize: 14.sp, color: AppColors.appGreyColor),
+            ),
+          ),
+          TextButton(
+            onPressed: _cardStatusMessage != null ? null : _openPaymentMethods,
+            child: Text(AppLocalization.tr.manageCardsAction),
+          ),
+        ],
       ),
     );
   }

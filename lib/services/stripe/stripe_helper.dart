@@ -35,13 +35,19 @@ class StripePaymentHelper {
   Future<void> _initializePaymentSheet(Map<String, dynamic> paymentData) async {
     try {
       final clientSecret = paymentData['client_secret'];
-      if (clientSecret == null) {
+      final setupClientSecret = paymentData['setup_client_secret'];
+      if (clientSecret == null && setupClientSecret == null) {
         throw StripePaymentException('Missing client_secret in payment data');
       }
 
       await Stripe.instance.initPaymentSheet(
         paymentSheetParameters: SetupPaymentSheetParameters(
           paymentIntentClientSecret: clientSecret,
+          setupIntentClientSecret: setupClientSecret,
+          // With a customer the sheet lists the rider's saved cards and can
+          // save a new one.
+          customerId: paymentData['customer_id'],
+          customerEphemeralKeySecret: paymentData['ephemeral_key'],
           merchantDisplayName: _config.merchantDisplayName,
           style: _config.paymentSheetTheme,
           allowsDelayedPaymentMethods: _config.allowsDelayedPaymentMethods,
@@ -77,6 +83,12 @@ class StripePaymentHelper {
       return result;
     } on StripeException catch (e) {
       _log('Stripe error during payment: ${e.error}');
+
+      // Closing the sheet is a choice, not an error.
+      if (e.error.code == FailureCode.Canceled) {
+        _currentPaymentData = null;
+        return PaymentResult.cancelled();
+      }
 
       final result = PaymentResult.failure(
         message: e.error.localizedMessage ?? AppLocalization.tr.paymentFailedMessage,
@@ -152,20 +164,52 @@ class StripePaymentHelper {
   /// [context] - BuildContext for showing dialogs
   /// [clientSecret] - PaymentIntent client secret created by our server
   /// [showSuccessDialog] - Whether to show success dialog (default: true)
+  /// [customerId] and [ephemeralKey] - when given, the sheet offers the
+  /// rider's saved cards
   Future<PaymentResult> processPayment({
     required BuildContext context,
     required String clientSecret,
+    String? customerId,
+    String? ephemeralKey,
     bool showSuccessDialog = true,
+  }) {
+    return _run(context, {
+      'client_secret': clientSecret,
+      'customer_id': customerId,
+      'ephemeral_key': ephemeralKey,
+    }, showSuccessDialog: showSuccessDialog);
+  }
+
+  /// Saves a card without charging it, by confirming a SetupIntent from our
+  /// server. Stripe keeps the card; the app only ever sees its last digits.
+  Future<PaymentResult> saveCard({
+    required BuildContext context,
+    required String setupIntentClientSecret,
+    required String customerId,
+    required String ephemeralKey,
+  }) {
+    return _run(context, {
+      'setup_client_secret': setupIntentClientSecret,
+      'customer_id': customerId,
+      'ephemeral_key': ephemeralKey,
+    }, showSuccessDialog: false);
+  }
+
+  Future<PaymentResult> _run(
+    BuildContext context,
+    Map<String, dynamic> paymentData, {
+    required bool showSuccessDialog,
   }) async {
     try {
-      if (clientSecret.isEmpty) {
+      final secret = paymentData['client_secret'] ?? paymentData['setup_client_secret'];
+      if (secret == null || (secret as String).isEmpty) {
         throw StripePaymentException('Missing client_secret in payment data');
       }
 
       _log('Starting payment process');
 
       // Step 1: Initialize payment sheet with the server-created intent
-      _currentPaymentData = {'client_secret': clientSecret};
+      _currentPaymentData = paymentData;
       await _initializePaymentSheet(_currentPaymentData!);
 
       // Step 2: Present payment sheet and handle result

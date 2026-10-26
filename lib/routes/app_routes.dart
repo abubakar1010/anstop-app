@@ -105,6 +105,8 @@ import 'package:ride_sharing/feature/passenger/trip_details/view/ongoing_trip_de
 import 'package:ride_sharing/feature/passenger/wallet/binding/passenger_wallet_binding.dart';
 import 'package:ride_sharing/feature/passenger/wallet/view/passenger_wallet_page.dart';
 
+import 'package:ride_sharing/feature/payment_methods/binding/payment_methods_binding.dart';
+import 'package:ride_sharing/feature/payment_methods/view/payment_methods_screen.dart';
 import '../widgets/auth_links/auth_link.dart';
 
 abstract class AppRoutes {
@@ -146,6 +148,7 @@ abstract class AppRoutes {
   static const String passengerCompletedTripScreen = '/passengerCompletedTripScreen';
   static const String passengerPaymentScreen = '/passengerPaymentScreen';
   static const String passengerWalletScreen = '/passengerWalletScreen';
+  static const String paymentMethodsScreen = '/paymentMethodsScreen';
 
   /// =========== Driver Home & Trips ===========
   static const String driverHomeScreen = '/driverHomeScreen';
@@ -381,6 +384,11 @@ abstract class AppRoutes {
       name: notificationScreen,
       page: () => NotificationScreen(),
       binding: NotificationBinding(),
+    ),
+    GetPage(
+      name: paymentMethodsScreen,
+      page: () => const PaymentMethodsScreen(),
+      binding: PaymentMethodsBinding(),
     ),
     GetPage(
       name: settingsScreen,

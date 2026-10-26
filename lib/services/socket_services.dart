@@ -405,6 +405,19 @@ class SocketIoService extends GetxService {
     _socket?.off('payment-confirmed');
   }
 
+  /// A card payment the server tried for the rider was declined.
+  void onPaymentFailed(Function(dynamic) handler) {
+    if (_socket == null) {
+      _logger.e('Cannot register payment-failed listener - socket is null!');
+      return;
+    }
+    _socket!.on('payment-failed', (data) => handler(data));
+  }
+
+  void offPaymentFailed() {
+    _socket?.off('payment-failed');
+  }
+
   void onRideUnavailable(Function(dynamic) handler) {
     if (_socket == null) {
       _logger.e('Cannot register ride-unavailable listener - socket is null!');

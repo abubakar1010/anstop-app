@@ -96,6 +96,14 @@ class PassengerCustomDrawer extends StatelessWidget {
                       ),
                     ),
                     _drawerItem(
+                      icon: Icons.credit_card_outlined,
+                      text: AppLocalization.tr.paymentMethodsTitle,
+                      onTap: () => _closeDrawerThen(
+                        context,
+                        () => Get.toNamed(AppRoutes.paymentMethodsScreen),
+                      ),
+                    ),
+                    _drawerItem(
                       imagePath: AppImage.support,
                       text: AppLocalization.tr.supportMenuItem,
                       onTap: () => _closeDrawerThen(
@@ -245,17 +253,20 @@ class PassengerCustomDrawer extends StatelessWidget {
   }
 
   Widget _drawerItem({
-    required String imagePath,   // 🔥 changed
+    String? imagePath,   // 🔥 changed
+    IconData? icon,      // for items without an image asset
     required String text,
     required VoidCallback onTap,
   }) {
     return ListTile(
-      leading: Image.asset(
-        imagePath,
-        width: 24.w,       // adjust size as needed
-        height: 24.h,
-        fit: BoxFit.contain,
-      ),
+      leading: imagePath != null
+          ? Image.asset(
+              imagePath,
+              width: 24.w,       // adjust size as needed
+              height: 24.h,
+              fit: BoxFit.contain,
+            )
+          : Icon(icon, size: 24.w, color: Colors.black87),
       title: Text(
         text,
         style: TextStyle(fontSize: 15.sp),

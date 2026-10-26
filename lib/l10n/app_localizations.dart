@@ -3505,6 +3505,138 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Minimum withdrawal is {amount}'**
   String withdrawalMinimumError(String amount);
+
+  /// No description provided for @paymentMethodsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment methods'**
+  String get paymentMethodsTitle;
+
+  /// No description provided for @addCardButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a card'**
+  String get addCardButton;
+
+  /// No description provided for @defaultCardLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Default'**
+  String get defaultCardLabel;
+
+  /// No description provided for @setAsDefaultAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Set as default'**
+  String get setAsDefaultAction;
+
+  /// No description provided for @removeCardAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove card'**
+  String get removeCardAction;
+
+  /// No description provided for @removeCardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove this card?'**
+  String get removeCardTitle;
+
+  /// No description provided for @removeCardMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'{card} will no longer be available for your payments.'**
+  String removeCardMessage(String card);
+
+  /// No description provided for @noSavedCardsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No saved cards'**
+  String get noSavedCardsTitle;
+
+  /// No description provided for @noSavedCardsMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a card to pay for your rides automatically when they end.'**
+  String get noSavedCardsMessage;
+
+  /// No description provided for @cardExpiresLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Expires {expiry}'**
+  String cardExpiresLabel(String expiry);
+
+  /// No description provided for @cardExpiredLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Expired'**
+  String get cardExpiredLabel;
+
+  /// No description provided for @cardAddedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your card has been saved.'**
+  String get cardAddedMessage;
+
+  /// No description provided for @cardRemovedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Card removed.'**
+  String get cardRemovedMessage;
+
+  /// No description provided for @defaultCardUpdatedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Default card updated.'**
+  String get defaultCardUpdatedMessage;
+
+  /// No description provided for @cardsSecureNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Card details are stored securely by Stripe. Anstop never sees your full card number.'**
+  String get cardsSecureNote;
+
+  /// No description provided for @defaultCardHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Your default card is charged automatically at the end of each card ride.'**
+  String get defaultCardHint;
+
+  /// No description provided for @chargingSavedCardMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Charging your saved card…'**
+  String get chargingSavedCardMessage;
+
+  /// No description provided for @confirmingPaymentMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirming your payment…'**
+  String get confirmingPaymentMessage;
+
+  /// No description provided for @payWithCardLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay with {card}'**
+  String payWithCardLabel(String card);
+
+  /// No description provided for @noSavedCardHint.
+  ///
+  /// In en, this message translates to:
+  /// **'No saved card: you\'ll enter one when you pay.'**
+  String get noSavedCardHint;
+
+  /// No description provided for @manageCardsAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage'**
+  String get manageCardsAction;
+
+  /// No description provided for @cardPaymentFailedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your card payment failed. Please try another card.'**
+  String get cardPaymentFailedMessage;
 }
 
 class _AppLocalizationsDelegate
