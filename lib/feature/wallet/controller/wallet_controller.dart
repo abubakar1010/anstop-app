@@ -12,6 +12,7 @@ import 'package:ride_sharing/services/stripe/stripe_config.dart';
 import '../../../services/api_client.dart';
 import 'package:ride_sharing/l10n/l10n_helper.dart';
 import 'package:ride_sharing/app/utils/app_snackbar.dart';
+import 'package:ride_sharing/app/helpers/price_format.dart';
 
 class WalletController extends GetxController {
   // ==================== Services ====================
@@ -69,7 +70,7 @@ class WalletController extends GetxController {
       isLoading.value = true;
       errorMessage.value = '';
 
-      final amount = double.tryParse(amountTEController.text.trim()) ?? 0;
+      final amount = parseAmount(amountTEController.text) ?? 0;
       if (amount <= 0) {
         errorMessage.value = AppLocalization.tr.invalidAmountError;
         return;
@@ -160,7 +161,7 @@ class WalletController extends GetxController {
     if (value == null || value.isEmpty) {
       return AppLocalization.tr.amountRequiredError;
     }
-    final amount = double.tryParse(value);
+    final amount = parseAmount(value);
     if (amount == null || amount <= 0) {
       return AppLocalization.tr.invalidAmountError;
     }

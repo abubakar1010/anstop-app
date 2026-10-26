@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:ride_sharing/app/utils/app_colors.dart';
 import 'package:ride_sharing/l10n/l10n_helper.dart';
+import 'package:ride_sharing/app/helpers/price_format.dart';
+import 'package:flutter/services.dart';
 
 class WithdrawalFormDialog extends StatefulWidget {
   final Function(int amount, String bankName, String accountNumber) onSubmit;
@@ -18,6 +20,9 @@ class WithdrawalFormDialog extends StatefulWidget {
 }
 
 class _WithdrawalFormDialogState extends State<WithdrawalFormDialog> {
+  /// Matches the server's minimum for a withdrawal request, in euros.
+  static const int _minimumWithdrawal = 100;
+
   final _formKey = GlobalKey<FormState>();
   final _amountController = TextEditingController();
   final _bankNameController = TextEditingController();
@@ -72,7 +77,9 @@ class _WithdrawalFormDialogState extends State<WithdrawalFormDialog> {
               SizedBox(height: 8.h),
               TextFormField(
                 controller: _amountController,
+                // Withdrawals are in whole euros.
                 keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 decoration: InputDecoration(
                   hintText: AppLocalization.tr.enterAmountHint,
                   prefixText: '€ ',
@@ -93,6 +100,11 @@ class _WithdrawalFormDialogState extends State<WithdrawalFormDialog> {
                   final amount = int.tryParse(value);
                   if (amount == null || amount <= 0) {
                     return AppLocalization.tr.invalidAmountError;
+                  }
+                  if (amount < _minimumWithdrawal) {
+                    return AppLocalization.tr.withdrawalMinimumError(
+                      formatPrice(_minimumWithdrawal, decimals: 0),
+                    );
                   }
                   return null;
                 },

@@ -634,5 +634,7 @@
   "onlineStatus": "Online",
   "noNotificationsTitle": "No notifications yet",
   "noNotificationsMessage": "Updates about your rides and wallet will appear here.",
-  "tripIdCopiedMessage": "Trip ID copied"
+  "tripIdCopiedMessage": "Trip ID copied",
+  "withdrawalMinimumError": "Minimum withdrawal is {amount}",
+  "@withdrawalMinimumError": {"placeholders": {"amount": {"type": "String"}}}
 }

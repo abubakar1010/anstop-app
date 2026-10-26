@@ -3499,6 +3499,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Trip ID copied'**
   String get tripIdCopiedMessage;
+
+  /// No description provided for @withdrawalMinimumError.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimum withdrawal is {amount}'**
+  String withdrawalMinimumError(String amount);
 }
 
 class _AppLocalizationsDelegate

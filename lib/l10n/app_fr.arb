@@ -628,5 +628,6 @@
   "onlineStatus": "En ligne",
   "noNotificationsTitle": "Aucune notification",
   "noNotificationsMessage": "Les mises à jour de vos courses et de votre portefeuille apparaîtront ici.",
-  "tripIdCopiedMessage": "Identifiant de la course copié"
+  "tripIdCopiedMessage": "Identifiant de la course copié",
+  "withdrawalMinimumError": "Le retrait minimum est de {amount}"
 }

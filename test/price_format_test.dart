@@ -27,4 +27,18 @@ void main() {
     expect(formatPrice(null), '');
     expect(formatPrice('abc'), '');
   });
+
+  test('parses amounts typed with a comma or a dot', () {
+    expect(parseAmount('12,50'), 12.5);
+    expect(parseAmount('12.50'), 12.5);
+    expect(parseAmount(' 12,5 € '), 12.5);
+    expect(parseAmount('abc'), isNull);
+  });
+
+  test('amount placeholder follows the language', () {
+    Get.locale = const Locale('en');
+    expect(amountPlaceholder(), '0.00');
+    Get.locale = const Locale('fr');
+    expect(amountPlaceholder(), '0,00');
+  });
 }

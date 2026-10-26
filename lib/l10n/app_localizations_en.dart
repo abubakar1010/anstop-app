@@ -1811,4 +1811,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tripIdCopiedMessage => 'Trip ID copied';
+
+  @override
+  String withdrawalMinimumError(String amount) {
+    return 'Minimum withdrawal is $amount';
+  }
 }

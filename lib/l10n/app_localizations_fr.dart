@@ -1841,4 +1841,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get tripIdCopiedMessage => 'Identifiant de la course copié';
+
+  @override
+  String withdrawalMinimumError(String amount) {
+    return 'Le retrait minimum est de $amount';
+  }
 }

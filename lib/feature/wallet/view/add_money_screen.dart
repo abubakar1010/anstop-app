@@ -1,6 +1,7 @@
 import 'package:ride_sharing/feature/wallet/controller/wallet_controller.dart';
 import 'package:ride_sharing/widgets/auth_links/auth_link.dart';
 import 'package:ride_sharing/l10n/l10n_helper.dart';
+import 'package:ride_sharing/app/helpers/price_format.dart';
 
 class AddMoneyScreen extends StatelessWidget {
   const AddMoneyScreen({super.key});
@@ -49,7 +50,7 @@ class AddMoneyScreen extends StatelessWidget {
                     // Amount Input Field
                     TextFormField(
                       controller: controller.amountTEController,
-                      keyboardType: TextInputType.number,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
                       validator: controller.validateAmount,
                       style: TextStyle(
                         fontSize: 24.sp,
@@ -71,7 +72,7 @@ class AddMoneyScreen extends StatelessWidget {
                           minWidth: 0,
                           minHeight: 0,
                         ),
-                        hintText: '0.00',
+                        hintText: amountPlaceholder(),
                         hintStyle: TextStyle(
                           fontSize: 24.sp,
                           fontWeight: FontWeight.w600,
