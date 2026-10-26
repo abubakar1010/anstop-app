@@ -27,6 +27,7 @@ class _FindNearbyCarsBottomSheetState extends State<FindNearbyCarsBottomSheet> {
         showModalBottomSheet(
           context: context,
           isScrollControlled: true,
+          useSafeArea: true,
           isDismissible: false, // Prevent dismissing by tapping outside
           enableDrag: false, // Prevent dismissing by dragging
           builder: (BuildContext context) {
@@ -220,6 +221,7 @@ class _FindNearbyCarsBottomSheetState extends State<FindNearbyCarsBottomSheet> {
                     showModalBottomSheet(
                       context: context,
                       isScrollControlled: true,
+                      useSafeArea: true,
                       builder: (BuildContext context) {
                         return BookingCarsBottomSheet(rideId: '');
                       },

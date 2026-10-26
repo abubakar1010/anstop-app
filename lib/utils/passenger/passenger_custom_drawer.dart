@@ -24,6 +24,8 @@ class PassengerCustomDrawer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Drawer(
       backgroundColor: AppColors.drawerShade,
+      child: SafeArea(
+      // Keeps the menu clear of the status bar and home indicator.
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -143,6 +145,7 @@ class PassengerCustomDrawer extends StatelessWidget {
             ),
           )
         ],
+      ),
       ),
     );
   }

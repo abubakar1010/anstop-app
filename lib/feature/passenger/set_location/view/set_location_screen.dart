@@ -58,7 +58,8 @@ class SetLocationScreen extends StatelessWidget {
 
               // Back button
               Positioned(
-                top: 40,
+                // Below the status bar / Dynamic Island on every device.
+                top: MediaQuery.paddingOf(context).top + 8,
                 left: 16,
                 child: Container(
                   width: 50,
