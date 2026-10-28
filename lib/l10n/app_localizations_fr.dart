@@ -1574,6 +1574,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get driverLabel => 'Chauffeur';
 
   @override
+  String get passengerLabel => 'Passager';
+
+  @override
   String get saveChangesButton => 'Enregistrer les modifications';
 
   @override
@@ -1648,6 +1651,30 @@ class AppLocalizationsFr extends AppLocalizations {
   String get cancelReasonOther => 'Autre';
 
   @override
+  String get cancelReasonRiderNoShow => 'Le passager ne s\'est pas présenté';
+
+  @override
+  String get cancelReasonRiderRequested =>
+      'Le passager m\'a demandé d\'annuler';
+
+  @override
+  String get cancelReasonVehicleProblem => 'Problème avec mon véhicule';
+
+  @override
+  String get cancellationReasonRequiredError =>
+      'Veuillez choisir au moins une raison';
+
+  @override
+  String get cancellationOtherRequiredError => 'Veuillez préciser la raison';
+
+  @override
+  String get rideCannotBeCancelledMessage =>
+      'Cette course ne peut plus être annulée';
+
+  @override
+  String get rideCancelledMessage => 'La course a été annulée';
+
+  @override
   String get fareCalculationFailedMessage =>
       'Impossible de calculer le tarif. Veuillez réessayer.';
 
@@ -1710,6 +1737,31 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get walletWithdrawalLabel => 'Retrait portefeuille';
+
+  @override
+  String get loadOlderTransactionsButton =>
+      'Charger les transactions plus anciennes';
+
+  @override
+  String get rideEarningLabel => 'Gains de course';
+
+  @override
+  String get ridePaidFromWalletLabel => 'Course payée avec le portefeuille';
+
+  @override
+  String get ridePaidByCardLabel => 'Course payée par carte';
+
+  @override
+  String get tipReceivedLabel => 'Pourboire reçu';
+
+  @override
+  String get tipPaidLabel => 'Pourboire';
+
+  @override
+  String get refundLabel => 'Remboursement';
+
+  @override
+  String get withdrawalToBankLabel => 'Retrait vers la banque';
 
   @override
   String get enterBankNameError => 'Veuillez saisir le nom de la banque';
@@ -1836,6 +1888,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get noNotificationsTitle => 'Aucune notification';
 
   @override
+  String get markAllAsReadButton => 'Tout marquer comme lu';
+
+  @override
   String get noNotificationsMessage =>
       'Les mises à jour de vos courses et de votre portefeuille apparaîtront ici.';
 
@@ -1845,6 +1900,16 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String withdrawalMinimumError(String amount) {
     return 'Le retrait minimum est de $amount';
+  }
+
+  @override
+  String depositMinimumError(String amount) {
+    return 'Le dépôt minimum est de $amount';
+  }
+
+  @override
+  String depositMaximumError(String amount) {
+    return 'Le dépôt maximum est de $amount';
   }
 
   @override

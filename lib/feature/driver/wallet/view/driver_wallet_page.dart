@@ -161,21 +161,35 @@ class _DriverWalletPageState extends State<DriverWalletPage> {
                       );
                     }
 
+                    final hasMore = _walletController.hasMoreTransactions.value;
                     return ListView.separated(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
-                      itemCount: _walletController.transactions.length,
+                      // One extra row for the "load older" button.
+                      itemCount: _walletController.transactions.length + (hasMore ? 1 : 0),
                       separatorBuilder: (_, __) => const SizedBox(height: 12),
                       itemBuilder: (context, index) {
+                        if (index == _walletController.transactions.length) {
+                          return Center(
+                            child: _walletController.isLoadingMoreTransactions.value
+                                ? const Padding(
+                                    padding: EdgeInsets.all(8),
+                                    child: CircularProgressIndicator(),
+                                  )
+                                : TextButton(
+                                    onPressed: _walletController.loadMoreTransactions,
+                                    child: Text(AppLocalization.tr.loadOlderTransactionsButton),
+                                  ),
+                          );
+                        }
                         final tx = _walletController.transactions[index];
+                        final view = tx.viewFor(_walletController.currentUserId.value);
 
                         return TransactionItem(
-                          title: tx.type == 'DEPOSIT'
-                              ? AppLocalization.tr.walletDepositLabel
-                              : AppLocalization.tr.walletWithdrawalLabel,
+                          title: view.title,
                           time: _formatTransactionTime(tx.createdAt),
-                          amount: tx.amount.toStringAsFixed(2),
-                          isPositive: tx.type == 'DEPOSIT',
+                          amount: view.amount.toStringAsFixed(2),
+                          isPositive: view.isPositive,
                         );
                       },
                     );

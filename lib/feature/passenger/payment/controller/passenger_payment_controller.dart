@@ -29,7 +29,7 @@ class PassengerPaymentController extends GetxController {
   void _loadPaymentInfo() {
     // Get amount from arguments if passed
     if (Get.arguments != null && Get.arguments is Map) {
-      amount.value = Get.arguments['amount'] ?? 0.0;
+      amount.value = (Get.arguments['amount'] as num? ?? 0).toDouble();
     }
   }
 
