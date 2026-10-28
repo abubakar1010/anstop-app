@@ -18,62 +18,86 @@ class GetTripDetailsModel {
   }
 }
 
+/// One ride from `GET /rides/:id`. Used by both roles: the rider looks at
+/// [driverId], the driver at [riderId].
 class TripDetailsData {
   final String id;
-  final DriverInfo driverId;
+  final TripUserInfo driverId;
+  final TripUserInfo riderId;
   final LocationInfo pickup;
   final LocationInfo destination;
   final String distance;
   final double fare;
+  final String status;
+  final String paymentMethod;
   final DateTime createdAt;
 
   TripDetailsData({
     required this.id,
     required this.driverId,
+    required this.riderId,
     required this.pickup,
     required this.destination,
     required this.distance,
     required this.fare,
+    required this.status,
+    required this.paymentMethod,
     required this.createdAt,
   });
 
   factory TripDetailsData.fromJson(Map<String, dynamic> json) {
     return TripDetailsData(
       id: json['_id'] ?? '',
-      driverId: DriverInfo.fromJson(json['driverId'] ?? {}),
-      pickup: LocationInfo.fromJson(json['pickup'] ?? {}),
+      driverId: TripUserInfo.fromJson(json['driverId']),
+      riderId: TripUserInfo.fromJson(json['riderId']),
+      // The server's field is "pickUp"; "pickup" is kept for older payloads.
+      pickup: LocationInfo.fromJson(json['pickUp'] ?? json['pickup'] ?? {}),
       destination: LocationInfo.fromJson(json['destination'] ?? {}),
-      distance: json['distance'] ?? '',
+      distance: '${json['distance'] ?? ''}',
       fare: (json['fare'] as num?)?.toDouble() ?? 0.0,
-      createdAt: DateTime.parse(json['createdAt'] ?? DateTime.now().toIso8601String()),
+      status: json['status'] ?? '',
+      paymentMethod: json['paymentMethod'] ?? '',
+      createdAt: DateTime.tryParse(json['createdAt'] ?? '')?.toLocal() ?? DateTime.now(),
     );
   }
 }
 
-class DriverInfo {
+/// The rider or driver of a ride, as populated by the server.
+class TripUserInfo {
   final String id;
   final String name;
   final String? profilePicture;
+  final double rating;
+  final int totalRides;
 
-  DriverInfo({
+  TripUserInfo({
     required this.id,
     required this.name,
     this.profilePicture,
+    this.rating = 0,
+    this.totalRides = 0,
   });
 
-  factory DriverInfo.fromJson(Map<String, dynamic> json) {
+  /// Accepts a populated user, a bare id string, or null (no driver yet).
+  factory TripUserInfo.fromJson(dynamic json) {
+    if (json is! Map<String, dynamic>) {
+      return TripUserInfo(id: json is String ? json : '', name: '');
+    }
     final first = json['firstName'] ?? json['name'] ?? '';
     final last = json['lastName'] ?? '';
-    return DriverInfo(
+    return TripUserInfo(
       id: json['_id'] ?? '',
       name: '$first $last'.trim(),
       profilePicture: json['profilePicture'],
+      rating: (json['rating'] as num?)?.toDouble() ?? 0,
+      totalRides: (json['totalRides'] as num?)?.toInt() ?? 0,
     );
   }
 }
 
 class LocationInfo {
   final String name;
+  /// GeoJSON order: [longitude, latitude].
   final List<double> coordinates;
   final String id;
 
@@ -82,6 +106,10 @@ class LocationInfo {
     required this.coordinates,
     required this.id,
   });
+
+  bool get hasPosition => coordinates.length == 2;
+  double get latitude => coordinates[1];
+  double get longitude => coordinates[0];
 
   factory LocationInfo.fromJson(Map<String, dynamic> json) {
     return LocationInfo(

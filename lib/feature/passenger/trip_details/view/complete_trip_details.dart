@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:ride_sharing/custom_assets/app_image.dart';
 import 'package:ride_sharing/feature/passenger/trip_details/controller/completed_trip_controller.dart';
 import 'package:ride_sharing/utils/user_info_section.dart';
+import 'package:ride_sharing/widgets/trip_route_map.dart';
 import 'package:ride_sharing/widgets/auth_links/auth_link.dart';
 import 'package:ride_sharing/widgets/custom_vertical_line.dart';
 import 'package:intl/intl.dart';
@@ -15,7 +16,11 @@ import 'package:ride_sharing/app/helpers/price_format.dart';
 class CompletedTripDetails extends StatefulWidget {
   final String rideId;
 
-  const CompletedTripDetails({super.key, required this.rideId});
+  /// True when the driver opens the trip: the screen then shows the rider
+  /// instead of the driver.
+  final bool asDriver;
+
+  const CompletedTripDetails({super.key, required this.rideId, this.asDriver = false});
 
   @override
   State<CompletedTripDetails> createState() => _CompletedTripDetailsState();
@@ -73,6 +78,8 @@ class _CompletedTripDetailsState extends State<CompletedTripDetails> {
         }
 
         final trip = controller.trip.value!;
+        final otherPerson = widget.asDriver ? trip.riderId : trip.driverId;
+        final otherRole = widget.asDriver ? AppLocalization.tr.passengerLabel : AppLocalization.tr.driverLabel;
         final formattedDate = DateFormat.yMMMd().format(trip.createdAt);
         final formattedTime = DateFormat.jm().format(trip.createdAt);
 
@@ -82,20 +89,7 @@ class _CompletedTripDetailsState extends State<CompletedTripDetails> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                ///Map image container
-                Card(
-                  elevation: 2,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: Image.network(
-                      "https://media.wired.com/photos/59269cd37034dc5f91bec0f1/191:100/w_1280,c_limit/GoogleMapTA.jpg",
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Center(child: Text(AppLocalization.tr.mapImageNotAvailable));
-                      },
-                    ),
-                  ),
-                ),
+                TripRouteMap(pickup: trip.pickup, destination: trip.destination),
 
                 SizedBox(height: 2.h),
                 Card(
@@ -109,8 +103,8 @@ class _CompletedTripDetailsState extends State<CompletedTripDetails> {
                         children: [
                           Row(
                             children: [
-                              Text(trip.driverId.name, style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),),
-                              Spacer(),
+                              Expanded(child: Text(otherPerson.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),)),
+                              SizedBox(width: 8.w),
                               Text(formattedDate, style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),),
                             ],
                           ),
@@ -163,7 +157,7 @@ class _CompletedTripDetailsState extends State<CompletedTripDetails> {
                             ),
                             ),
                             SizedBox(width: 5.sp,),
-                            Text(trip.distance),
+                            Text('${trip.distance} km'),
                           ],),
                         SizedBox(height: 8.h,),
                       ],
@@ -196,13 +190,13 @@ class _CompletedTripDetailsState extends State<CompletedTripDetails> {
                     child: Column(
                       children: [
                         UserInfoSection(
-                          imageUrl: trip.driverId.profilePicture ?? AppImage.defaultProfileImageUrl,
-                          name: trip.driverId.name,
-                          rating: 4.5,
-                          trips: 0,
-                          profession: AppLocalization.tr.driverLabel,
+                          imageUrl: (otherPerson.profilePicture?.isNotEmpty ?? false) ? otherPerson.profilePicture! : AppImage.defaultProfileImageUrl,
+                          name: otherPerson.name,
+                          rating: otherPerson.rating,
+                          trips: otherPerson.totalRides,
+                          profession: otherRole,
                           price: formatPrice(trip.fare),
-                          distance: trip.distance,
+                          distance: '${trip.distance} km',
                         ),
                       ],
                     ),

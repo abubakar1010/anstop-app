@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:ride_sharing/feature/passenger/car_booking/passenger/cancel_taxi.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:ride_sharing/feature/passenger/trip_details/data/get_trip_details_model.dart';
 import 'package:ride_sharing/feature/passenger/trip_details/service/trip_details_service.dart';
@@ -79,23 +80,25 @@ class OngoingTripController extends GetxController {
     // This should update driverLocation and eta
   }
 
-  Future<void> cancelTrip() async {
-    try {
-      isLoading.value = true;
+  /// Whether the server would still accept a cancellation from this side:
+  /// a rider until pick-up, a driver only once accepted.
+  bool canCancel({required bool asDriver}) {
+    final status = trip.value?.status;
+    return asDriver ? status == 'ACCEPTED' : (status == 'PENDING' || status == 'ACCEPTED');
+  }
 
-      // Navigate to cancellation screen
-      // final result = await Get.toNamed(AppRoutes.cancelTaxiScreen);
-
-      // if (result == true) {
-      //   Get.back();
-      // }
-
-    } catch (e) {
-      debugPrint('ongoing_trip_controller: $e');
-      errorMessage.value = AppLocalization.tr.genericErrorMessage;
-    } finally {
-      isLoading.value = false;
-    }
+  /// Asks for a reason, cancels the ride, then leaves the trip screen.
+  Future<void> cancelTrip({required bool asDriver}) async {
+    final cancelled = await Get.to<bool>(
+      () => CancelTaxiScreen(rideId: rideId, asDriver: asDriver),
+    );
+    if (cancelled != true) return;
+    Get.back();
+    AppSnackbar.snackbar(
+      AppLocalization.tr.successTitle,
+      AppLocalization.tr.rideCancelledMessage,
+      snackPosition: SnackPosition.BOTTOM,
+    );
   }
 
   void contactDriver() {
