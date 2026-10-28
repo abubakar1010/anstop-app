@@ -8,6 +8,7 @@ class NotificationModel {
   /// Free-form hint from the server (e.g. "payment", "wallet"); picks the icon.
   final String iconKey;
   final DateTime dateTime;
+  final bool isRead;
 
   NotificationModel({
     required this.id,
@@ -15,7 +16,17 @@ class NotificationModel {
     required this.description,
     required this.iconKey,
     required this.dateTime,
+    this.isRead = false,
   });
+
+  NotificationModel copyWith({bool? isRead}) => NotificationModel(
+        id: id,
+        title: title,
+        description: description,
+        iconKey: iconKey,
+        dateTime: dateTime,
+        isRead: isRead ?? this.isRead,
+      );
 
   factory NotificationModel.fromJson(Map<String, dynamic> json) {
     return NotificationModel(
@@ -26,6 +37,7 @@ class NotificationModel {
       dateTime:
           DateTime.tryParse((json['createdAt'] ?? '').toString())?.toLocal() ??
           DateTime.now(),
+      isRead: json['isRead'] == true,
     );
   }
 
@@ -41,6 +53,7 @@ class NotificationModel {
     if (iconKey.contains('ride') || iconKey.contains('car')) {
       return Icons.directions_car_outlined;
     }
+    if (iconKey.contains('account')) return Icons.verified_user_outlined;
     return Icons.notifications_none;
   }
 }

@@ -1,3 +1,4 @@
+import 'package:ride_sharing/utils/drawer_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -15,14 +16,12 @@ class SupportListScreen extends GetView<SupportListController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: DrawerNavigation.openedFromDrawer(context) ? const ModeDrawer() : null,
       backgroundColor: const Color(0xFFF8FBFE),
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        leading: IconButton(
-          icon:  Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => loginController.navigateToHomeByRole()
-        ),
+        leading: const DrawerOrBackButton(),
         title: Text(
           AppLocalization.tr.supportTitle,
           style: const TextStyle(

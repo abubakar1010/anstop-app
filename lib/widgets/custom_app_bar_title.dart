@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../utils/passenger/passenger_custom_drawer.dart';
 import 'logo.dart';
+import 'unread_badge.dart';
 
 class CustomAppBarTitle extends StatelessWidget implements PreferredSizeWidget {
   final GlobalKey<ScaffoldState>? scaffoldKey; // 👈 now optional
@@ -52,7 +53,8 @@ class CustomAppBarTitle extends StatelessWidget implements PreferredSizeWidget {
       elevation: 0,
       centerTitle: centerTitle,
       leading: IconButton(
-        icon: const Icon(Icons.menu, color: Colors.black),
+        // The badge tells the user there is something new behind the menu.
+        icon: const WithUnreadBadge(child: Icon(Icons.menu, color: Colors.black)),
         onPressed: scaffoldKey != null
             ? () => scaffoldKey!.currentState?.openDrawer()
             : () => Scaffold.of(context).openDrawer(), // fallback to context

@@ -67,28 +67,32 @@ class UserInfoSection extends StatelessWidget {
           ),
           SizedBox(width: 12.sp),
 
-          // Inner Column for User Info
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                name, // User Name
-                style: TextStyle(
-                  fontSize: 18.sp,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
+          // Inner Column for User Info. Expanded so a long name is cut short
+          // instead of pushing the price off the screen.
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name, // User Name
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
                 ),
-              ),
 
-              UserInfoRow(
-                rating: rating,
-                trips: trips,
-                profession: profession,
-              ),
-            ],
+                UserInfoRow(
+                  rating: rating,
+                  trips: trips,
+                  profession: profession,
+                ),
+              ],
+            ),
           ),
-          Spacer(),
-
+          SizedBox(width: 8.w),
 
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,

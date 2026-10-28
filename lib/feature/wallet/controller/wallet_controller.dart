@@ -30,7 +30,20 @@ class WalletController extends GetxController {
 
   late StripePaymentHelper _stripeHelper;
   final transactions = <TransactionModel>[].obs;
-  final RxInt balance = 0.obs;
+  /// Who is looking: decides whether a ride reads as a cost or as earnings.
+  final RxString currentUserId = ''.obs;
+
+  /// Paging of the transaction list: the newest page loads first, older
+  /// ones on demand.
+  int _transactionsPage = 1;
+  final RxBool hasMoreTransactions = false.obs;
+  final RxBool isLoadingMoreTransactions = false.obs;
+  final RxDouble balance = 0.0.obs;
+
+  // Must match the server's STRIPE_MIN_DEPOSIT / STRIPE_MAX_DEPOSIT, so the
+  // user sees the limit before a request is made.
+  static const int minimumDeposit = 1;
+  static const int maximumDeposit = 1000;
 
   // ==================== Lifecycle ====================
   @override
@@ -167,19 +180,32 @@ class WalletController extends GetxController {
     if (amount == null || amount <= 0) {
       return AppLocalization.tr.invalidAmountError;
     }
+    if (amount < minimumDeposit) {
+      return AppLocalization.tr.depositMinimumError(formatPrice(minimumDeposit, decimals: 0));
+    }
+    if (amount > maximumDeposit) {
+      return AppLocalization.tr.depositMaximumError(formatPrice(maximumDeposit, decimals: 0));
+    }
     return null;
   }
 
   // ==================== Fetch Transactions ====================
+  /// Page 1 replaces the list (first load, refresh); later pages append.
   Future<void> getTransactions({int page = 1, int limit = 10}) async {
-
+    final isFirstPage = page == 1;
+    if (!isFirstPage && isLoadingMoreTransactions.value) return;
 
     try {
-      isLoading.value = true;
+      if (isFirstPage) {
+        isLoading.value = true;
+      } else {
+        isLoadingMoreTransactions.value = true;
+      }
       errorMessage.value = '';
 
       final prefs = await SharedPreferences.getInstance();
       final accessToken = await SessionController.to.accessToken() ?? '';
+      currentUserId.value = prefs.getString('userId') ?? '';
 
       if (accessToken.isEmpty) {
         final msg = AppLocalization.tr.sessionExpiredMessage;
@@ -201,9 +227,15 @@ class WalletController extends GetxController {
         limit: limit,
       );
 
-      transactions.assignAll(result);
+      if (isFirstPage) {
+        transactions.assignAll(result.results);
+      } else {
+        transactions.addAll(result.results);
+      }
+      _transactionsPage = page;
+      hasMoreTransactions.value = page < result.totalPages;
 
-      logger.i('✅ Transactions fetched: ${result.length}');
+      logger.i('✅ Transactions fetched: ${result.results.length} (page $page of ${result.totalPages})');
     } catch (e) {
       final msg = e.toString();
       errorMessage.value = msg;
@@ -219,8 +251,11 @@ class WalletController extends GetxController {
       );
     } finally {
       isLoading.value = false;
+      isLoadingMoreTransactions.value = false;
     }
   }
+
+  Future<void> loadMoreTransactions() => getTransactions(page: _transactionsPage + 1);
 
   Future<void> getBalance() async {
     try {
@@ -235,7 +270,7 @@ class WalletController extends GetxController {
       );
 
       if (response.isSuccess) {
-        balance.value = response.responseData['data']['balance'] ?? 0;
+        balance.value = (response.responseData['data']['balance'] as num? ?? 0).toDouble();
       } else {
         AppSnackbar.snackbar(
           AppLocalization.tr.errorTitle,

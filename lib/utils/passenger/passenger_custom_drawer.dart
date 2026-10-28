@@ -1,3 +1,5 @@
+import 'package:ride_sharing/utils/drawer_navigation.dart';
+import 'package:ride_sharing/widgets/unread_badge.dart';
 import 'package:ride_sharing/services/session_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -5,7 +7,6 @@ import 'package:get/get.dart';
 import 'package:ride_sharing/app/utils/app_colors.dart';
 import 'package:ride_sharing/custom_assets/app_image.dart';
 import 'package:ride_sharing/feature/driver/profile/controller/driver_profile_controller.dart';
-import 'package:ride_sharing/feature/settings/view/settings_screen.dart';
 import 'package:ride_sharing/routes/app_routes.dart';
 import 'package:ride_sharing/widgets/auth_links/auth_link.dart';
 import 'package:ride_sharing/feature/auth/service/auth_service.dart';
@@ -70,53 +71,69 @@ class PassengerCustomDrawer extends StatelessWidget {
                   padding: EdgeInsets.zero,
                   children: [
                     _drawerItem(
-                      imagePath: AppImage.notification,
-                      text: AppLocalization.tr.notificationMenuItem,
+                      icon: Icons.home_outlined,
+                      text: AppLocalization.tr.homeMenuItem,
+                      route: AppRoutes.passengerHomeScreen,
                       onTap: () => _closeDrawerThen(
                         context,
-                        () => Get.toNamed(AppRoutes.notificationScreen),
+                        () => DrawerNavigation.go(AppRoutes.passengerHomeScreen),
+                      ),
+                    ),
+                    _drawerItem(
+                      imagePath: AppImage.notification,
+                      text: AppLocalization.tr.notificationMenuItem,
+                      trailing: const UnreadBadge(),
+                      route: AppRoutes.notificationScreen,
+                      onTap: () => _closeDrawerThen(
+                        context,
+                        () => DrawerNavigation.go(AppRoutes.notificationScreen),
                       ),
                     ),
 
                     _drawerItem(
                       imagePath: AppImage.carDrawer,
                       text: AppLocalization.tr.myRideMenuItem,
+                      route: AppRoutes.passengerMyRideScreen,
                       onTap: () => _closeDrawerThen(
                         context,
-                        () => Get.toNamed(AppRoutes.passengerMyRideScreen),
+                        () => DrawerNavigation.go(AppRoutes.passengerMyRideScreen),
                       ),
                     ),
 
                     _drawerItem(
                       imagePath: AppImage.walletDrawer,
                       text: AppLocalization.tr.walletMenuItem,
+                      route: AppRoutes.passengerWalletScreen,
                       onTap: () => _closeDrawerThen(
                         context,
-                        () => Get.toNamed(AppRoutes.passengerWalletScreen),
+                        () => DrawerNavigation.go(AppRoutes.passengerWalletScreen),
                       ),
                     ),
                     _drawerItem(
                       icon: Icons.credit_card_outlined,
                       text: AppLocalization.tr.paymentMethodsTitle,
+                      route: AppRoutes.paymentMethodsScreen,
                       onTap: () => _closeDrawerThen(
                         context,
-                        () => Get.toNamed(AppRoutes.paymentMethodsScreen),
+                        () => DrawerNavigation.go(AppRoutes.paymentMethodsScreen),
                       ),
                     ),
                     _drawerItem(
                       imagePath: AppImage.support,
                       text: AppLocalization.tr.supportMenuItem,
+                      route: AppRoutes.supportListScreen,
                       onTap: () => _closeDrawerThen(
                         context,
-                        () => Get.toNamed(AppRoutes.supportListScreen),
+                        () => DrawerNavigation.go(AppRoutes.supportListScreen),
                       ),
                     ),
                     _drawerItem(
                       imagePath: AppImage.settings,
                       text: AppLocalization.tr.settingsMenuItem,
+                      route: AppRoutes.settingsScreen,
                       onTap: () => _closeDrawerThen(
                         context,
-                        () => Get.to(SettingsScreen()),
+                        () => DrawerNavigation.go(AppRoutes.settingsScreen),
                       ),
                      ),
                     _drawerItem(
@@ -230,7 +247,8 @@ class PassengerCustomDrawer extends StatelessWidget {
 
         if (isOnboarded) {
           // Driver is fully onboarded, go to driver home screen
-          Get.toNamed(AppRoutes.driverHomeScreen);
+          // Replaces the rider's pages: back must not return to rider mode.
+          Get.offAllNamed(AppRoutes.driverHomeScreen);
         } else {
           // Driver needs to complete onboarding
           Get.toNamed(AppRoutes.driverRegistrationScreen);
@@ -253,23 +271,36 @@ class PassengerCustomDrawer extends StatelessWidget {
   }
 
   Widget _drawerItem({
-    String? imagePath,   // 🔥 changed
+    String? imagePath,
     IconData? icon,      // for items without an image asset
     required String text,
     required VoidCallback onTap,
+    Widget? trailing,
+    /// The page this item opens; it is highlighted while that page is shown.
+    String? route,
   }) {
+    final selected = route != null && Get.currentRoute == route;
     return ListTile(
+      // Shows which page is open, like a standard navigation drawer.
+      selected: selected,
+      selectedTileColor: AppColors.primaryColor.withOpacity(0.08),
+      selectedColor: AppColors.primaryColor,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      trailing: trailing,
       leading: imagePath != null
           ? Image.asset(
               imagePath,
-              width: 24.w,       // adjust size as needed
+              width: 24.w,
               height: 24.h,
               fit: BoxFit.contain,
             )
-          : Icon(icon, size: 24.w, color: Colors.black87),
+          : Icon(icon, size: 24.w, color: selected ? AppColors.primaryColor : Colors.black87),
       title: Text(
         text,
-        style: TextStyle(fontSize: 15.sp),
+        style: TextStyle(
+          fontSize: 15.sp,
+          fontWeight: selected ? FontWeight.w700 : FontWeight.w400,
+        ),
       ),
       onTap: onTap,
     );

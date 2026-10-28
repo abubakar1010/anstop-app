@@ -1,21 +1,50 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 import 'package:ride_sharing/custom_assets/app_image.dart';
 import 'package:ride_sharing/l10n/l10n_helper.dart';
-import 'package:ride_sharing/widgets/custom_button.dart'; // Assuming CustomButton is imported from your widgets
+import 'package:ride_sharing/widgets/custom_button.dart';
 import '../../../../app/utils/app_colors.dart';
-import '../../../../widgets/custom_textfield_with_checkbox.dart';
+import 'controller/cancel_taxi_controller.dart';
 
+/// Asks why the ride is being cancelled, then cancels it. Pops with `true`
+/// once the server has cancelled the ride.
 class CancelTaxiScreen extends StatefulWidget {
-  const CancelTaxiScreen({super.key});
+  /// The ride to cancel; null means the ride currently in progress.
+  final String? rideId;
+  final bool asDriver;
+
+  const CancelTaxiScreen({super.key, this.rideId, this.asDriver = false});
 
   @override
   State<CancelTaxiScreen> createState() => _CancelTaxiScreenState();
 }
 
 class _CancelTaxiScreenState extends State<CancelTaxiScreen> {
-  bool _isChecked1 = false;
-  bool _isChecked2 = false;
+  late final CancelTaxiController controller;
+  late final String _tag = 'cancel:${widget.rideId ?? 'current'}';
+
+  @override
+  void initState() {
+    super.initState();
+    controller = Get.put(
+      CancelTaxiController(rideId: widget.rideId, asDriver: widget.asDriver),
+      tag: _tag,
+    );
+  }
+
+  @override
+  void dispose() {
+    Get.delete<CancelTaxiController>(tag: _tag);
+    super.dispose();
+  }
+
+  Future<void> _submit() async {
+    final cancelled = await controller.submitCancellation();
+    if (!cancelled || !mounted) return;
+    if (!widget.asDriver) await _showSorryDialog(context);
+    if (mounted) Navigator.of(context).pop(true);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,86 +62,79 @@ class _CancelTaxiScreenState extends State<CancelTaxiScreen> {
         backgroundColor: Colors.white,
         elevation: 0,
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(height: 20.sp),
-          Center(
-            child: Text(
-              AppLocalization.tr.selectCancellationReasonLabel,
-              style: TextStyle(color: AppColors.appGreyColor),
+      body: SingleChildScrollView(
+        padding: EdgeInsets.symmetric(horizontal: 16.sp),
+        child: Obx(() => Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(height: 20.sp),
+            Center(
+              child: Text(
+                AppLocalization.tr.selectCancellationReasonLabel,
+                textAlign: TextAlign.center,
+                style: TextStyle(color: AppColors.appGreyColor),
+              ),
             ),
-          ),
-          SizedBox(height: 20.sp),
-
-          // TextField with Checkbox prefix
-          // Row with border wrapping the checkbox and textfield
-          CustomTextFieldWithCheckbox(
-            isChecked: _isChecked1,
-            onCheckboxChanged: (value) {
-              setState(() {
-                _isChecked1 = value!;
-              });
-            },
-            hintText: AppLocalization.tr.cancellationReasonHint,
-          ),
-          SizedBox(height: 10.h,),
-          CustomTextFieldWithCheckbox(
-            isChecked: _isChecked2,
-            onCheckboxChanged: (value) {
-              setState(() {
-                _isChecked2 = value!;
-              });
-            },
-            hintText: AppLocalization.tr.anotherCancellationReasonHint,
-          ),
-          SizedBox(height: 10.h,),
-          CustomTextFieldWithCheckbox(
-            isChecked: _isChecked2,
-            onCheckboxChanged: (value) {
-              setState(() {
-                _isChecked2 = value!;
-              });
-            },
-            hintText: AppLocalization.tr.anotherCancellationReasonHint,
-          ),SizedBox(height: 10.h,),
-          CustomTextFieldWithCheckbox(
-            isChecked: _isChecked2,
-            onCheckboxChanged: (value) {
-              setState(() {
-                _isChecked2 = value!;
-              });
-            },
-            hintText: AppLocalization.tr.anotherCancellationReasonHint,
-          ),SizedBox(height: 10.h,),
-          CustomTextFieldWithCheckbox(
-            isChecked: _isChecked2,
-            onCheckboxChanged: (value) {
-              setState(() {
-                _isChecked2 = value!;
-              });
-            },
-            hintText: AppLocalization.tr.anotherCancellationReasonHint,
-          ),
-          // Add more widgets here if necessary
-        ],
+            SizedBox(height: 20.sp),
+            for (final reason in controller.cancellationReasons) ...[
+              _ReasonTile(
+                label: reason,
+                isChecked: controller.isReasonSelected(reason),
+                onTap: () => controller.selectReason(reason),
+              ),
+              SizedBox(height: 10.h),
+            ],
+            if (controller.isOtherSelected)
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  border: Border.all(color: AppColors.grayShade100),
+                  borderRadius: BorderRadius.circular(10.r),
+                ),
+                child: TextField(
+                  controller: controller.otherReasonTEController,
+                  maxLines: 3,
+                  maxLength: 300,
+                  onChanged: (_) => controller.errorMessage.value = '',
+                  decoration: InputDecoration(
+                    hintText: AppLocalization.tr.cancellationReasonHint,
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.all(12),
+                  ),
+                ),
+              ),
+            if (controller.errorMessage.value.isNotEmpty)
+              Padding(
+                padding: EdgeInsets.only(top: 12.h),
+                child: Text(
+                  controller.errorMessage.value,
+                  style: const TextStyle(color: Colors.red),
+                ),
+              ),
+            SizedBox(height: 20.h),
+          ],
+        )),
       ),
       bottomNavigationBar: BottomAppBar(
-        child: CustomButton(
-          onPressed: () {
-            _showThankYouDialog(context);
-          },
-          title: Text(
-            AppLocalization.tr.submitButton,
-            style: TextStyle(color: AppColors.white),
-          ),
-        ),
+        child: Obx(() => CustomButton(
+          onPressed: controller.isLoading.value ? () {} : _submit,
+          title: controller.isLoading.value
+              ? SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.white),
+                )
+              : Text(
+                  AppLocalization.tr.submitButton,
+                  style: TextStyle(color: AppColors.white),
+                ),
+        )),
       ),
     );
   }
 
-  void _showThankYouDialog(BuildContext context) {
-    showDialog(
+  Future<void> _showSorryDialog(BuildContext context) {
+    return showDialog(
       context: context,
       barrierDismissible: false, // Prevent dismissing the dialog by tapping outside
       builder: (BuildContext context) {
@@ -124,16 +146,14 @@ class _CancelTaxiScreenState extends State<CancelTaxiScreen> {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Asset Image at the top of the dialog
               Padding(
                 padding: EdgeInsets.symmetric(vertical: 10),
                 child: Image.asset(
-                  AppImage.sadEmoji, // Replace with your image path
-                  height: 50.h, // Adjust the height if needed
-                  width: 50.h, // Adjust the width if needed
+                  AppImage.sadEmoji,
+                  height: 50.h,
+                  width: 50.h,
                 ),
               ),
-              // Thank You Message
               Padding(
                 padding: EdgeInsets.all(10),
                 child: Text(
@@ -145,7 +165,6 @@ class _CancelTaxiScreenState extends State<CancelTaxiScreen> {
                   ),
                 ),
               ),
-              // Optionally add a Close button
               Padding(
                 padding: EdgeInsets.all(10),
                 child: CustomButton(
@@ -162,6 +181,45 @@ class _CancelTaxiScreenState extends State<CancelTaxiScreen> {
           ),
         );
       },
+    );
+  }
+}
+
+/// One selectable reason, in the bordered style the screen used before.
+class _ReasonTile extends StatelessWidget {
+  const _ReasonTile({required this.label, required this.isChecked, required this.onTap});
+
+  final String label;
+  final bool isChecked;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(10.r),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border.all(color: AppColors.grayShade100),
+          borderRadius: BorderRadius.circular(10.r),
+        ),
+        child: Row(
+          children: [
+            Checkbox(
+              value: isChecked,
+              onChanged: (_) => onTap(),
+              activeColor: AppColors.primaryColor,
+            ),
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 12.h),
+                child: Text(label),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

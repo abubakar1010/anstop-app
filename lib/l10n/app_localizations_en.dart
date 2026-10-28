@@ -715,6 +715,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notificationMenuItem => 'Notification';
 
   @override
+  String get homeMenuItem => 'Home';
+
+  @override
   String get supportMenuItem => 'Support';
 
   @override
@@ -1550,6 +1553,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get driverLabel => 'Driver';
 
   @override
+  String get passengerLabel => 'Passenger';
+
+  @override
   String get saveChangesButton => 'Save Changes';
 
   @override
@@ -1623,6 +1629,29 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cancelReasonOther => 'Other';
 
   @override
+  String get cancelReasonRiderNoShow => 'The passenger didn\'t show up';
+
+  @override
+  String get cancelReasonRiderRequested => 'The passenger asked me to cancel';
+
+  @override
+  String get cancelReasonVehicleProblem => 'Problem with my vehicle';
+
+  @override
+  String get cancellationReasonRequiredError =>
+      'Please select at least one reason';
+
+  @override
+  String get cancellationOtherRequiredError => 'Please describe the reason';
+
+  @override
+  String get rideCannotBeCancelledMessage =>
+      'This ride can no longer be cancelled';
+
+  @override
+  String get rideCancelledMessage => 'The ride has been cancelled';
+
+  @override
   String get fareCalculationFailedMessage =>
       'Could not calculate the fare. Please try again.';
 
@@ -1682,6 +1711,30 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get walletWithdrawalLabel => 'Wallet withdrawal';
+
+  @override
+  String get loadOlderTransactionsButton => 'Load older transactions';
+
+  @override
+  String get rideEarningLabel => 'Ride earnings';
+
+  @override
+  String get ridePaidFromWalletLabel => 'Ride paid from wallet';
+
+  @override
+  String get ridePaidByCardLabel => 'Ride paid by card';
+
+  @override
+  String get tipReceivedLabel => 'Tip received';
+
+  @override
+  String get tipPaidLabel => 'Tip';
+
+  @override
+  String get refundLabel => 'Refund';
+
+  @override
+  String get withdrawalToBankLabel => 'Withdrawal to bank';
 
   @override
   String get enterBankNameError => 'Please enter the bank name';
@@ -1806,6 +1859,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noNotificationsTitle => 'No notifications yet';
 
   @override
+  String get markAllAsReadButton => 'Mark all as read';
+
+  @override
   String get noNotificationsMessage =>
       'Updates about your rides and wallet will appear here.';
 
@@ -1815,6 +1871,16 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String withdrawalMinimumError(String amount) {
     return 'Minimum withdrawal is $amount';
+  }
+
+  @override
+  String depositMinimumError(String amount) {
+    return 'Minimum deposit is $amount';
+  }
+
+  @override
+  String depositMaximumError(String amount) {
+    return 'Maximum deposit is $amount';
   }
 
   @override

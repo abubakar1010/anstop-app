@@ -34,8 +34,14 @@ class UserInfoRow extends StatelessWidget {
         SizedBox(width: 5.w),
         Image.asset(AppImage.steeringWheel, width: 15.w, height: 15.h),
         SizedBox(width: 5.w),
-        Text(profession, style: TextStyle(fontSize: 10.sp, color: AppColors.togglebuttonColor)),
-        SizedBox(width: 5.w),
+        Flexible(
+          child: Text(
+            profession,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(fontSize: 10.sp, color: AppColors.togglebuttonColor),
+          ),
+        ),
       ],
     );
   }

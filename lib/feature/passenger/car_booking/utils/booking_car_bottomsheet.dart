@@ -233,12 +233,13 @@ class _BookingCarsBottomSheetState extends State<BookingCarsBottomSheet> {
 
           TripIdWidget(tripId: widget.rideId),
           CustomHorizontalLine(thickness: 5.sp,),
-          // Cancel Button
-          // CancelDriverWidget(
-          //   onCancelPressed: () {
-          //     Get.to(() => CancelTaxiScreen());
-          //   },
-          // ),
+          // Cancel Button. The home screen closes this sheet when the ride
+          // turns CANCELLED, whichever side cancelled it.
+          CancelDriverWidget(
+            onCancelPressed: () {
+              Get.to(() => CancelTaxiScreen(rideId: widget.rideId));
+            },
+          ),
 
         ],
       ),

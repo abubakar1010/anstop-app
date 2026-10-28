@@ -32,7 +32,8 @@ class WalletService {
     }
   }
 
-  Future<List<TransactionModel>> getTransactions({
+  /// One page of the user's transactions, newest first.
+  Future<TransactionPagination> getTransactions({
     String? accessToken,
     int page = 1,
     int limit = 10,
@@ -43,12 +44,18 @@ class WalletService {
       queryParams: {
         'page': page,
         'limit': limit,
+        // The server defaults to oldest first, which hid every recent
+        // deposit behind the first page.
+        'sortBy': 'createdAt',
+        'sortOrder': 'desc',
+        // Leaves out rides the rider paid by card: they never touched the
+        // wallet. A driver still sees them as earnings.
+        'walletOnly': 'true',
       },
     );
 
     if (response.isSuccess) {
-      final model = TransactionResponseModel.fromJson(response.responseData);
-      return model.data.results;
+      return TransactionResponseModel.fromJson(response.responseData).data;
     } else {
       throw Exception(response.errorMessage);
     }

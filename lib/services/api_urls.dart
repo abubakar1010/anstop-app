@@ -86,6 +86,9 @@ class ApiUrls {
   static const String createReview = '$baseUrl/reviews';
   static const String setFcmToken = '$baseUrl/users/fcm-token';
   static const String notifications = '$baseUrl/notifications';
+  static const String notificationsUnreadCount = '$baseUrl/notifications/unread-count';
+  static const String notificationsReadAll = '$baseUrl/notifications/read-all';
+  static String notificationRead(String id) => '$baseUrl/notifications/$id/read';
 
   // Saved cards (stored by Stripe; the server returns brand, last 4 and expiry)
   static const String paymentMethods = '$baseUrl/payment-methods';

@@ -1466,6 +1466,12 @@ abstract class AppLocalizations {
   /// **'Notification'**
   String get notificationMenuItem;
 
+  /// No description provided for @homeMenuItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get homeMenuItem;
+
   /// No description provided for @supportMenuItem.
   ///
   /// In en, this message translates to:
@@ -3032,6 +3038,12 @@ abstract class AppLocalizations {
   /// **'Driver'**
   String get driverLabel;
 
+  /// No description provided for @passengerLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Passenger'**
+  String get passengerLabel;
+
   /// No description provided for @saveChangesButton.
   ///
   /// In en, this message translates to:
@@ -3170,6 +3182,48 @@ abstract class AppLocalizations {
   /// **'Other'**
   String get cancelReasonOther;
 
+  /// No description provided for @cancelReasonRiderNoShow.
+  ///
+  /// In en, this message translates to:
+  /// **'The passenger didn\'t show up'**
+  String get cancelReasonRiderNoShow;
+
+  /// No description provided for @cancelReasonRiderRequested.
+  ///
+  /// In en, this message translates to:
+  /// **'The passenger asked me to cancel'**
+  String get cancelReasonRiderRequested;
+
+  /// No description provided for @cancelReasonVehicleProblem.
+  ///
+  /// In en, this message translates to:
+  /// **'Problem with my vehicle'**
+  String get cancelReasonVehicleProblem;
+
+  /// No description provided for @cancellationReasonRequiredError.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select at least one reason'**
+  String get cancellationReasonRequiredError;
+
+  /// No description provided for @cancellationOtherRequiredError.
+  ///
+  /// In en, this message translates to:
+  /// **'Please describe the reason'**
+  String get cancellationOtherRequiredError;
+
+  /// No description provided for @rideCannotBeCancelledMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This ride can no longer be cancelled'**
+  String get rideCannotBeCancelledMessage;
+
+  /// No description provided for @rideCancelledMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The ride has been cancelled'**
+  String get rideCancelledMessage;
+
   /// No description provided for @fareCalculationFailedMessage.
   ///
   /// In en, this message translates to:
@@ -3265,6 +3319,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Wallet withdrawal'**
   String get walletWithdrawalLabel;
+
+  /// No description provided for @loadOlderTransactionsButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Load older transactions'**
+  String get loadOlderTransactionsButton;
+
+  /// No description provided for @rideEarningLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Ride earnings'**
+  String get rideEarningLabel;
+
+  /// No description provided for @ridePaidFromWalletLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Ride paid from wallet'**
+  String get ridePaidFromWalletLabel;
+
+  /// No description provided for @ridePaidByCardLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Ride paid by card'**
+  String get ridePaidByCardLabel;
+
+  /// No description provided for @tipReceivedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Tip received'**
+  String get tipReceivedLabel;
+
+  /// No description provided for @tipPaidLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Tip'**
+  String get tipPaidLabel;
+
+  /// No description provided for @refundLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Refund'**
+  String get refundLabel;
+
+  /// No description provided for @withdrawalToBankLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Withdrawal to bank'**
+  String get withdrawalToBankLabel;
 
   /// No description provided for @enterBankNameError.
   ///
@@ -3488,6 +3590,12 @@ abstract class AppLocalizations {
   /// **'No notifications yet'**
   String get noNotificationsTitle;
 
+  /// No description provided for @markAllAsReadButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark all as read'**
+  String get markAllAsReadButton;
+
   /// No description provided for @noNotificationsMessage.
   ///
   /// In en, this message translates to:
@@ -3505,6 +3613,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Minimum withdrawal is {amount}'**
   String withdrawalMinimumError(String amount);
+
+  /// No description provided for @depositMinimumError.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimum deposit is {amount}'**
+  String depositMinimumError(String amount);
+
+  /// No description provided for @depositMaximumError.
+  ///
+  /// In en, this message translates to:
+  /// **'Maximum deposit is {amount}'**
+  String depositMaximumError(String amount);
 
   /// No description provided for @paymentMethodsTitle.
   ///

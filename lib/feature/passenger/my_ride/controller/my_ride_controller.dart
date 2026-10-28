@@ -32,16 +32,20 @@ class MyRideController extends GetxController {
       errorMessage.value = '';
       final prefs = await SharedPreferences.getInstance();
       final accessToken = await SessionController.to.accessToken();
-      final status = isOngoing.value ? 'ACCEPTED' : 'COMPLETED';
+      final userId = prefs.getString('userId') ?? '';
 
-      final response = await _service.getMyRides(
-        status: status,
-        accessToken: accessToken!
-      );
+      // One request for every status: "ongoing" spans several of them, and
+      // finished rides end as PAID, not COMPLETED.
+      final response = await _service.getMyRides(accessToken: accessToken!);
 
       if (response.isSuccess) {
         final List list = response.responseData['data'] ?? [];
-        rides.assignAll(list.map((e) => MyRideModel.fromJson(e)).toList());
+        final mine = list
+            .map((e) => MyRideModel.fromJson(e))
+            // A rider-and-driver account also gets the rides it drove.
+            .where((ride) => ride.rider.id == userId)
+            .where((ride) => isOngoing.value ? ride.isOngoing : ride.isCompleted);
+        rides.assignAll(MyRideModel.newestFirst(mine));
       }
       else {
         debugPrint('my_ride_controller: ${response.errorMessage}');

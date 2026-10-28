@@ -1,3 +1,4 @@
+import 'package:ride_sharing/services/app_mode.dart';
 import 'dart:async';
 import 'dart:ui';
 import 'package:flutter/material.dart';
@@ -36,6 +37,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen>
   @override
   void initState() {
     super.initState();
+    AppMode.set(driver: true);
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 2),

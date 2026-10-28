@@ -44,8 +44,6 @@ import 'package:ride_sharing/feature/driver/invoice/binding/invoice_binding.dart
 import 'package:ride_sharing/feature/driver/invoice/view/invoice_view.dart';
 import 'package:ride_sharing/feature/driver/my_trip/binding/my_trip_binding.dart';
 import 'package:ride_sharing/feature/driver/my_trip/view/my_trip.dart';
-import 'package:ride_sharing/feature/driver/my_trip_details/binding/driver_completed_trip_binding.dart';
-import 'package:ride_sharing/feature/driver/my_trip_details/binding/driver_ongoing_trip_binding.dart';
 import 'package:ride_sharing/feature/driver/my_trip_details/view/driver_completed_trip_details.dart';
 import 'package:ride_sharing/feature/driver/my_trip_details/view/driver_ongoing_trip_details.dart';
 import 'package:ride_sharing/feature/driver/profile/binding/driver_profile_binding.dart';
@@ -83,7 +81,6 @@ import 'package:ride_sharing/feature/wallet/binding/add_money_binding.dart';
 import 'package:ride_sharing/feature/wallet/view/add_money_screen.dart';
 
 // Passenger imports
-import 'package:ride_sharing/feature/passenger/car_booking/passenger/binding/cancel_taxi_binding.dart';
 import 'package:ride_sharing/feature/passenger/car_booking/passenger/binding/pick_up_location_binding.dart';
 import 'package:ride_sharing/feature/passenger/car_booking/passenger/binding/set_on_map_binding.dart';
 import 'package:ride_sharing/feature/passenger/car_booking/passenger/cancel_taxi.dart';
@@ -288,8 +285,8 @@ abstract class AppRoutes {
     ),
     GetPage(
       name: cancelTaxiScreen,
-      page: () => CancelTaxiScreen(),
-      binding: CancelTaxiBinding(),
+      // Optional argument: the ride id (defaults to the ride in progress).
+      page: () => CancelTaxiScreen(rideId: Get.arguments as String?),
     ),
 
     /// Passenger Trip & Payment Routes
@@ -342,13 +339,13 @@ abstract class AppRoutes {
     ),
     GetPage(
       name: driverOngoingTripScreen,
-      page: () => DriverOngoingTripDetails(),
-      binding: DriverOngoingTripBinding(),
+      // Opened with the ride id as the argument.
+      page: () => DriverOngoingTripDetails(rideId: Get.arguments as String? ?? ''),
     ),
     GetPage(
       name: driverCompletedTripScreen,
-      page: () => DriverCompletedTripDetails(),
-      binding: DriverCompletedTripBinding(),
+      // Opened with the ride id as the argument.
+      page: () => DriverCompletedTripDetails(rideId: Get.arguments as String? ?? ''),
     ),
     GetPage(
       name: driverTripFlowScreen,

@@ -20,6 +20,8 @@ import 'package:ride_sharing/services/ride_session_controller.dart';
 import 'package:ride_sharing/services/maps_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ride_sharing/l10n/l10n_helper.dart';
+import 'package:ride_sharing/app/utils/app_snackbar.dart';
+import 'package:ride_sharing/services/app_mode.dart';
 
 class HomePageController extends GetxController
     with MapCameraMixin, WidgetsBindingObserver {
@@ -40,6 +42,7 @@ class HomePageController extends GetxController
   Worker? _rideSnapshotWorker;
   String? _paymentRideShown;
   String? _restoredRideState;
+  String? _cancelledRideShown;
 
   void showPassengerSheet(WidgetBuilder builder) {
     _currentSheetController?.close();
@@ -96,6 +99,7 @@ class HomePageController extends GetxController
   @override
   void onInit() {
     super.onInit();
+    AppMode.set(driver: false);
     WidgetsBinding.instance.addObserver(this);
     // Deferred to the first frame so Get.context exists — the permission
     // dialogs below are localized and need a BuildContext.
@@ -108,6 +112,17 @@ class HomePageController extends GetxController
 
   void _applyRideSnapshot(RideSnapshot? snapshot) {
     rideRequestActive = snapshot?.isActive ?? false;
+    if (snapshot?.status == 'CANCELLED' && _cancelledRideShown != snapshot!.rideId) {
+      _cancelledRideShown = snapshot.rideId;
+      // Close the driver/trip sheet, whether the rider or the driver cancelled.
+      closeCurrentSheet();
+      _restoredRideState = null;
+      AppSnackbar.snackbar(
+        AppLocalization.tr.cancelTaxiTitle,
+        AppLocalization.tr.rideCancelledMessage,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }
     if (snapshot != null && _currentSheetController == null &&
         (snapshot.status == 'ACCEPTED' || snapshot.status == 'ONGOING') &&
         _restoredRideState != '${snapshot.rideId}:${snapshot.status}') {

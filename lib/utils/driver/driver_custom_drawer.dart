@@ -1,3 +1,5 @@
+import 'package:ride_sharing/utils/drawer_navigation.dart';
+import 'package:ride_sharing/widgets/unread_badge.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:ride_sharing/app/utils/app_colors.dart';
@@ -9,7 +11,6 @@ import 'package:ride_sharing/feature/driver/wallet/view/driver_wallet_page.dart'
 import 'package:ride_sharing/feature/notification/view/notification_screen.dart';
 import 'package:ride_sharing/feature/passenger/homepage/view/home_page.dart';
 import 'package:ride_sharing/feature/passenger/my_ride/view/my_ride.dart';
-import 'package:ride_sharing/feature/settings/view/settings_screen.dart';
 import 'package:ride_sharing/widgets/auth_links/auth_link.dart';
 
 import '../../feature/auth/view/log_in_screen.dart';
@@ -73,29 +74,42 @@ class DriverCustomDrawer extends StatelessWidget {
                   padding: EdgeInsets.zero,
                   children: [
                     _drawerItem(
-                      imagePath: AppImage.notification,
-                      text: AppLocalization.tr.notificationMenuItem,
+                      icon: Icons.home_outlined,
+                      text: AppLocalization.tr.homeMenuItem,
+                      route: AppRoutes.driverHomeScreen,
                       onTap: () => _closeDrawerThen(
                         context,
-                        () => Get.toNamed(AppRoutes.notificationScreen),
+                        () => DrawerNavigation.go(AppRoutes.driverHomeScreen),
+                      ),
+                    ),
+                    _drawerItem(
+                      imagePath: AppImage.notification,
+                      text: AppLocalization.tr.notificationMenuItem,
+                      trailing: const UnreadBadge(),
+                      route: AppRoutes.notificationScreen,
+                      onTap: () => _closeDrawerThen(
+                        context,
+                        () => DrawerNavigation.go(AppRoutes.notificationScreen),
                       ),
                     ),
 
                     _drawerItem(
                       imagePath: AppImage.carDrawer,
                       text: AppLocalization.tr.myTripsMenuItem,
+                      route: AppRoutes.driverMyTripScreen,
                       onTap: () => _closeDrawerThen(
                         context,
-                        () => Get.toNamed(AppRoutes.passengerMyRideScreen),
+                        () => DrawerNavigation.go(AppRoutes.driverMyTripScreen),
                       ),
                     ),
 
                     _drawerItem(
                       imagePath: AppImage.walletDrawer,
                       text: AppLocalization.tr.myEarningsMenuItem,
+                      route: AppRoutes.driverWalletScreen,
                       onTap: () => _closeDrawerThen(
                         context,
-                        () => Get.toNamed(AppRoutes.driverWalletScreen),
+                        () => DrawerNavigation.go(AppRoutes.driverWalletScreen),
                       ),
                     ),
                     _drawerItem(
@@ -106,17 +120,19 @@ class DriverCustomDrawer extends StatelessWidget {
                     _drawerItem(
                       imagePath: AppImage.support,
                       text: AppLocalization.tr.supportMenuItem,
+                      route: AppRoutes.supportListScreen,
                       onTap: () => _closeDrawerThen(
                         context,
-                        () => Get.toNamed(AppRoutes.supportListScreen),
+                        () => DrawerNavigation.go(AppRoutes.supportListScreen),
                       ),
                     ),
                     _drawerItem(
                       imagePath: AppImage.settings,
                       text: AppLocalization.tr.settingsMenuItem,
+                      route: AppRoutes.settingsScreen,
                       onTap: () => _closeDrawerThen(
                         context,
-                        () => Get.to(SettingsScreen()),
+                        () => DrawerNavigation.go(AppRoutes.settingsScreen),
                       ),
                     ),
                     _drawerItem(
@@ -147,7 +163,8 @@ class DriverCustomDrawer extends StatelessWidget {
             child: CustomButton(
               onPressed: () => _closeDrawerThen(
                 context,
-                () => Get.toNamed(AppRoutes.passengerHomeScreen),
+                // Replaces the driver's pages: back must not return to driver mode.
+                () => Get.offAllNamed(AppRoutes.passengerHomeScreen),
               ),
               title: Text(AppLocalization.tr.switchToPassengerButton,style: TextStyle(color: AppColors.white),),
             ),
@@ -170,20 +187,36 @@ class DriverCustomDrawer extends StatelessWidget {
   }
 
   Widget _drawerItem({
-    required String imagePath,   // 🔥 changed
+    String? imagePath,
+    IconData? icon,      // for items without an image asset
     required String text,
     required VoidCallback onTap,
+    Widget? trailing,
+    /// The page this item opens; it is highlighted while that page is shown.
+    String? route,
   }) {
+    final selected = route != null && Get.currentRoute == route;
     return ListTile(
-      leading: Image.asset(
-        imagePath,
-        width: 24.w,       // adjust size as needed
-        height: 24.h,
-        fit: BoxFit.contain,
-      ),
+      // Shows which page is open, like a standard navigation drawer.
+      selected: selected,
+      selectedTileColor: AppColors.primaryColor.withOpacity(0.08),
+      selectedColor: AppColors.primaryColor,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      trailing: trailing,
+      leading: imagePath != null
+          ? Image.asset(
+              imagePath,
+              width: 24.w,
+              height: 24.h,
+              fit: BoxFit.contain,
+            )
+          : Icon(icon, size: 24.w, color: selected ? AppColors.primaryColor : Colors.black87),
       title: Text(
         text,
-        style: TextStyle(fontSize: 15.sp),
+        style: TextStyle(
+          fontSize: 15.sp,
+          fontWeight: selected ? FontWeight.w700 : FontWeight.w400,
+        ),
       ),
       onTap: onTap,
     );
