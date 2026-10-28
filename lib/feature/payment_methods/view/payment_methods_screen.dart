@@ -1,3 +1,4 @@
+import 'package:ride_sharing/utils/drawer_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -13,15 +14,13 @@ class PaymentMethodsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = Get.find<PaymentMethodsController>();
     return Scaffold(
+      drawer: DrawerNavigation.openedFromDrawer(context) ? const ModeDrawer() : null,
       backgroundColor: AppColors.secondaryBgColor,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
         systemOverlayStyle: SystemUiOverlayStyle.dark,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.appBarTitleColor),
-          onPressed: () => Navigator.pop(context),
-        ),
+        leading: const DrawerOrBackButton(color: AppColors.appBarTitleColor),
         title: Text(
           AppLocalization.tr.paymentMethodsTitle,
           style: const TextStyle(

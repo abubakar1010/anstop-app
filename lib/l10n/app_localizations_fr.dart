@@ -719,6 +719,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get notificationMenuItem => 'Notifications';
 
   @override
+  String get homeMenuItem => 'Accueil';
+
+  @override
   String get supportMenuItem => 'Assistance';
 
   @override

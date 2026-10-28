@@ -1,3 +1,4 @@
+import 'package:ride_sharing/utils/drawer_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:ride_sharing/feature/auth/controller/login_controller.dart';
@@ -9,7 +10,6 @@ import 'package:ride_sharing/feature/settings/utils/settings_menu_item.dart';
 import 'package:ride_sharing/feature/settings/view/change_password_screen.dart';
 import 'package:ride_sharing/feature/settings/view/legal_pages_screen.dart';
 import 'package:ride_sharing/routes/app_routes.dart';
-import 'package:ride_sharing/utils/driver/driver_custom_drawer.dart';
 import 'package:ride_sharing/widgets/auth_links/auth_link.dart';
 import '../../../app/utils/app_colors.dart';
 import 'change_language_screen.dart';
@@ -31,17 +31,7 @@ class SettingsScreen extends StatelessWidget {
         backgroundColor: Colors.white,
         elevation: 0,
         systemOverlayStyle: SystemUiOverlayStyle.dark,
-        leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios_new,
-            color: SettingsColors.primaryText,
-            size: 24,
-          ),
-          onPressed: () {
-
-          loginController.navigateToHomeByRole();
-          },
-        ),
+        leading: const DrawerOrBackButton(color: SettingsColors.primaryText, backIcon: Icons.arrow_back_ios_new),
         title: Text(
           AppLocalization.tr.settingsTitle,
           style: const TextStyle(
@@ -69,7 +59,7 @@ class SettingsScreen extends StatelessWidget {
           ),
         ],
       ),
-      drawer: DriverCustomDrawer(),
+      drawer: DrawerNavigation.openedFromDrawer(context) ? const ModeDrawer() : null,
       body: Column(
         children: [
           Expanded(

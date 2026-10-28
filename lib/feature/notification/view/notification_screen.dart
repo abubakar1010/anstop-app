@@ -1,3 +1,4 @@
+import 'package:ride_sharing/utils/drawer_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:ride_sharing/feature/notification/model/notification_model.dart';
@@ -20,19 +21,13 @@ class _NotificationScreenState extends State<NotificationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: DrawerNavigation.openedFromDrawer(context) ? const ModeDrawer() : null,
       backgroundColor: NotificationColors.backgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
         systemOverlayStyle: SystemUiOverlayStyle.dark,
-        leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back,
-            color: NotificationColors.menuIconColor,
-            size: 24,
-          ),
-          onPressed: () => Navigator.pop(context),
-        ),
+        leading: const DrawerOrBackButton(color: NotificationColors.menuIconColor),
         title: Text(
           AppLocalization.tr.notificationTitle,
           style: const TextStyle(

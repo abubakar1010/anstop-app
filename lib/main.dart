@@ -15,6 +15,7 @@ import 'package:ride_sharing/services/session_controller.dart';
 import 'package:ride_sharing/services/realtime_client.dart';
 import 'package:ride_sharing/services/ride_session_controller.dart';
 import 'package:ride_sharing/services/notification_badge_service.dart';
+import 'package:ride_sharing/services/app_mode.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -40,6 +41,7 @@ void main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   final session = Get.put(SessionController(), permanent: true);
   await session.restore();
+  await AppMode.restore();
   await Get.putAsync<SocketIoService>(() async {
     final service = SocketIoService();
     await service.init();

@@ -21,6 +21,7 @@ import 'package:ride_sharing/services/maps_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ride_sharing/l10n/l10n_helper.dart';
 import 'package:ride_sharing/app/utils/app_snackbar.dart';
+import 'package:ride_sharing/services/app_mode.dart';
 
 class HomePageController extends GetxController
     with MapCameraMixin, WidgetsBindingObserver {
@@ -98,6 +99,7 @@ class HomePageController extends GetxController
   @override
   void onInit() {
     super.onInit();
+    AppMode.set(driver: false);
     WidgetsBinding.instance.addObserver(this);
     // Deferred to the first frame so Get.context exists — the permission
     // dialogs below are localized and need a BuildContext.

@@ -1466,6 +1466,12 @@ abstract class AppLocalizations {
   /// **'Notification'**
   String get notificationMenuItem;
 
+  /// No description provided for @homeMenuItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get homeMenuItem;
+
   /// No description provided for @supportMenuItem.
   ///
   /// In en, this message translates to:
