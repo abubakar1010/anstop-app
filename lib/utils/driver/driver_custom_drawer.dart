@@ -1,3 +1,4 @@
+import 'package:ride_sharing/widgets/unread_badge.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:ride_sharing/app/utils/app_colors.dart';
@@ -75,6 +76,7 @@ class DriverCustomDrawer extends StatelessWidget {
                     _drawerItem(
                       imagePath: AppImage.notification,
                       text: AppLocalization.tr.notificationMenuItem,
+                      trailing: const UnreadBadge(),
                       onTap: () => _closeDrawerThen(
                         context,
                         () => Get.toNamed(AppRoutes.notificationScreen),
@@ -173,8 +175,10 @@ class DriverCustomDrawer extends StatelessWidget {
     required String imagePath,   // 🔥 changed
     required String text,
     required VoidCallback onTap,
+    Widget? trailing,
   }) {
     return ListTile(
+      trailing: trailing,
       leading: Image.asset(
         imagePath,
         width: 24.w,       // adjust size as needed

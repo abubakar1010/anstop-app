@@ -16,9 +16,13 @@ class NotificationItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final unread = !notification.isRead;
     return InkWell(
       onTap: onTap,
-      child: Padding(
+      child: Container(
+        // Unread notifications stand out until they are opened.
+        color: unread ? NotificationColors.primaryGreen.withOpacity(0.08) : null,
+        child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -47,9 +51,9 @@ class NotificationItem extends StatelessWidget {
                 children: [
                   Text(
                     notification.title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 15,
-                      fontWeight: FontWeight.w600,
+                      fontWeight: unread ? FontWeight.w700 : FontWeight.w500,
                       color: NotificationColors.titleText,
                     ),
                   ),
@@ -68,8 +72,19 @@ class NotificationItem extends StatelessWidget {
                 ],
               ),
             ),
+            if (unread)
+              Container(
+                width: 10,
+                height: 10,
+                margin: const EdgeInsets.only(left: 8, top: 6),
+                decoration: const BoxDecoration(
+                  color: AppColors.primaryColor,
+                  shape: BoxShape.circle,
+                ),
+              ),
           ],
         ),
+      ),
       ),
     );
   }

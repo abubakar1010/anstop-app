@@ -14,6 +14,7 @@ import 'package:ride_sharing/services/socket_services.dart';
 import 'package:ride_sharing/services/session_controller.dart';
 import 'package:ride_sharing/services/realtime_client.dart';
 import 'package:ride_sharing/services/ride_session_controller.dart';
+import 'package:ride_sharing/services/notification_badge_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -46,6 +47,7 @@ void main() async {
   });
   Get.put(RealtimeClient(), permanent: true);
   Get.put(RideSessionController().initialize(), permanent: true);
+  Get.put(NotificationBadgeService().initialize(), permanent: true);
 
   runApp(const RideSharingApp());
 }

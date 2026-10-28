@@ -42,6 +42,15 @@ class _NotificationScreenState extends State<NotificationScreen> {
           ),
         ),
         centerTitle: true,
+        actions: [
+          Obx(() => controller.hasUnread
+              ? IconButton(
+                  tooltip: AppLocalization.tr.markAllAsReadButton,
+                  icon: const Icon(Icons.done_all, color: NotificationColors.menuIconColor),
+                  onPressed: controller.markAllAsRead,
+                )
+              : const SizedBox.shrink()),
+        ],
       ),
       body: Obx(() {
         if (controller.isLoading.value && controller.notifications.isEmpty) {
@@ -87,7 +96,10 @@ class _NotificationScreenState extends State<NotificationScreen> {
                         for (final notification in group.notifications)
                           NotificationItem(
                             notification: notification,
-                            onTap: () => _showNotificationDetails(notification),
+                            onTap: () {
+                              controller.markAsRead(notification);
+                              _showNotificationDetails(notification);
+                            },
                           ),
                       ],
                     );

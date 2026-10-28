@@ -1,3 +1,4 @@
+import 'package:ride_sharing/widgets/unread_badge.dart';
 import 'package:ride_sharing/services/session_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -72,6 +73,7 @@ class PassengerCustomDrawer extends StatelessWidget {
                     _drawerItem(
                       imagePath: AppImage.notification,
                       text: AppLocalization.tr.notificationMenuItem,
+                      trailing: const UnreadBadge(),
                       onTap: () => _closeDrawerThen(
                         context,
                         () => Get.toNamed(AppRoutes.notificationScreen),
@@ -257,8 +259,10 @@ class PassengerCustomDrawer extends StatelessWidget {
     IconData? icon,      // for items without an image asset
     required String text,
     required VoidCallback onTap,
+    Widget? trailing,
   }) {
     return ListTile(
+      trailing: trailing,
       leading: imagePath != null
           ? Image.asset(
               imagePath,

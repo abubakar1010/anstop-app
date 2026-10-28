@@ -4,6 +4,9 @@ import 'package:flutter/foundation.dart';
 import 'api_client.dart';
 import 'package:ride_sharing/services/api_urls.dart';
 import 'package:logger/logger.dart';
+import 'package:get/get.dart';
+import 'package:ride_sharing/routes/app_routes.dart';
+import 'notification_badge_service.dart';
 
 class FcmService {
   final FirebaseMessaging _messaging = FirebaseMessaging.instance;
@@ -13,6 +16,7 @@ class FcmService {
   /// per controller, so without a static guard every sign-in would attach
   /// another listener and re-POST the token once per past login.
   static StreamSubscription<String>? _refreshSubscription;
+  static StreamSubscription<RemoteMessage>? _openedSubscription;
 
   /// Registers this device for push.
   ///
@@ -27,6 +31,13 @@ class FcmService {
         badge: true,
         sound: true,
       );
+      // iOS hides pushes while the app is open unless asked to show them.
+      await _messaging.setForegroundNotificationPresentationOptions(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
+      _openNotificationsOnTap();
 
       // On Apple platforms `getToken()` throws `apns-token-not-set` until APNS
       // has handed us its token. That happens asynchronously after permission
@@ -65,6 +76,23 @@ class FcmService {
     } catch (e) {
       _logger.e('❌ FCM init failed (non-fatal): $e');
     }
+  }
+
+  /// Tapping a push opens the notification list, whether the app was in the
+  /// background or not running at all.
+  void _openNotificationsOnTap() {
+    _openedSubscription ??= FirebaseMessaging.onMessageOpenedApp.listen((_) => _showNotifications());
+    _messaging.getInitialMessage().then((message) {
+      if (message != null) _showNotifications();
+    });
+  }
+
+  static void _showNotifications() {
+    if (Get.currentRoute == AppRoutes.notificationScreen) {
+      NotificationBadgeService.to.refreshCount();
+      return;
+    }
+    Get.toNamed(AppRoutes.notificationScreen);
   }
 
   /// Polls for the APNS token until it arrives or [timeout] elapses.
