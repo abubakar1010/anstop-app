@@ -3038,6 +3038,12 @@ abstract class AppLocalizations {
   /// **'Driver'**
   String get driverLabel;
 
+  /// No description provided for @recenterOnDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'Show driver'**
+  String get recenterOnDriver;
+
   /// No description provided for @passengerLabel.
   ///
   /// In en, this message translates to:

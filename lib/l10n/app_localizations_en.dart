@@ -1553,6 +1553,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get driverLabel => 'Driver';
 
   @override
+  String get recenterOnDriver => 'Show driver';
+
+  @override
   String get passengerLabel => 'Passenger';
 
   @override

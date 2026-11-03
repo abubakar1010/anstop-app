@@ -17,6 +17,7 @@ class AppGoogleMap extends StatelessWidget {
     this.polylines = const <Polyline>{},
     this.circles = const <Circle>{},
     this.onTap,
+    this.onUserGesture,
   });
 
   final MapCameraMixin camera;
@@ -28,9 +29,13 @@ class AppGoogleMap extends StatelessWidget {
   /// Receives the [LatLng] of the tapped position.
   final void Function(LatLng)? onTap;
 
+  /// Fired when the user touches the map — unlike `onCameraMoveStarted`,
+  /// never for camera moves the app makes itself.
+  final VoidCallback? onUserGesture;
+
   @override
   Widget build(BuildContext context) {
-    return GoogleMap(
+    final map = GoogleMap(
       // Seeded from the last position this device reported, so a cold start
       // opens where the user actually is instead of a hardcoded city.
       initialCameraPosition: LocationService.initialCamera,
@@ -44,5 +49,7 @@ class AppGoogleMap extends StatelessWidget {
       onMapCreated: camera.attachMapController,
       onTap: onTap,
     );
+    if (onUserGesture == null) return map;
+    return Listener(onPointerDown: (_) => onUserGesture!(), child: map);
   }
 }

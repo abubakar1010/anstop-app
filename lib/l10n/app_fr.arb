@@ -550,6 +550,7 @@
   "nowLabel": "Maintenant",
   "professionalLabel": "Professionnel",
   "driverLabel": "Chauffeur",
+  "recenterOnDriver": "Afficher le chauffeur",
   "passengerLabel": "Passager",
   "saveChangesButton": "Enregistrer les modifications",
   "confirmButton": "Confirmer",

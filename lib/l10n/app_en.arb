@@ -551,6 +551,7 @@
   "nowLabel": "Now",
   "professionalLabel": "Professional",
   "driverLabel": "Driver",
+  "recenterOnDriver": "Show driver",
   "passengerLabel": "Passenger",
   "saveChangesButton": "Save Changes",
   "confirmButton": "Confirm",

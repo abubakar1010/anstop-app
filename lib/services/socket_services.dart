@@ -330,12 +330,44 @@ class SocketIoService extends GetxService {
 
   // Emit update-location (for drivers - continuously sends current GPS position)
   Future<bool> emitUpdateLocation({required String locationName, required double latitude,
-      required double longitude}) async {
+      required double longitude, double? heading, double? speed}) async {
     final ack = await request('update-location', {
       'locationName': locationName, 'latitude': latitude, 'longitude': longitude,
+      if (heading != null) 'heading': heading,
+      if (speed != null) 'speed': speed,
     });
     return ack.ok;
   }
+
+  // Nearby available drivers (for passengers - live cars on the home map).
+  // Returns the drivers around [latitude]/[longitude] right now; after that
+  // their moves arrive through onNearbyDriverLocation.
+  Future<List<dynamic>?> subscribeNearbyDrivers({required double latitude,
+      required double longitude}) async {
+    final ack = await request('subscribe-nearby-drivers', {
+      'latitude': latitude, 'longitude': longitude,
+    });
+    return ack.ok && ack.data is List ? ack.data as List : null;
+  }
+
+  Future<void> unsubscribeNearbyDrivers() async {
+    if (!isSocketReady) return;
+    await request('unsubscribe-nearby-drivers', {});
+  }
+
+  void onNearbyDriverLocation(Function(dynamic) handler) {
+    _socket?.off('nearby-driver-location');
+    _socket?.on('nearby-driver-location', handler);
+  }
+
+  void offNearbyDriverLocation() => _socket?.off('nearby-driver-location');
+
+  void onNearbyDriverRemoved(Function(dynamic) handler) {
+    _socket?.off('nearby-driver-removed');
+    _socket?.on('nearby-driver-removed', handler);
+  }
+
+  void offNearbyDriverRemoved() => _socket?.off('nearby-driver-removed');
 
   Future<bool> emitNewOffer({required String rideId}) async =>
       (await request('new-offer', {'rideId': rideId})).ok;

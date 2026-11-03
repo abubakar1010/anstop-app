@@ -1577,6 +1577,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get driverLabel => 'Chauffeur';
 
   @override
+  String get recenterOnDriver => 'Afficher le chauffeur';
+
+  @override
   String get passengerLabel => 'Passager';
 
   @override

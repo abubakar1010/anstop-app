@@ -18,6 +18,8 @@ import 'package:ride_sharing/services/map_camera_mixin.dart';
 import 'package:ride_sharing/services/socket_services.dart';
 import 'package:ride_sharing/services/ride_session_controller.dart';
 import 'package:ride_sharing/services/maps_service.dart';
+import 'package:ride_sharing/services/map_motion.dart';
+import 'package:ride_sharing/services/car_marker_animator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ride_sharing/l10n/l10n_helper.dart';
 import 'package:ride_sharing/app/utils/app_snackbar.dart';
@@ -71,9 +73,16 @@ class HomePageController extends GetxController
   static const double _imageNorthOffsetDegrees = 0.0;
 
   // Custom marker icons
-  ui.Image? _carImage;
   BitmapDescriptor? _pinMarkerIcon;
-  BitmapDescriptor? _smallCarIcon;
+  BitmapDescriptor? _carIcon;
+
+  // Every car on the map — the booked driver and nearby available ones —
+  // glides between fixes through one animator. Rotation is the marker's own
+  // `rotation`, so the icon is drawn once rather than on every fix.
+  static const String _driverMarkerId = 'driver_location';
+  static const String _nearbyMarkerPrefix = 'nearby_driver_';
+  late final CarMarkerAnimator _cars = CarMarkerAnimator(onFrame: _renderCars);
+  Timer? _coveredRenderRetry;
 
   // Route state for snap-to-route bearing
   List<LatLng> _currentRoutePoints = [];
@@ -83,8 +92,25 @@ class HomePageController extends GetxController
   // Tracks last position where Directions API was called — avoids redundant fetches
   LatLng? _lastFetchedDriverLocation;
 
-  // Tracks previous driver position to compute movement bearing before route loads
-  LatLng? _previousDriverPosition;
+  // The pickup or destination the booked driver is heading to; null when no
+  // driver is being tracked.
+  LatLng? _trackingTarget;
+  String? _trackingPinId;
+  bool get isTrackingDriver => _trackingTarget != null;
+
+  // Keeps the driver in frame until the user pans the map themselves; the
+  // recenter button turns it back on.
+  bool followDriver = true;
+  bool _hasFramedDriver = false;
+
+  // Nearby available drivers, watched while no driver is booked.
+  bool _watchingNearby = false;
+  // Cars added only because a ride request went to them; live nearby cars
+  // are never in here, so clearing the search leaves those on the map.
+  final Set<String> _searchOnlyCars = {};
+  LatLng? _nearbySubscribedAt;
+  Timer? _nearbyStaleTimer;
+  Worker? _connectionWorker;
 
   // Live position stream — keeps the passenger marker/camera on the real
   // device location while no driver is being tracked.
@@ -108,6 +134,17 @@ class HomePageController extends GetxController
     _rideSnapshotWorker = ever<RideSnapshot?>(RideSessionController.to.ride,
         _applyRideSnapshot);
     _applyRideSnapshot(RideSessionController.to.ride.value);
+    // A new connection has lost its rooms and, if the socket was replaced,
+    // its listeners too.
+    _connectionWorker = ever<bool>(SocketIoService.to.isConnected, (connected) {
+      if (!connected) return;
+      if (isTrackingDriver) _listenForDriverLocation();
+      if (_watchingNearby) {
+        _listenForNearbyDrivers();
+        _nearbySubscribedAt = null;
+        _startNearbyDrivers();
+      }
+    });
   }
 
   void _applyRideSnapshot(RideSnapshot? snapshot) {
@@ -171,12 +208,47 @@ class HomePageController extends GetxController
       _paymentRideShown = snapshot.rideId;
       _resumeIncompleteRide({...snapshot.data, '_id': snapshot.rideId});
     }
+    _syncDriverTracking(snapshot);
     update();
+  }
+
+  /// Puts the map in the mode the ride calls for: the booked car while a
+  /// driver is on the way or driving, otherwise every available car nearby.
+  /// Also how tracking comes back after the app is reopened mid-ride.
+  void _syncDriverTracking(RideSnapshot? snapshot) {
+    final status = snapshot?.status;
+    if (status == 'ACCEPTED' || status == 'ONGOING') {
+      final place = snapshot!.data[status == 'ACCEPTED' ? 'pickUp' : 'destination'];
+      final coords = place is Map ? place['coordinates'] : null;
+      if (coords is List && coords.length >= 2) {
+        // GeoJSON order: [longitude, latitude]
+        final target = LatLng((coords[1] as num).toDouble(), (coords[0] as num).toDouble());
+        if (status == 'ACCEPTED') {
+          startDriverLocationTracking(target);
+        } else {
+          startRideToDestinationTracking(target);
+        }
+      }
+      return;
+    }
+    // No snapshot means the server has no current ride for this user — it
+    // ended while the app was away.
+    if (isTrackingDriver &&
+        (status == null || status == 'CANCELLED' || status == 'COMPLETED' ||
+            status == 'PAID')) {
+      stopDriverLocationTracking();
+    }
+    if (!isTrackingDriver) _startNearbyDrivers();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused || state == AppLifecycleState.hidden) {
+      _cars.pause();
+      return;
+    }
     if (state != AppLifecycleState.resumed) return;
+    _cars.resume();
     // The user may have just granted permission — or switched location on —
     // in Settings. Without this retry the map would stay on the fallback
     // camera for the rest of the session.
@@ -279,24 +351,13 @@ class HomePageController extends GetxController
         'assets/images/location_pin.png',
         40,
       );
-      _carImage = await _loadCarImage('assets/images/3D_car.png', _carImageSize);
-      _smallCarIcon = await _getBitmapDescriptorFromAsset(
+      _carIcon = await _getBitmapDescriptorFromAsset(
         'assets/images/3D_car.png',
         _carImageSize,
       );
     } catch (_) {
       // Fallback to defaults if assets are missing
     }
-  }
-
-  Future<ui.Image> _loadCarImage(String assetPath, int width) async {
-    final ByteData data = await rootBundle.load(assetPath);
-    final ui.Codec codec = await ui.instantiateImageCodec(
-      data.buffer.asUint8List(),
-      targetWidth: width,
-    );
-    final ui.FrameInfo fi = await codec.getNextFrame();
-    return fi.image;
   }
 
   Future<BitmapDescriptor> _getBitmapDescriptorFromAsset(
@@ -312,125 +373,43 @@ class HomePageController extends GetxController
     return BitmapDescriptor.bytes(byteData!.buffer.asUint8List());
   }
 
-  /// Rotates the car image by [degrees] and returns it as a BitmapDescriptor.
-  Future<BitmapDescriptor> _getRotatedCarBitmap(double degrees) async {
-    debugPrint('🎨 [PASSENGER BITMAP] bearing=${degrees.toStringAsFixed(1)}°, offset=$_imageNorthOffsetDegrees°, carImage=${_carImage != null ? "loaded(${_carImage!.width}x${_carImage!.height})" : "NULL"}');
-    if (_carImage == null) {
-      debugPrint('🎨 [PASSENGER BITMAP] ❌ _carImage is null — returning default azure marker');
-      return BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure);
+  // ─── Car markers ───────────────────────────────────────────────────────────
+
+  bool _isCarMarker(String id) =>
+      id == _driverMarkerId || id.startsWith(_nearbyMarkerPrefix);
+
+  /// Redraws every car where the animator says it is right now. Only the map
+  /// rebuilds ('map' id), not the sheets and cards around it.
+  void _renderCars() {
+    // Another page is on top: nobody sees the map, so skip the marker work
+    // and check back shortly to draw the cars where they belong by then.
+    final context = scaffoldKey.currentContext;
+    if (context != null && ModalRoute.of(context)?.isCurrent == false) {
+      _coveredRenderRetry ??= Timer(const Duration(milliseconds: 500), () {
+        _coveredRenderRetry = null;
+        _renderCars();
+      });
+      return;
     }
-
-    final int w = _carImage!.width;
-    final int h = _carImage!.height;
-    final double diagonal = sqrt(w * w + h * h);
-    final int canvasSize = diagonal.ceil();
-
-    final double radians = ((degrees + _imageNorthOffsetDegrees) % 360) * pi / 180;
-
-    final ui.PictureRecorder recorder = ui.PictureRecorder();
-    final Canvas canvas = Canvas(
-        recorder, Rect.fromLTWH(0, 0, canvasSize.toDouble(), canvasSize.toDouble()));
-
-    final double cx = canvasSize / 2.0;
-    final double cy = canvasSize / 2.0;
-
-    canvas.save();
-    canvas.translate(cx, cy);
-    canvas.rotate(radians);
-    canvas.drawImage(
-      _carImage!,
-      Offset(-w / 2.0, -h / 2.0),
-      Paint()..filterQuality = FilterQuality.high,
-    );
-    canvas.restore();
-
-    final ui.Picture picture = recorder.endRecording();
-    final ui.Image rotatedImage = await picture.toImage(canvasSize, canvasSize);
-    final ByteData? byteData =
-        await rotatedImage.toByteData(format: ui.ImageByteFormat.png);
-
-    if (byteData == null) {
-      return BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure);
-    }
-    return BitmapDescriptor.bytes(byteData.buffer.asUint8List());
-  }
-
-  // ─── Bearing & snap-to-route ───────────────────────────────────────────────
-
-  double _calculateBearing(LatLng from, LatLng to) {
-    final lat1 = from.latitude * pi / 180;
-    final lat2 = to.latitude * pi / 180;
-    final diffLng = (to.longitude - from.longitude) * pi / 180;
-
-    final x = sin(diffLng) * cos(lat2);
-    final y = cos(lat1) * sin(lat2) -
-        sin(lat1) * cos(lat2) * cos(diffLng);
-
-    return (atan2(x, y) * 180 / pi + 360) % 360;
-  }
-
-  /// Snaps [pos] to the nearest point on the stored route and returns its
-  /// bearing toward the next route point.
-  ({LatLng position, double bearing}) _snapToRoute(LatLng pos) {
-    if (_currentRoutePoints.isEmpty) {
-      return (position: pos, bearing: _currentBearing);
-    }
-
-    double minDist = double.infinity;
-    LatLng closestPoint = pos;
-    int closestIdx = _currentRouteSegmentIndex;
-
-    final start = max(0, _currentRouteSegmentIndex - 2);
-    for (int i = start; i < _currentRoutePoints.length; i++) {
-      final d = _haversineKm(
-            pos.latitude,
-            pos.longitude,
-            _currentRoutePoints[i].latitude,
-            _currentRoutePoints[i].longitude,
-          ) *
-          1000; // metres
-      if (d < minDist) {
-        minDist = d;
-        closestPoint = _currentRoutePoints[i];
-        closestIdx = i;
-      }
-    }
-
-    _currentRouteSegmentIndex = closestIdx;
-
-    double bearing = _currentBearing;
-    if (closestIdx < _currentRoutePoints.length - 1) {
-      bearing = _calculateBearing(
-          closestPoint, _currentRoutePoints[closestIdx + 1]);
-    }
-    _currentBearing = bearing;
-
-    return (position: closestPoint, bearing: bearing);
-  }
-
-  /// Updates the driver marker with a rotated car icon at [position].
-  Future<void> _updateDriverMarkerWithRotation(
-      LatLng position, double bearing, String locationName) async {
-    debugPrint('🚕 [PASSENGER MARKER] bearing=${bearing.toStringAsFixed(1)}°, pos=${position.latitude.toStringAsFixed(6)},${position.longitude.toStringAsFixed(6)}, carImage=${_carImage != null ? "loaded" : "NULL"}');
-
-    final BitmapDescriptor icon = await _getRotatedCarBitmap(bearing);
-
-    debugPrint('🚕 [PASSENGER MARKER] icon.hashCode=${icon.hashCode}, markersBeforeUpdate=${markers.length}');
-
+    final cars = _cars.frames;
+    final icon = _carIcon ??
+        BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure);
     markers = {
-      ...markers.where((m) => m.markerId.value != 'driver_location'),
-      Marker(
-        markerId: const MarkerId('driver_location'),
-        position: position,
-        icon: icon,
-        // The driver's app sends its own label; name the pin in this user's language.
-        infoWindow: InfoWindow(title: AppLocalization.tr.driverLabel),
-        anchor: const Offset(0.5, 0.5),
-        flat: true,
-      ),
+      ...markers.where((m) => !_isCarMarker(m.markerId.value)),
+      for (final car in cars.entries)
+        Marker(
+          markerId: MarkerId(car.key),
+          position: car.value.position,
+          rotation: (car.value.bearing + _imageNorthOffsetDegrees) % 360,
+          icon: icon,
+          // The driver's app sends its own label; name the pin in this user's language.
+          infoWindow: InfoWindow(title: AppLocalization.tr.driverLabel),
+          anchor: const Offset(0.5, 0.5),
+          flat: true,
+          zIndexInt: car.key == _driverMarkerId ? 2 : 1,
+        ),
     };
-
-    debugPrint('🚕 [PASSENGER MARKER] ✅ markers updated, new size=${markers.length}');
+    update(['map']);
   }
 
   // ─── Location permission & initial position ────────────────────────────────
@@ -445,6 +424,7 @@ class HomePageController extends GetxController
         isLoading = false;
         _updateCurrentLocationMarker(position);
         update();
+        _startNearbyDrivers();
 
         // Don't fight the camera while a driver route is being framed.
         if (_followUserCamera) {
@@ -491,143 +471,234 @@ class HomePageController extends GetxController
     currentPosition = position;
     _updateCurrentLocationMarker(position);
     update();
+    _startNearbyDrivers();
 
     moveCameraTo(LatLng(position.latitude, position.longitude));
   }
 
   // ─── Driver location tracking + polyline ──────────────────────────────────
 
-  void startDriverLocationTracking(LatLng pickupLocation) {
-    _lastFetchedDriverLocation = null;
-    _followUserCamera = false;
-    _resetRouteState();
-
-    debugPrint('🟢 [POLYLINE DEBUG] startDriverLocationTracking called');
-    debugPrint('🟢 [POLYLINE DEBUG] pickupLocation = ${pickupLocation.latitude}, ${pickupLocation.longitude}');
-
-    // Add pickup pin marker
-    _addPinMarker('pickup_location', pickupLocation, AppLocalization.tr.pickupLabel);
-
-    SocketIoService.to.onUpdateLocation((data) async {
-      if (data == null || data is! Map<String, dynamic>) return;
-
-      final lat = (data['latitude'] as num).toDouble();
-      final lng = (data['longitude'] as num).toDouble();
-      final locationName = data['locationName'] as String? ?? AppLocalization.tr.driverLabel;
-      final driverLatLng = LatLng(lat, lng);
-
-      debugPrint('🟡 [SOCKET] update-location → lat=$lat, lng=$lng');
-      debugPrint('🟡 [SOCKET] routePoints=${_currentRoutePoints.length}, prevDriverPos=$_previousDriverPosition');
-      debugPrint('🟡 [POLYLINE DEBUG] update-location received → driver lat=$lat, lng=$lng');
-      debugPrint('🟡 [POLYLINE DEBUG] polyline origin (driver) = $lat, $lng');
-      debugPrint('🟡 [POLYLINE DEBUG] polyline destination (pickup) = ${pickupLocation.latitude}, ${pickupLocation.longitude}');
-
-      // Only re-fetch Directions API when driver has moved ≥ 50 m
-      final shouldFetch = _lastFetchedDriverLocation == null ||
-          _haversineKm(
-                _lastFetchedDriverLocation!.latitude,
-                _lastFetchedDriverLocation!.longitude,
-                lat,
-                lng,
-              ) >=
-              0.05;
-
-      debugPrint('🟡 [POLYLINE DEBUG] shouldFetch=$shouldFetch (lastFetched=${_lastFetchedDriverLocation?.latitude}, ${_lastFetchedDriverLocation?.longitude})');
-
-      if (shouldFetch) {
-        _lastFetchedDriverLocation = driverLatLng;
-        await _fetchAndDrawRoute(driverLatLng, pickupLocation);
-      }
-
-      // Snap to route for smooth bearing.
-      // If route not yet loaded, fall back to movement direction bearing.
-      final snapped = _snapToRoute(driverLatLng);
-      double bearing = snapped.bearing;
-      if (_currentRoutePoints.isEmpty && _previousDriverPosition != null) {
-        bearing = _calculateBearing(_previousDriverPosition!, driverLatLng);
-        _currentBearing = bearing;
-      }
-      _previousDriverPosition = driverLatLng;
-
-      await _updateDriverMarkerWithRotation(snapped.position, bearing, locationName);
-      update();
-
-      // Animate camera to keep both driver and pickup in frame
-      final bounds = LatLngBounds(
-        southwest: LatLng(
-          min(lat, pickupLocation.latitude) - 0.005,
-          min(lng, pickupLocation.longitude) - 0.005,
-        ),
-        northeast: LatLng(
-          max(lat, pickupLocation.latitude) + 0.005,
-          max(lng, pickupLocation.longitude) + 0.005,
-        ),
-      );
-      mapController?.animateCamera(CameraUpdate.newLatLngBounds(bounds, 60));
-    });
-  }
+  void startDriverLocationTracking(LatLng pickupLocation) => _trackAssignedDriver(
+      pickupLocation, 'pickup_location', AppLocalization.tr.pickupLabel);
 
   // Switch polyline target from pickup → destination when ride begins
   void startRideToDestinationTracking(LatLng destination) {
-    SocketIoService.to.offUpdateLocation();
+    markers = Set<Marker>.from(
+        markers.where((m) => m.markerId.value != 'pickup_location'));
+    _trackAssignedDriver(
+        destination, 'destination_location', AppLocalization.tr.destinationLabel);
+  }
+
+  void _trackAssignedDriver(LatLng target, String pinId, String pinLabel) {
+    // The sheets and the ride snapshot can both ask for the same leg.
+    if (_trackingTarget == target && _trackingPinId == pinId) return;
+
+    _stopNearbyDrivers(clear: true);
     _lastFetchedDriverLocation = null;
     _followUserCamera = false;
     _resetRouteState();
+    _trackingTarget = target;
+    _trackingPinId = pinId;
+    followDriver = true;
+    _hasFramedDriver = false;
 
-    // Replace pickup pin with destination pin
-    markers = Set<Marker>.from(
-        markers.where((m) => m.markerId.value != 'pickup_location'));
-    _addPinMarker('destination_location', destination, AppLocalization.tr.destinationLabel);
+    _addPinMarker(pinId, target, pinLabel);
+    update();
+    _listenForDriverLocation();
+  }
 
-    SocketIoService.to.onUpdateLocation((data) async {
-      if (data == null || data is! Map<String, dynamic>) return;
-
-      final lat = (data['latitude'] as num).toDouble();
-      final lng = (data['longitude'] as num).toDouble();
-      final locationName = data['locationName'] as String? ?? AppLocalization.tr.driverLabel;
-      final driverLatLng = LatLng(lat, lng);
-
-      // Re-fetch route only when driver moves ≥ 50 m
-      final shouldFetch = _lastFetchedDriverLocation == null ||
-          _haversineKm(
-                _lastFetchedDriverLocation!.latitude,
-                _lastFetchedDriverLocation!.longitude,
-                lat,
-                lng,
-              ) >=
-              0.05;
-
-      if (shouldFetch) {
-        _lastFetchedDriverLocation = driverLatLng;
-        await _fetchAndDrawRoute(driverLatLng, destination);
-      }
-
-      // Snap to route for smooth bearing.
-      // If route not yet loaded, fall back to movement direction bearing.
-      final snapped = _snapToRoute(driverLatLng);
-      double bearing = snapped.bearing;
-      if (_currentRoutePoints.isEmpty && _previousDriverPosition != null) {
-        bearing = _calculateBearing(_previousDriverPosition!, driverLatLng);
-        _currentBearing = bearing;
-      }
-      _previousDriverPosition = driverLatLng;
-
-      await _updateDriverMarkerWithRotation(snapped.position, bearing, locationName);
-      update();
-
-      // Keep both driver and destination in frame
-      final bounds = LatLngBounds(
-        southwest: LatLng(
-          min(lat, destination.latitude) - 0.005,
-          min(lng, destination.longitude) - 0.005,
-        ),
-        northeast: LatLng(
-          max(lat, destination.latitude) + 0.005,
-          max(lng, destination.longitude) + 0.005,
-        ),
-      );
-      mapController?.animateCamera(CameraUpdate.newLatLngBounds(bounds, 60));
+  void _listenForDriverLocation() {
+    SocketIoService.to.offUpdateLocation();
+    SocketIoService.to.onUpdateLocation((data) {
+      if (data is Map) _onDriverFix(Map<String, dynamic>.from(data));
     });
+  }
+
+  Future<void> _onDriverFix(Map<String, dynamic> data) async {
+    final target = _trackingTarget;
+    final lat = (data['latitude'] as num?)?.toDouble();
+    final lng = (data['longitude'] as num?)?.toDouble();
+    if (target == null || lat == null || lng == null) return;
+    final fix = LatLng(lat, lng);
+
+    // Only re-fetch Directions API when driver has moved ≥ 50 m
+    if (_lastFetchedDriverLocation == null ||
+        distanceMeters(_lastFetchedDriverLocation!, fix) >= 50) {
+      _lastFetchedDriverLocation = fix;
+      await _fetchAndDrawRoute(fix, target);
+      // The leg may have changed (or ended) while directions were loading.
+      if (_trackingTarget != target) return;
+    }
+
+    final previous = _cars.targetOf(_driverMarkerId);
+    final heading = (data['heading'] as num?)?.toDouble();
+    final speed = (data['speed'] as num?)?.toDouble() ?? 0;
+
+    // On the route, ride along it; off it, trust the phone's heading while
+    // moving, else the direction between the last two fixes.
+    LatLng position = fix;
+    double bearing = _currentBearing;
+    final projection = projectOntoRoute(fix, _currentRoutePoints,
+        fromIndex: _currentRouteSegmentIndex);
+    if (projection != null && projection.offRouteMeters <= kMaxRouteSnapMeters) {
+      position = projection.position;
+      bearing = projection.bearing;
+      _currentRouteSegmentIndex = projection.segmentIndex;
+    } else if (heading != null && speed > 1) {
+      bearing = heading;
+    } else if (previous != null && distanceMeters(previous, fix) > 2) {
+      bearing = bearingBetween(previous, fix);
+    }
+    _currentBearing = bearing;
+
+    _cars.moveTo(_driverMarkerId, position, bearing,
+        timestamp: (data['timestamp'] as num?)?.toInt(),
+        animate: previous != null);
+    await _keepDriverInView(fix, target);
+  }
+
+  /// Frames driver and target once, then only re-frames when the car is about
+  /// to leave the screen — not on every fix, and never after the user has
+  /// moved the map themselves.
+  Future<void> _keepDriverInView(LatLng driver, LatLng target) async {
+    final controller = mapController;
+    if (!followDriver || controller == null) return;
+    if (_hasFramedDriver) {
+      try {
+        final visible = await controller.getVisibleRegion();
+        if (visible.contains(driver)) return;
+      } catch (_) {
+        // The map may be gone; the next fix will try again.
+        return;
+      }
+    }
+    _hasFramedDriver = true;
+    _frameDriverAndTarget(driver, target);
+  }
+
+  void _frameDriverAndTarget(LatLng driver, LatLng target) {
+    final bounds = LatLngBounds(
+      southwest: LatLng(
+        min(driver.latitude, target.latitude) - 0.005,
+        min(driver.longitude, target.longitude) - 0.005,
+      ),
+      northeast: LatLng(
+        max(driver.latitude, target.latitude) + 0.005,
+        max(driver.longitude, target.longitude) + 0.005,
+      ),
+    );
+    mapController?.animateCamera(CameraUpdate.newLatLngBounds(bounds, 60));
+  }
+
+  /// The user touched the map: stop pulling the camera back to the driver.
+  void onUserMovedMap() {
+    if (!isTrackingDriver || !followDriver) return;
+    followDriver = false;
+    update(['map']);
+  }
+
+  void recenterOnDriver() {
+    final target = _trackingTarget;
+    if (target == null) return;
+    followDriver = true;
+    _hasFramedDriver = true;
+    _frameDriverAndTarget(_cars.targetOf(_driverMarkerId) ?? target, target);
+    update(['map']);
+  }
+
+  // ─── Nearby available drivers (live, before a driver is booked) ──────────
+
+  /// Watches the available cars around the user. Cheap to call on every fix:
+  /// it only re-subscribes after the user has moved 1 km.
+  Future<void> _startNearbyDrivers() async {
+    final position = currentPosition;
+    if (position == null || isTrackingDriver) return;
+    final here = LatLng(position.latitude, position.longitude);
+    if (_watchingNearby &&
+        _nearbySubscribedAt != null &&
+        distanceMeters(_nearbySubscribedAt!, here) < 1000) {
+      return;
+    }
+
+    final socket = SocketIoService.to;
+    if (!_watchingNearby) {
+      _watchingNearby = true;
+      _listenForNearbyDrivers();
+      _nearbyStaleTimer ??= Timer.periodic(const Duration(seconds: 15), (_) {
+        _cars.removeStale(const Duration(seconds: 60),
+            where: (id) => id.startsWith(_nearbyMarkerPrefix));
+      });
+    }
+    // Never ask while offline: a request on a dead socket makes the service
+    // build a new one, dropping every other screen's listeners. The
+    // reconnect worker subscribes as soon as the socket is back.
+    if (!socket.isSocketReady) return;
+    _nearbySubscribedAt = here;
+
+    final drivers = await socket.subscribeNearbyDrivers(
+        latitude: here.latitude, longitude: here.longitude);
+    if (drivers == null) {
+      // Not connected yet — the next fix or the reconnect retries.
+      _nearbySubscribedAt = null;
+      return;
+    }
+    if (!_watchingNearby) return;
+    for (final raw in drivers) {
+      if (raw is! Map) continue;
+      final lat = (raw['latitude'] as num?)?.toDouble();
+      final lng = (raw['longitude'] as num?)?.toDouble();
+      if (lat == null || lng == null || (lat == 0 && lng == 0)) continue;
+      final id = '$_nearbyMarkerPrefix${raw['driverId']}';
+      _searchOnlyCars.remove(id);
+      if (_cars.contains(id)) continue;
+      _cars.moveTo(id, LatLng(lat, lng),
+          (raw['heading'] as num?)?.toDouble() ?? 0,
+          animate: false);
+    }
+  }
+
+  void _listenForNearbyDrivers() {
+    SocketIoService.to
+      ..onNearbyDriverLocation(_onNearbyDriverFix)
+      ..onNearbyDriverRemoved((data) {
+        if (data is Map) _cars.remove('$_nearbyMarkerPrefix${data['driverId']}');
+      });
+  }
+
+  void _onNearbyDriverFix(dynamic data) {
+    if (!_watchingNearby || data is! Map) return;
+    final lat = (data['latitude'] as num?)?.toDouble();
+    final lng = (data['longitude'] as num?)?.toDouble();
+    if (lat == null || lng == null) return;
+    final id = '$_nearbyMarkerPrefix${data['driverId']}';
+    _searchOnlyCars.remove(id);
+    final fix = LatLng(lat, lng);
+    final previous = _cars.targetOf(id);
+    final heading = (data['heading'] as num?)?.toDouble();
+    final bearing = heading ??
+        (previous != null && distanceMeters(previous, fix) > 2
+            ? bearingBetween(previous, fix)
+            : _cars.bearingOf(id) ?? 0);
+    _cars.moveTo(id, fix, bearing,
+        timestamp: (data['timestamp'] as num?)?.toInt(),
+        animate: previous != null);
+  }
+
+  void _stopNearbyDrivers({bool clear = false}) {
+    if (_watchingNearby) {
+      _watchingNearby = false;
+      _nearbySubscribedAt = null;
+      _nearbyStaleTimer?.cancel();
+      _nearbyStaleTimer = null;
+      SocketIoService.to
+        ..offNearbyDriverLocation()
+        ..offNearbyDriverRemoved()
+        ..unsubscribeNearbyDrivers();
+    }
+    if (clear) {
+      _searchOnlyCars.clear();
+      _cars.removeWhere((id) => id.startsWith(_nearbyMarkerPrefix));
+    }
   }
 
   // ─── Destination 500 m radius circle ──────────────────────────────────────
@@ -715,10 +786,11 @@ class HomePageController extends GetxController
 
   // ─── Nearest-driver markers (shown while passenger is searching) ───────────
 
+  /// The drivers a new request was sent to. They join the live nearby cars
+  /// (same marker ids), so they keep moving while the user waits for offers.
   void showNearestDriverMarkers(List<dynamic> drivers) {
-    final newMarkers = <Marker>{};
     for (final raw in drivers) {
-      if (raw is! Map<String, dynamic>) continue;
+      if (raw is! Map) continue;
       final id = raw['_id'] as String? ?? '';
       if (id.isEmpty) continue;
 
@@ -730,52 +802,42 @@ class HomePageController extends GetxController
           [0.0, 0.0];
       if (coords.length < 2) continue;
 
-      final lat = coords[1];
-      final lng = coords[0];
-      final locationName = raw['locationName'] as String? ?? AppLocalization.tr.driverLabel;
-
-      newMarkers.add(Marker(
-        markerId: MarkerId('nearest_driver_$id'),
-        position: LatLng(lat, lng),
-        icon: _smallCarIcon ??
-            BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
-        // The driver's app sends its own label; name the pin in this user's language.
-        infoWindow: InfoWindow(title: AppLocalization.tr.driverLabel),
-        anchor: const Offset(0.5, 0.5),
-        flat: true,
-      ));
+      final markerId = '$_nearbyMarkerPrefix$id';
+      if (_cars.contains(markerId)) continue;
+      _searchOnlyCars.add(markerId);
+      _cars.moveTo(markerId, LatLng(coords[1], coords[0]),
+          (raw['locationHeading'] as num?)?.toDouble() ?? 0,
+          animate: false);
     }
-
-    // Remove old nearest-driver markers, keep everything else
-    markers = {
-      ...markers.where((m) => !m.markerId.value.startsWith('nearest_driver_')),
-      ...newMarkers,
-    };
-    update();
   }
 
+  /// Ends the search: drops the cars only it put on the map. Live nearby cars
+  /// stay; booking a driver clears those through [_trackAssignedDriver].
   void clearNearestDriverMarkers() {
-    markers = Set<Marker>.from(
-      markers.where((m) => !m.markerId.value.startsWith('nearest_driver_')),
-    );
-    update();
+    final searchOnly = Set<String>.from(_searchOnlyCars);
+    _searchOnlyCars.clear();
+    _cars.removeWhere(searchOnly.contains);
   }
 
   void stopDriverLocationTracking() {
     SocketIoService.to.offUpdateLocation();
     _lastFetchedDriverLocation = null;
+    _trackingTarget = null;
+    _trackingPinId = null;
+    followDriver = true;
     _followUserCamera = true;
     _resetRouteState();
+    _cars.remove(_driverMarkerId);
     polylines = {};
     circles = {};
     markers = Set<Marker>.from(
       markers.where((m) =>
-          m.markerId.value != 'driver_location' &&
           m.markerId.value != 'pickup_location' &&
           m.markerId.value != 'destination_location' &&
           m.markerId.value != 'destination_radius_label'),
     );
     update();
+    if (!rideRequestActive) _startNearbyDrivers();
   }
 
   // ─── Helpers ──────────────────────────────────────────────────────────────
@@ -784,7 +846,6 @@ class HomePageController extends GetxController
     _currentRoutePoints = [];
     _currentRouteSegmentIndex = 0;
     _currentBearing = 0.0;
-    _previousDriverPosition = null;
   }
 
   void _addPinMarker(String id, LatLng position, String title) {
@@ -882,23 +943,18 @@ class HomePageController extends GetxController
     return points;
   }
 
-  double _haversineKm(double lat1, double lon1, double lat2, double lon2) {
-    const r = 6371.0;
-    final dLat = (lat2 - lat1) * pi / 180;
-    final dLon = (lon2 - lon1) * pi / 180;
-    final a = sin(dLat / 2) * sin(dLat / 2) +
-        cos(lat1 * pi / 180) *
-            cos(lat2 * pi / 180) *
-            sin(dLon / 2) *
-            sin(dLon / 2);
-    return r * 2 * atan2(sqrt(a), sqrt(1 - a));
-  }
-
   // ──────────────────────────────────────────────────────────────────────────
 
   @override
   void onClose() {
     _rideSnapshotWorker?.dispose();
+    _connectionWorker?.dispose();
+    _stopNearbyDrivers();
+    // The socket outlives this controller; its handler must not either.
+    SocketIoService.to.offUpdateLocation();
+    _trackingTarget = null;
+    _cars.dispose();
+    _coveredRenderRetry?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     _positionSubscription?.cancel();
     disposeMapController();

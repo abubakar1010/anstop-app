@@ -58,3 +58,11 @@ upload-keystore.jks
 android/key.properties
 branch_structure.json
 .gitignore
+.env.*
+!.env.example
+node_modules/
+build/
+.next/
+*.apk
+*.aab
+*.zip

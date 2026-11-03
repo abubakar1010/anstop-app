@@ -15,6 +15,7 @@ import 'package:ride_sharing/services/map_camera_mixin.dart';
 import 'package:ride_sharing/services/socket_services.dart';
 import 'package:ride_sharing/services/ride_session_controller.dart';
 import 'package:ride_sharing/services/maps_service.dart';
+import 'package:ride_sharing/services/map_motion.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ride_sharing/l10n/l10n_helper.dart';
 import 'package:ride_sharing/app/utils/app_snackbar.dart';
@@ -67,6 +68,13 @@ class DriverHomeScreenController extends GetxController
   // Location update service & timer (when driver is online)
   Timer? _locationUpdateTimer;
   static const Duration _locationUpdateInterval = Duration(seconds: 20);
+
+  // Live position sent to riders: often enough for their maps to animate
+  // smoothly, not on every 1 m GPS fix.
+  static const Duration _minEmitInterval = Duration(seconds: 2);
+  static const double _minEmitDistanceMeters = 5;
+  DateTime? _lastEmitAt;
+  LatLng? _lastEmitPosition;
 
   // Idle GPS tracking (when online, no active route)
   StreamSubscription<Position>? _idleLocationSubscription;
@@ -296,62 +304,25 @@ class DriverHomeScreenController extends GetxController
     update();
   }
 
-  // Calculate bearing (angle) between two points in degrees
-  double _calculateBearing(LatLng from, LatLng to) {
-    final lat1 = from.latitude * math.pi / 180;
-    final lat2 = to.latitude * math.pi / 180;
-    final diffLng = (to.longitude - from.longitude) * math.pi / 180;
-
-    final x = math.sin(diffLng) * math.cos(lat2);
-    final y = math.cos(lat1) * math.sin(lat2) -
-        math.sin(lat1) * math.cos(lat2) * math.cos(diffLng);
-
-    final bearing = math.atan2(x, y);
-    return (bearing * 180 / math.pi + 360) % 360;
-  }
-
-  // Find the closest point on the route and return snapped position with bearing
+  // Snap the car onto the route segment it is on (not the nearest route
+  // vertex, which made it hop point to point) — the same projection riders
+  // use, so both apps draw this car in the same place. Fixes far off the
+  // route are drawn where they are.
   ({LatLng position, double bearing, int segmentIndex}) _snapToRouteWithBearing(LatLng currentPosition) {
-    if (_currentRoutePoints.isEmpty) {
-      return (position: currentPosition, bearing: _currentBearing, segmentIndex: 0);
+    final projection = projectOntoRoute(currentPosition, _currentRoutePoints,
+        fromIndex: _currentRouteSegmentIndex);
+    if (projection == null) {
+      return (position: currentPosition, bearing: _currentBearing, segmentIndex: _currentRouteSegmentIndex);
     }
 
-    double minDistance = double.infinity;
-    LatLng closestPoint = currentPosition;
-    int closestSegmentIndex = _currentRouteSegmentIndex;
+    _logger.i('Snapped to route segment ${projection.segmentIndex}, distance: ${projection.offRouteMeters.toStringAsFixed(1)}m, bearing: ${projection.bearing.toStringAsFixed(1)}°');
 
-    // Search from current segment onwards (driver moves forward)
-    // Also check a few segments back in case of GPS drift
-    final startIndex = math.max(0, _currentRouteSegmentIndex - 2);
-
-    for (int i = startIndex; i < _currentRoutePoints.length; i++) {
-      final point = _currentRoutePoints[i];
-      final distance = Geolocator.distanceBetween(
-        currentPosition.latitude,
-        currentPosition.longitude,
-        point.latitude,
-        point.longitude,
-      );
-
-      if (distance < minDistance) {
-        minDistance = distance;
-        closestPoint = point;
-        closestSegmentIndex = i;
-      }
-    }
-
-    // Calculate bearing to next point on route
-    double bearing = _currentBearing;
-    if (closestSegmentIndex < _currentRoutePoints.length - 1) {
-      bearing = _calculateBearing(
-        closestPoint,
-        _currentRoutePoints[closestSegmentIndex + 1],
-      );
-    }
-
-    _logger.i('Snapped to route point $closestSegmentIndex, distance: ${minDistance.toStringAsFixed(1)}m, bearing: ${bearing.toStringAsFixed(1)}°');
-
-    return (position: closestPoint, bearing: bearing, segmentIndex: closestSegmentIndex);
+    final onRoute = projection.offRouteMeters <= kMaxRouteSnapMeters;
+    return (
+      position: onRoute ? projection.position : currentPosition,
+      bearing: projection.bearing,
+      segmentIndex: projection.segmentIndex,
+    );
   }
 
   // Update driver marker with position and rotated bitmap
@@ -1041,14 +1012,11 @@ class DriverHomeScreenController extends GetxController
 
       currentPosition = position;
 
-      // Emit update-location socket event with current GPS position
-      await SocketIoService.to.emitUpdateLocation(
-        locationName: 'Current Location',
-        latitude: position.latitude,
-        longitude: position.longitude,
-      );
-
       final currentLatLng = LatLng(position.latitude, position.longitude);
+
+      // Emit update-location socket event with current GPS position
+      _maybeEmitLocation(currentLatLng,
+          heading: _gpsHeading(position), speed: position.speed);
 
       if (_currentRoutePoints.isNotEmpty) {
         final snappedResult = _snapToRouteWithBearing(currentLatLng);
@@ -1133,12 +1101,20 @@ class DriverHomeScreenController extends GetxController
   /// Stop simulation mode
   void stopSimulation() {
     _logger.i('Stopping route simulation');
+    final bool wasSimulating = isSimulationMode.value;
 
     _simulationTimer?.cancel();
     _simulationTimer = null;
     isSimulationMode.value = false;
     _simulationPointIndex = 0;
     _simulationProgress = 0.0;
+
+    // Put the server (and the rider's map) back on the real position.
+    final real = currentPosition;
+    if (wasSimulating && real != null) {
+      _maybeEmitLocation(LatLng(real.latitude, real.longitude),
+          heading: _gpsHeading(real), speed: real.speed, force: true);
+    }
 
     update();
   }
@@ -1180,14 +1156,17 @@ class DriverHomeScreenController extends GetxController
     }
 
     // Interpolate position between current and next point
-    final interpolatedPosition = _interpolatePosition(
+    final interpolatedPosition = lerpLatLng(
       currentPoint,
       nextPoint,
       _simulationProgress,
     );
 
     // Calculate bearing to next point
-    final bearing = _calculateBearing(currentPoint, nextPoint);
+    final bearing = bearingBetween(currentPoint, nextPoint);
+
+    // Riders see the simulated car move as if it were real.
+    _maybeEmitLocation(interpolatedPosition, heading: bearing, speed: 10, simulated: true);
 
     // Update marker with interpolated position and rotation
     await _updateDriverMarkerWithRotation(interpolatedPosition, bearing);
@@ -1195,13 +1174,6 @@ class DriverHomeScreenController extends GetxController
     _logger.d('Simulation: point $_simulationPointIndex/${_currentRoutePoints.length - 1}, progress: ${(_simulationProgress * 100).toStringAsFixed(0)}%, bearing: ${bearing.toStringAsFixed(1)}°');
 
     update();
-  }
-
-  /// Interpolate between two LatLng points
-  LatLng _interpolatePosition(LatLng from, LatLng to, double progress) {
-    final lat = from.latitude + (to.latitude - from.latitude) * progress;
-    final lng = from.longitude + (to.longitude - from.longitude) * progress;
-    return LatLng(lat, lng);
   }
 
   /// Set simulation speed (0.01 = slow, 0.1 = fast)
@@ -1271,19 +1243,70 @@ class DriverHomeScreenController extends GetxController
     ) async {
       currentPosition = position;
       final currentLatLng = LatLng(position.latitude, position.longitude);
+      // Only a real movement gives a direction; before that the car's last
+      // known heading (kept on the server) is better than a made-up north.
+      final bool hasMovementBearing = _previousIdlePosition != null;
 
       if (_previousIdlePosition != null) {
-        _currentBearing = _calculateBearing(_previousIdlePosition!, currentLatLng);
+        _currentBearing = bearingBetween(_previousIdlePosition!, currentLatLng);
         _logger.i('🟢 [IDLE TRACK] moved — bearing=${_currentBearing.toStringAsFixed(1)}°, from=${_previousIdlePosition!.latitude.toStringAsFixed(6)} to=${currentLatLng.latitude.toStringAsFixed(6)}');
       } else {
         _logger.i('🟢 [IDLE TRACK] first fix — lat=${position.latitude.toStringAsFixed(6)}, bearing stays ${_currentBearing.toStringAsFixed(1)}°');
       }
       _previousIdlePosition = currentLatLng;
 
+      // Nearby riders watch idle cars move too.
+      _maybeEmitLocation(currentLatLng,
+          heading: _gpsHeading(position) ?? (hasMovementBearing ? _currentBearing : null),
+          speed: position.speed);
+
       await _updateDriverMarkerWithRotation(currentLatLng, _currentBearing);
       _logger.i('🟢 [IDLE TRACK] calling update()');
       update();
     });
+  }
+
+  /// GPS heading, or null while it isn't meaningful (standing still or no
+  /// fix on direction yet).
+  double? _gpsHeading(Position position) =>
+      position.speed > 0.5 && position.heading >= 0 ? position.heading % 360 : null;
+
+  /// Sends [position] to the server when the driver has moved enough since
+  /// the last send, or when the stationary heartbeat is due. [force] is the
+  /// heartbeat itself.
+  ///
+  /// While simulating, only simulated points ([simulated]) go out: real GPS
+  /// fixes and the heartbeat would make the rider's car jump between the two.
+  void _maybeEmitLocation(LatLng position,
+      {double? heading, double? speed, bool force = false, bool simulated = false}) {
+    if (isSimulationMode.value && !simulated) return;
+    final now = DateTime.now();
+    final last = _lastEmitAt;
+    final sinceLast = last == null ? null : now.difference(last);
+    final moved = _lastEmitPosition == null
+        ? double.infinity
+        : Geolocator.distanceBetween(_lastEmitPosition!.latitude,
+            _lastEmitPosition!.longitude, position.latitude, position.longitude);
+    final due = force ||
+        sinceLast == null ||
+        sinceLast >= _locationUpdateInterval ||
+        (sinceLast >= _minEmitInterval && moved >= _minEmitDistanceMeters);
+    if (!due) return;
+
+    _lastEmitAt = now;
+    _lastEmitPosition = position;
+    unawaited(SocketIoService.to
+        .emitUpdateLocation(
+          locationName: 'Current Location',
+          latitude: position.latitude,
+          longitude: position.longitude,
+          heading: heading,
+          speed: speed != null && speed >= 0 ? speed : null,
+        )
+        .catchError((Object e) {
+      _logger.e('Error sending location: $e');
+      return false;
+    }));
   }
 
   void _stopIdleLocationTracking() {
@@ -1301,15 +1324,11 @@ class DriverHomeScreenController extends GetxController
     // The backend has no REST endpoint for this: a driver's location is only
     // stored through the `update-location` socket event, and nearest-driver
     // search reads that stored location.
-    try {
-      await SocketIoService.to.emitUpdateLocation(
-        locationName: 'Current Location',
-        latitude: currentPosition!.latitude,
-        longitude: currentPosition!.longitude,
-      );
-    } catch (e) {
-      _logger.e('Error posting current location: $e');
-    }
+    _maybeEmitLocation(
+        LatLng(currentPosition!.latitude, currentPosition!.longitude),
+        heading: _gpsHeading(currentPosition!),
+        speed: currentPosition!.speed,
+        force: true);
   }
 
   // ==================== END ONLINE LOCATION UPDATES ====================
