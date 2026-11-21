@@ -28,7 +28,9 @@ class ApiClient {
         onRequest: (options, handler) async {
           options.headers['Accept-Language'] = LocaleService.languageCode;
           final token = await SessionController.to.accessToken();
-          if (token != null && token.isNotEmpty)
+          if (token != null &&
+              token.isNotEmpty &&
+              options.headers['Authorization'] == null)
             options.headers['Authorization'] = 'Bearer $token';
           handler.next(options);
         },
@@ -79,7 +81,17 @@ class ApiClient {
     Map<String, dynamic>? body,
     String? accessToken,
     Map<String, String>? customHeaders,
-  }) => _request('POST', url, data: body, headers: customHeaders);
+  }) => _request(
+    'POST',
+    url,
+    data: body,
+    headers: {
+      ...?customHeaders,
+      // Explicit token (e.g. the password-reset token from verify-OTP).
+      if (accessToken != null && accessToken.isNotEmpty)
+        'Authorization': 'Bearer $accessToken',
+    },
+  );
   Future<ApiResponse> patchRequest(
     String url, {
     Map<String, dynamic>? body,

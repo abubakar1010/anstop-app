@@ -149,10 +149,17 @@ class OtpVerificationController extends GetxController {
       } else {
         // Show error message
         debugPrint('otp_verification_controller: ${response.errorMessage}');
-        errorMessage.value = AppLocalization.tr.genericErrorMessage;
+        // A wrong, used or expired code is the user's to retry; only other
+        // failures are a generic error.
+        final message = switch (response.statusCode) {
+          401 || 404 => AppLocalization.tr.invalidCodeMessage,
+          429 => AppLocalization.tr.tooManyRequestsMessage,
+          _ => response.errorMessage,
+        };
+        errorMessage.value = message;
         AppSnackbar.snackbar(
           AppLocalization.tr.verificationFailedTitle,
-          AppLocalization.tr.genericErrorMessage,
+          message,
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.red,
           colorText: Colors.white,
