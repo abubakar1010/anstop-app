@@ -1,0 +1,95 @@
+# Codemagic CI/CD for Anstop (iOS -> TestFlight / App Store Connect).
+#
+# One-time setup lives in Codemagic's UI, not in this file. See
+# docs/codemagic-ios-setup.md for the step-by-step guide.
+#
+# Needs in Codemagic:
+#   - App Store Connect integration named "anstop-asc"   (Team settings > Integrations)
+#   - Environment variable group named "anstop_secrets"   containing
+#       STRIPE_PUBLISHABLE_KEY   (pk_live_... for release)
+#       GOOGLE_MAPS_API_KEY
+#   - APP_STORE_APPLE_ID below set to the app's numeric Apple ID
+#     (App Store Connect > your app > App Information > Apple ID)
+
+workflows:
+  ios-release:
+    name: iOS release (TestFlight)
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+
+    integrations:
+      app_store_connect: anstop-asc
+
+    environment:
+      groups:
+        - anstop_secrets
+      vars:
+        BUNDLE_ID: "com.anstopcovoiturage"
+        # TODO: replace with the numeric Apple ID of the app in App Store Connect.
+        APP_STORE_APPLE_ID: "0000000000"
+      # Creates (or reuses) the distribution certificate and App Store
+      # provisioning profile for this bundle id through the integration above.
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.anstopcovoiturage
+      flutter: 3.41.9
+      xcode: latest
+      cocoapods: default
+
+    # Builds only when started by hand in Codemagic (or by the API). Add a
+    # `triggering:` block here later if you want builds on tags or pushes.
+
+    scripts:
+      - name: Create .env from Codemagic secrets
+        # .env is bundled into the app as an asset but is git-ignored, so the
+        # build would fail (and ship without keys) if it were not created here.
+        script: |
+          set -e
+          if [ -z "$STRIPE_PUBLISHABLE_KEY" ] || [ -z "$GOOGLE_MAPS_API_KEY" ]; then
+            echo "STRIPE_PUBLISHABLE_KEY and GOOGLE_MAPS_API_KEY must be set in the anstop_secrets group" >&2
+            exit 1
+          fi
+          case "$STRIPE_PUBLISHABLE_KEY" in
+            pk_live_*) echo "Stripe key: live" ;;
+            pk_test_*) echo "WARNING: Stripe key is a TEST key; this build will not take real payments" ;;
+            *) echo "STRIPE_PUBLISHABLE_KEY does not look like a Stripe publishable key" >&2; exit 1 ;;
+          esac
+          printf 'STRIPE_PUBLISHABLE_KEY=%s\nGOOGLE_MAPS_API_KEY=%s\n' \
+            "$STRIPE_PUBLISHABLE_KEY" "$GOOGLE_MAPS_API_KEY" > .env
+
+      - name: Get Flutter packages
+        script: flutter pub get
+
+      - name: Install CocoaPods
+        script: |
+          cd ios
+          pod install
+
+      - name: Apply signing profiles to the Xcode project
+        script: xcode-project use-profiles
+
+      - name: Build IPA
+        script: |
+          set -e
+          # The build number must be higher than every build already uploaded for
+          # this version, or App Store Connect rejects the upload. The version
+          # name (1.0.2) still comes from pubspec.yaml.
+          LATEST=$(app-store-connect get-latest-testflight-build-number "$APP_STORE_APPLE_ID" || echo 0)
+          NEXT=$(( ${LATEST:-0} + 1 ))
+          echo "Latest TestFlight build: ${LATEST:-0}, building: $NEXT"
+          flutter build ipa --release \
+            --build-number="$NEXT" \
+            --export-options-plist=/Users/builder/export_options.plist
+
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+      - flutter_drive.log
+
+    publishing:
+      app_store_connect:
+        auth: integration
+        # Sends the build to TestFlight (internal testers get it automatically).
+        submit_to_testflight: true
+        # Leave false: submit for App Store review by hand after testing.
+        submit_to_app_store: false
